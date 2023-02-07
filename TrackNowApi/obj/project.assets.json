@@ -2634,11 +2634,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\TrackNow\\Code\\TrackNow\\TrackNowApi\\TrackNowApi.csproj",
+      "projectUniqueName": "D:\\TrackNow\\TrackNowApi\\TrackNowApi.csproj",
       "projectName": "TrackNowApi",
-      "projectPath": "D:\\TrackNow\\Code\\TrackNow\\TrackNowApi\\TrackNowApi.csproj",
+      "projectPath": "D:\\TrackNow\\TrackNowApi\\TrackNowApi.csproj",
       "packagesPath": "C:\\Users\\ganesanp\\.nuget\\packages\\",
-      "outputPath": "D:\\TrackNow\\Code\\TrackNow\\TrackNowApi\\obj\\",
+      "outputPath": "D:\\TrackNow\\TrackNowApi\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
