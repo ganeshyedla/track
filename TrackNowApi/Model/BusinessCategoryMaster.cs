@@ -5,9 +5,9 @@ namespace TrackNowApi.Model
 {
     public partial class BusinessCategoryMaster
     {
-        public decimal CategoryId { get; set; }
-        public string? CategoryName { get; set; }
-        public string? CategoryDescription { get; set; }
+        public decimal BusinessCatergoryId { get; set; }
+        public string? BusinessCategoryName { get; set; }
+        public string? BusinessCategoryDescription { get; set; }
         public DateTime? CreatedDate { get; set; }
         public string? CreatedUser { get; set; }
         public DateTime? UpdateDate { get; set; }

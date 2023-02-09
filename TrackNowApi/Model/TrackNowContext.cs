@@ -86,21 +86,21 @@ namespace TrackNowApi.Model
 
             modelBuilder.Entity<BusinessCategoryMaster>(entity =>
             {
-                entity.HasKey(e => e.CategoryId)
+                entity.HasKey(e => e.BusinessCatergoryId)
                     .HasName("PK__Business__19093A2B8C184FB8");
 
                 entity.ToTable("BusinessCategoryMaster");
 
-                entity.Property(e => e.CategoryId)
+                entity.Property(e => e.BusinessCatergoryId)
                     .HasColumnType("numeric(18, 0)")
                     .ValueGeneratedOnAdd()
-                    .HasColumnName("CategoryID");
+                    .HasColumnName("BusinessCatergoryId");
 
-                entity.Property(e => e.CategoryDescription)
+                entity.Property(e => e.BusinessCategoryDescription)
                     .HasMaxLength(500)
                     .IsUnicode(false);
 
-                entity.Property(e => e.CategoryName)
+                entity.Property(e => e.BusinessCategoryName)
                     .HasMaxLength(250)
                     .IsUnicode(false);
 
