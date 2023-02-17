@@ -18,9 +18,9 @@ namespace TrackNowApi.Controllers
     //        }
     //        else
     //            return true;
-                
+
     //    }   
-                
+
     //}
     [Route("api/[controller]")]
     [ApiController]
@@ -59,8 +59,10 @@ namespace TrackNowApi.Controllers
                            Mail = o.Mail,
                            LocationCode = o.LocationCode,
                            Juristiction = o.Juristiction,
-
-                       }));
+                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerID).Select(u => u.CustomerName).SingleOrDefault()
+                        }
+                        )
+                       );
 
         }
 
@@ -82,6 +84,7 @@ namespace TrackNowApi.Controllers
                            Mail = o.Mail,
                            LocationCode = o.LocationCode,
                            Juristiction = o.Juristiction,
+                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerID).Select(u => u.CustomerName).SingleOrDefault()
 
                        }));
 

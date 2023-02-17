@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TrackNowApi.Model
 {
     public partial class CustomerFilingMasterHistory
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal historyid { get; set; }
         public decimal CustomerId { get; set; }
         public decimal FilingId { get; set; }
         public string? Notes { get; set; }

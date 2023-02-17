@@ -26,5 +26,7 @@ namespace TrackNowApi.Model
         public string? Notes { get; set; }
         public string? Poc { get; set; }
         public decimal? BusinessCatergoryId { get; set; }
+        public decimal? ParentCustomerID { get; set; }
+        
     }
 }

@@ -190,6 +190,12 @@ namespace TrackNowApi.Model
                 entity.Property(e => e.UpdateUser)
                     .HasMaxLength(100)
                     .IsUnicode(false);
+
+                entity.Property(e => e.ParentCustomerID)
+                    .HasColumnType("numeric(18, 0)")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("ParentCustomerID");
+
             });
 
             modelBuilder.Entity<CustomerFileTracking>(entity =>
@@ -728,7 +734,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.FileTrackingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FileTrackingID");
+                    .HasColumnName("FileTrackingId");
 
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")

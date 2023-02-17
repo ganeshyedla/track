@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TrackNowApi.Model
 {
     public partial class FilingMasterDraft
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public decimal DraftId { get; set; }
         public decimal? FilingId { get; set; }
         public string? FilingDescription { get; set; }

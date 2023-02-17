@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TrackNowApi.Model
 {
     public partial class WorkflowTracking
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal WorkflowTrackId { get; set; }
         public decimal? WorkflowId { get; set; }
         public string? Comments { get; set; }
         public string? Attachments { get; set; }

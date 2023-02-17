@@ -19,7 +19,12 @@ namespace TrackNowApi.Data
         public DbSet<ReferenceDoc> ReferenceDoc { get; set; }
         public DbSet<BusinessCategoryMaster> BusinessCategoryMaster { get; set; }
         public DbSet<CustomerFilingMaster> CustomerFilingMaster { get; set; }
-        
+        public DbSet<FilingMasterDraft> FilingMasterDraft { get; set; }
+        public DbSet<FilingMasterWorkflow> FilingMasterWorkflow { get; set; }
+        public DbSet<WorkflowTracking> WorkflowTracking { get; set; }
+        public DbSet<SystemFilingFollowup> SystemFilingFollowup { get; set; }
+        public DbSet<FilingMasterHistory> FilingMasterHistory { get; set; }
+        public DbSet<CustomerFilingMasterHistory> CustomerFilingMasterHistory { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -38,6 +43,32 @@ namespace TrackNowApi.Data
 
             modelBuilder.Entity<ReferenceDoc>()
                .HasKey(t => t.FilingId);
+            
+            modelBuilder.Entity<FilingMasterDraft>()
+                .HasKey(t => new { t.DraftId });
+
+            modelBuilder.Entity<FilingMasterWorkflow>()
+            .HasKey(t => new { t.WorkflowId });
+
+            modelBuilder.Entity<WorkflowTracking>()
+            .HasKey(t => new { t.WorkflowTrackId });
+
+            modelBuilder.Entity<SystemFilingFollowup>()
+            .HasKey(t => new { t.FileTrackingId });
+
+            modelBuilder.Entity<FilingMasterHistory>()
+           .HasKey(t => new { t.historyid });
+
+            modelBuilder.Entity<CustomerFilingMasterHistory>()
+          .HasKey(t => new { t.historyid });
+
+            modelBuilder.Entity<CustomerHistory>()
+          .HasKey(t => new { t.historyid });
+
+
+
+
+
 
         }
 
