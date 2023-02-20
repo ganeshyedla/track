@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Runtime.Intrinsics.Arm;
 using System.Text.RegularExpressions;
 using TrackNowApi.Data;
@@ -41,23 +42,34 @@ namespace TrackNowApi.Controllers
 
             return Ok(customer);
         }
+        [HttpPost("CreateCustomerBusinessCategory")]
+        public IActionResult CreateCustomerBusinessCategory([FromBody] CustomerBusinessCategory []CustomerBusinessCategory)
+        {
+            foreach (CustomerBusinessCategory  Bc in CustomerBusinessCategory)
+            {
+                _db.Add(Bc);
+            }
+            
+            _db.SaveChanges();
+            return Ok(CustomerBusinessCategory);
+        }
 
         [HttpGet("CustomerList")]
         public IActionResult CustomerList()
         {
             return Ok((from o in _db.Customer
-                       join i in _db.BusinessCategoryMaster
-                       on o.BusinessCatergoryId equals i.BusinessCatergoryId
                        select new
                        {
                            CustomerID = o.CustomerId,
                            CustomerName = o.CustomerName,
-                           BusinessCategory = i.BusinessCategoryName,
+                           BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.CustomerBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
+                                               select new { i.BusinessCatergoryId,i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
                            Phone = o.Phone,
-                           Mail = o.Mail,
-                           LocationCode = o.LocationCode,
+                           Email = o.Email,
+                           ZipCode = o.ZipCode,
                            Juristiction = o.Juristiction,
                            ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerID).Select(u => u.CustomerName).SingleOrDefault()
                         }
@@ -70,32 +82,32 @@ namespace TrackNowApi.Controllers
         public IActionResult CustomerList(int CustomerId)
         {
             return Ok((from o in _db.Customer
-                       join i in _db.BusinessCategoryMaster
-                       on o.BusinessCatergoryId equals i.BusinessCatergoryId
                        where o.CustomerId == CustomerId
                        select new
                        {
                            CustomerID = o.CustomerId,
                            CustomerName = o.CustomerName,
-                           BusinessCategory = i.BusinessCategoryName,
+                           BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.CustomerBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
+                                               select new { i.BusinessCatergoryId, i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
                            Phone = o.Phone,
-                           Mail = o.Mail,
-                           LocationCode = o.LocationCode,
+                           Email = o.Email,
+                           ZipCode = o.ZipCode,
                            Juristiction = o.Juristiction,
                            ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerID).Select(u => u.CustomerName).SingleOrDefault()
-
-                       }));
-
+                       }
+            )
+           );
         }
 
         [HttpGet("CustomerSearch")]
         public IActionResult CustomerSearch(string? BusinessCategory, string? Juristiction, string? State, string? City)
         {
             return Ok((from o in _db.Customer
-                       join i in _db.BusinessCategoryMaster
-                       on o.BusinessCatergoryId equals i.BusinessCatergoryId
+                       join c in _db.CustomerBusinessCategory on o.CustomerId equals c.CustomerId
+                       join i in _db.BusinessCategoryMaster on c.BusinessCatergoryId equals i.BusinessCatergoryId
                        where o.Juristiction != null && i.BusinessCategoryName != null
                                 && o.State != null && o.City != null
                                 && i.BusinessCategoryName.Contains(BusinessCategory)
@@ -107,12 +119,14 @@ namespace TrackNowApi.Controllers
                        {
                            CustomerID = o.CustomerId,
                            CustomerName = o.CustomerName,
-                           BusinessCategory = i.BusinessCategoryName,
+                           BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.CustomerBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
+                                               select new { i.BusinessCatergoryId, i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
                            Phone = o.Phone,
-                           Mail = o.Mail,
-                           LocationCode = o.LocationCode,
+                           Email = o.Email,
+                           ZipCode = o.ZipCode,
                            Juristiction = o.Juristiction,
 
                        })); ;
@@ -131,45 +145,34 @@ namespace TrackNowApi.Controllers
                        })); ;
 
         }
-        [HttpGet("StateList")]
-        public IActionResult StateList()
-        {
-            List<string> StateList = new List<string>(){ "Alabama", "Alaska", "American Samoa", "Arizona", "Arkansas", "California",
-                "Colorado", "Connecticut", "Delaware", "District of Columbia", "Federated States of Micronesia", "Florida", "Georgia",
-                "Guam", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Marshall Islands",
-                "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
-                "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Northern Mariana Islands", "Ohio", "Oklahoma", "Oregon",
-                "Palau", "Pennsylvania", "Puerto Rico", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont",
-                "Virgin Island", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming" };
-            return Ok(StateList);
-
-        }
-
+        
         [HttpGet("CustomerfulltextSearch")]
         public IActionResult CustomerfulltextSearch(string? Textsearch)
         {
             return Ok((from o in _db.Customer
-                       join i in _db.BusinessCategoryMaster
-                       on o.BusinessCatergoryId equals i.BusinessCatergoryId
+                       join c in _db.CustomerBusinessCategory on o.CustomerId equals c.CustomerId
+                       join i in _db.BusinessCategoryMaster on c.BusinessCatergoryId equals i.BusinessCatergoryId
                        where o.Juristiction != null && o.CustomerName != null
-                                && o.Address != null && o.LocationCode != null
-                                && o.Mail != null && o.State != null && o.City != null
+                                && o.Address != null && o.ZipCode != null
+                                && o.Email != null && o.State != null && o.City != null
                                 &&
                                 (
                                 o.Juristiction.Contains(Textsearch) || o.CustomerName.Contains(Textsearch) ||
-                                o.Address.Contains(Textsearch) || o.LocationCode.ToString().Contains(Textsearch) ||
-                                o.Mail.Contains(Textsearch) || o.State.Contains(Textsearch) || o.City.Contains(Textsearch)
+                                o.Address.Contains(Textsearch) || o.ZipCode.ToString().Contains(Textsearch) ||
+                                o.Email.Contains(Textsearch) || o.State.Contains(Textsearch) || o.City.Contains(Textsearch)
                                 )
                        select new
                        {
                            CustomerID = o.CustomerId,
                            CustomerName = o.CustomerName,
-                           BusinessCategory = i.BusinessCategoryName,
+                           BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.CustomerBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
+                                               select new { i.BusinessCatergoryId, i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
                            Phone = o.Phone,
-                           Mail = o.Mail,
-                           LocationCode = o.LocationCode,
+                           Email = o.Email,
+                           ZipCode = o.ZipCode,
                            Juristiction = o.Juristiction,
 
                        })); ;
@@ -190,11 +193,36 @@ namespace TrackNowApi.Controllers
         public IActionResult CustomerUpdate(int CustomerId, [FromBody] Customer customer)
         {
 
+            
+
             if (customer == null || customer.CustomerId != CustomerId)
             {
                 return BadRequest(ModelState);
             }
+
+            CustomerHistory CustomerHistory = new CustomerHistory();
+            CustomerHistory.Title= customer.Title;
+            CustomerHistory.CustomerId=customer.CustomerId;
+            CustomerHistory.CustomerName=customer.CustomerName;
+            CustomerHistory.Address = customer.Address;
+            CustomerHistory.City = customer.City;
+            CustomerHistory.State = customer.State;
+            CustomerHistory.LocationCode = customer.ZipCode;
+            CustomerHistory.Email = customer.Email;
+            CustomerHistory.TaxNumber = customer.TaxNumber;
+            CustomerHistory.CreateDate = customer.CreateDate;
+            CustomerHistory.CreateUser = customer.CreateUser;
+            CustomerHistory.Phone = customer.Phone;
+            CustomerHistory.UpdateDate = customer.UpdateDate;
+            CustomerHistory.UpdateUser = customer.UpdateUser;
+            CustomerHistory.Juristiction = customer.Juristiction;
+            CustomerHistory.Notes = customer.Notes;
+            CustomerHistory.JSI_POC = customer.JSI_POC;
+            CustomerHistory.Customer_POC = customer.Customer_POC;
+            CustomerHistory.Dboperation = "Update Customer";
+            CustomerHistory.Source = "CustomerUpdate API";
             _db.Update(customer);
+            CreateCustomerHistory(CustomerHistory);
             _db.SaveChanges();
 
             return Ok(customer);

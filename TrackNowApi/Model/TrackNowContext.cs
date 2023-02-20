@@ -20,7 +20,8 @@ namespace TrackNowApi.Model
         public virtual DbSet<BusinessCategoryMaster> BusinessCategoryMasters { get; set; } = null!;
         public virtual DbSet<Customer> Customers { get; set; } = null!;
         public virtual DbSet<CustomerFileTracking> CustomerFileTrackings { get; set; } = null!;
-        public virtual DbSet<CustomerFilingBusiness> CustomerFilingBusinesses { get; set; } = null!;
+        public virtual DbSet<CustomerBusinessCategory> CustomerBusinessCategory { get; set; } = null!;
+        public virtual DbSet<FilingBusinessCategory> FilingBusinessCategory { get; set; } = null!;
         public virtual DbSet<CustomerFilingFollowup> CustomerFilingFollowups { get; set; } = null!;
         public virtual DbSet<CustomerFilingMaster> CustomerFilingMasters { get; set; } = null!;
         public virtual DbSet<CustomerFilingMasterHistory> CustomerFilingMasterHistories { get; set; } = null!;
@@ -127,10 +128,6 @@ namespace TrackNowApi.Model
                     .HasMaxLength(250)
                     .IsUnicode(false);
 
-                entity.Property(e => e.BusinessCatergoryId)
-                    .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("BusinessCatergoryID");
-
                 entity.Property(e => e.City)
                     .HasMaxLength(100)
                     .IsUnicode(false);
@@ -154,9 +151,9 @@ namespace TrackNowApi.Model
                     .HasMaxLength(2000)
                     .IsUnicode(false);
 
-                entity.Property(e => e.LocationCode).HasColumnType("numeric(18, 0)");
+                entity.Property(e => e.ZipCode).HasColumnType("numeric(18, 0)");
 
-                entity.Property(e => e.Mail)
+                entity.Property(e => e.Email)
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
@@ -168,10 +165,15 @@ namespace TrackNowApi.Model
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Poc)
+                entity.Property(e => e.Customer_POC)
                     .HasMaxLength(100)
                     .IsUnicode(false)
-                    .HasColumnName("POC");
+                    .HasColumnName("Customer_POC");
+
+                entity.Property(e => e.JSI_POC)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("JSI_POC");
 
                 entity.Property(e => e.State)
                     .HasMaxLength(100)
@@ -233,27 +235,36 @@ namespace TrackNowApi.Model
                     .IsUnicode(false);
             });
 
-            modelBuilder.Entity<CustomerFilingBusiness>(entity =>
+            modelBuilder.Entity<CustomerBusinessCategory>(entity =>
             {
                 entity.HasNoKey();
 
-                entity.ToTable("CustomerFilingBusiness");
+                entity.ToTable("CustomerBusinessCategory");
 
-                entity.Property(e => e.CategoryId)
+                entity.Property(e => e.BusinessCatergoryId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("CategoryID");
+                    .HasColumnName("BusinessCatergoryId");
 
                 entity.Property(e => e.CustomerId)
                     .HasColumnType("numeric(18, 0)")
                     .HasColumnName("CustomerID");
 
+                });
+
+            modelBuilder.Entity<FilingBusinessCategory>(entity =>
+            {
+                entity.HasNoKey();
+
+                entity.ToTable("FilingBusinessCategory");
+
+                entity.Property(e => e.BusinessCatergoryId)
+                    .HasColumnType("numeric(18, 0)")
+                    .HasColumnName("BusinessCatergoryId");
+
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
                     .HasColumnName("FilingID");
 
-                entity.Property(e => e.State)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<CustomerFilingFollowup>(entity =>
@@ -368,9 +379,9 @@ namespace TrackNowApi.Model
                     .HasMaxLength(250)
                     .IsUnicode(false);
 
-                entity.Property(e => e.CatergoryId)
+                entity.Property(e => e.BusinessCatergoryId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("CatergoryID");
+                    .HasColumnName("BusinessCatergoryId");
 
                 entity.Property(e => e.City)
                     .HasMaxLength(100)
@@ -401,7 +412,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.LocationCode).HasColumnType("numeric(18, 0)");
 
-                entity.Property(e => e.Mail)
+                entity.Property(e => e.Email)
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
@@ -413,10 +424,15 @@ namespace TrackNowApi.Model
                     .HasMaxLength(50)
                     .IsUnicode(false);
 
-                entity.Property(e => e.Poc)
+                entity.Property(e => e.Customer_POC)
                     .HasMaxLength(100)
                     .IsUnicode(false)
-                    .HasColumnName("POC");
+                    .HasColumnName("Customer_POC");
+
+                entity.Property(e => e.JSI_POC)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("JSI_POC");
 
                 entity.Property(e => e.Source)
                     .HasMaxLength(100)
@@ -458,8 +474,6 @@ namespace TrackNowApi.Model
                 entity.Property(e => e.CreateUser)
                     .HasMaxLength(100)
                     .IsUnicode(false);
-
-                entity.Property(e => e.FilingCategoryId).HasColumnType("numeric(18, 0)");
 
                 entity.Property(e => e.FilingDescription)
                     .HasMaxLength(500)

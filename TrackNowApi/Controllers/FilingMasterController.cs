@@ -16,7 +16,7 @@ namespace TrackNowApi.Controllers
             _db = db;
         }
         [HttpPost("CreateFilingMaster")]
-        public IActionResult CreateFilingMaster([FromBody] FilingMaster FilingMaster)
+        public IActionResult CreateFilingMaster(FilingMaster FilingMaster)
         {
 
             _db.Add(FilingMaster);
@@ -24,21 +24,75 @@ namespace TrackNowApi.Controllers
 
             return Ok(FilingMaster);
         }
+        [HttpPost("CreateFilingBusinessCategory")]
+        public IActionResult CreateFilingBusinessCategory([FromBody] FilingBusinessCategory []FilingBusinessCategory)
+        {
+            foreach (FilingBusinessCategory Bc in FilingBusinessCategory)
+            {
+                _db.Add(Bc);
+            }
+
+            _db.SaveChanges();
+            return Ok(FilingBusinessCategory);
+
+        }
         [HttpGet("FilingMasterList")]
         public IActionResult FilingMasterList()
         {
-            List<FilingMaster> FilingMaster = new List<FilingMaster>();
-            FilingMaster = _db.FilingMaster.ToList();
-
-            return Ok(FilingMaster);
+            return Ok((from o in _db.FilingMaster
+                       select new
+                       {
+                           FilingID = o.FilingId,
+                           FilingDescription = o.FilingDescription,
+                           FilingFrequency = o.FilingFrequency,
+                           StateInfo = o.StateInfo,
+                           RuleInf = o.RuleInfo,
+                           Required = o.Required,
+                           BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.FilingBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
+                                               select new { i.BusinessCatergoryId, i.BusinessCategoryName }).ToList(),
+                           Jsidept = o.Jsidept,
+                           JsicontactName = o.JsicontactName,
+                           JsicontactEmail = o.JsicontactEmail,
+                           Juristiction = o.Juristiction,
+                           Notes = o.Notes,
+                           CreateDate = o.CreateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateDate = o.UpdateDate,
+                           UpdateUser = o.UpdateUser,
+                           ChangesInprogress = o.ChangesInprogress
+                       }
+                       ));
 
         }
         [HttpGet("FilingMasterList{FilingId:Int}")]
         public IActionResult FilingMasterList(int FilingId)
         {
-            FilingMaster FilingMaster = _db.FilingMaster.FirstOrDefault(x => x.FilingId == FilingId);
-
-            return Ok(FilingMaster);
+            return Ok((from o in _db.FilingMaster
+                       where o.FilingId== FilingId
+                       select new
+                       {
+                           FilingID = o.FilingId,
+                           FilingDescription = o.FilingDescription,
+                           FilingFrequency = o.FilingFrequency,
+                           StateInfo = o.StateInfo,
+                           RuleInf = o.RuleInfo,
+                           Required = o.Required,
+                           BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.FilingBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
+                                               select new { i.BusinessCatergoryId, i.BusinessCategoryName }).ToList(),
+                           Jsidept = o.Jsidept,
+                           JsicontactName = o.JsicontactName,
+                           JsicontactEmail = o.JsicontactEmail,
+                           Juristiction = o.Juristiction,
+                           Notes = o.Notes,
+                           CreateDate = o.CreateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateDate = o.UpdateDate,
+                           UpdateUser = o.UpdateUser,
+                           ChangesInprogress = o.ChangesInprogress
+                       }
+                       ));
 
         }
         [HttpPut("FilingMasterUpdate{FilingId:Int}")]

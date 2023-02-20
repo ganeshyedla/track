@@ -13,7 +13,6 @@ namespace TrackNowApi.Model
         public string? StateInfo { get; set; }
         public string? RuleInfo { get; set; }
         public bool? Required { get; set; }
-        public decimal FilingCategoryId { get; set; }
         public string? Jsidept { get; set; }
         public string? JsicontactName { get; set; }
         public string? JsicontactEmail { get; set; }

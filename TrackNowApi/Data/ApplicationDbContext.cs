@@ -25,12 +25,21 @@ namespace TrackNowApi.Data
         public DbSet<SystemFilingFollowup> SystemFilingFollowup { get; set; }
         public DbSet<FilingMasterHistory> FilingMasterHistory { get; set; }
         public DbSet<CustomerFilingMasterHistory> CustomerFilingMasterHistory { get; set; }
+        public DbSet<FilingBusinessCategory> FilingBusinessCategory { get; set; }
+        public DbSet<CustomerBusinessCategory> CustomerBusinessCategory { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<CustomerFilingMaster>()
                 .HasKey(t => new { t.CustomerId, t.FilingId });
+
+            modelBuilder.Entity<CustomerBusinessCategory>()
+             .HasKey(t => new { t.CustomerId, t.BusinessCatergoryId });
+
+            modelBuilder.Entity<FilingBusinessCategory>()
+             .HasKey(t => new { t.FilingId, t.BusinessCatergoryId });
 
             modelBuilder.Entity<CustomerHistory>()
                 .HasKey(t => t.CustomerId);
