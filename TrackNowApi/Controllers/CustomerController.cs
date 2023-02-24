@@ -64,8 +64,8 @@ namespace TrackNowApi.Controllers
                            CustomerID = o.CustomerId,
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
-                                               join j in _db.CustomerBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
-                                               select new { i.BusinessCatergoryId,i.BusinessCategoryName }).ToList(),
+                                               join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               select new { i.BusinessCategoryId,i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
                            Phone = o.Phone,
@@ -89,8 +89,8 @@ namespace TrackNowApi.Controllers
                            CustomerID = o.CustomerId,
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
-                                               join j in _db.CustomerBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
-                                               select new { i.BusinessCatergoryId, i.BusinessCategoryName }).ToList(),
+                                               join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
                            Phone = o.Phone,
@@ -108,7 +108,7 @@ namespace TrackNowApi.Controllers
         {
             return Ok((from o in _db.Customer
                        join c in _db.CustomerBusinessCategory on o.CustomerId equals c.CustomerId
-                       join i in _db.BusinessCategoryMaster on c.BusinessCatergoryId equals i.BusinessCatergoryId
+                       join i in _db.BusinessCategoryMaster on c.BusinessCategoryId equals i.BusinessCategoryId
                        where o.Juristiction != null && i.BusinessCategoryName != null
                                 && o.State != null && o.City != null
                                 && i.BusinessCategoryName.Contains(BusinessCategory)
@@ -121,8 +121,8 @@ namespace TrackNowApi.Controllers
                            CustomerID = o.CustomerId,
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
-                                               join j in _db.CustomerBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
-                                               select new { i.BusinessCatergoryId, i.BusinessCategoryName }).ToList(),
+                                               join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
                            Phone = o.Phone,
@@ -139,7 +139,7 @@ namespace TrackNowApi.Controllers
             return Ok((from i in _db.BusinessCategoryMaster
                        select new
                        {
-                           BusinessCatergoryId = i.BusinessCatergoryId,
+                           BusinessCategoryId = i.BusinessCategoryId,
                            BusinessCategory = i.BusinessCategoryName,
                            BusinessCategoryName = i.BusinessCategoryName
 
@@ -152,7 +152,7 @@ namespace TrackNowApi.Controllers
         {
             return Ok((from o in _db.Customer
                        join c in _db.CustomerBusinessCategory on o.CustomerId equals c.CustomerId
-                       join i in _db.BusinessCategoryMaster on c.BusinessCatergoryId equals i.BusinessCatergoryId
+                       join i in _db.BusinessCategoryMaster on c.BusinessCategoryId equals i.BusinessCategoryId
                        where o.Juristiction != null && o.CustomerName != null
                                 && o.Address != null && o.ZipCode != null
                                 && o.Email != null && o.State != null && o.City != null
@@ -167,8 +167,8 @@ namespace TrackNowApi.Controllers
                            CustomerID = o.CustomerId,
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
-                                               join j in _db.CustomerBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
-                                               select new { i.BusinessCatergoryId, i.BusinessCategoryName }).ToList(),
+                                               join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
                            Phone = o.Phone,

@@ -10,7 +10,7 @@ namespace TrackNowApi.Model
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public decimal historyid { get; set; }
         public decimal? CustomerId { get; set; }
-        public decimal? BusinessCatergoryId { get; set; }
+        public decimal? BusinessCategoryId { get; set; }
         public string? CustomerName { get; set; }
         public string? Address { get; set; }
         public string? City { get; set; }

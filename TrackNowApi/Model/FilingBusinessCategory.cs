@@ -4,7 +4,7 @@
     public partial class FilingBusinessCategory
     {
         public decimal? FilingId { get; set; }
-        public decimal? BusinessCatergoryId { get; set; }
+        public decimal? BusinessCategoryId { get; set; }
 
     }
 }

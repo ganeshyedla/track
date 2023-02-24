@@ -36,10 +36,10 @@ namespace TrackNowApi.Data
                 .HasKey(t => new { t.CustomerId, t.FilingId });
 
             modelBuilder.Entity<CustomerBusinessCategory>()
-             .HasKey(t => new { t.CustomerId, t.BusinessCatergoryId });
+             .HasKey(t => new { t.CustomerId, t.BusinessCategoryId });
 
             modelBuilder.Entity<FilingBusinessCategory>()
-             .HasKey(t => new { t.FilingId, t.BusinessCatergoryId });
+             .HasKey(t => new { t.FilingId, t.BusinessCategoryId });
 
             modelBuilder.Entity<CustomerHistory>()
                 .HasKey(t => t.CustomerId);
@@ -48,7 +48,7 @@ namespace TrackNowApi.Data
                 .HasKey(t => t.FilingId);
 
             modelBuilder.Entity<BusinessCategoryMaster>()
-                .HasKey(t => t.BusinessCatergoryId);
+                .HasKey(t => t.BusinessCategoryId);
 
             modelBuilder.Entity<ReferenceDoc>()
                .HasKey(t => t.FilingId);

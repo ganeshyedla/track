@@ -87,15 +87,15 @@ namespace TrackNowApi.Model
 
             modelBuilder.Entity<BusinessCategoryMaster>(entity =>
             {
-                entity.HasKey(e => e.BusinessCatergoryId)
+                entity.HasKey(e => e.BusinessCategoryId)
                     .HasName("PK__Business__19093A2B8C184FB8");
 
                 entity.ToTable("BusinessCategoryMaster");
 
-                entity.Property(e => e.BusinessCatergoryId)
+                entity.Property(e => e.BusinessCategoryId)
                     .HasColumnType("numeric(18, 0)")
                     .ValueGeneratedOnAdd()
-                    .HasColumnName("BusinessCatergoryId");
+                    .HasColumnName("BusinessCategoryId");
 
                 entity.Property(e => e.BusinessCategoryDescription)
                     .HasMaxLength(500)
@@ -241,9 +241,9 @@ namespace TrackNowApi.Model
 
                 entity.ToTable("CustomerBusinessCategory");
 
-                entity.Property(e => e.BusinessCatergoryId)
+                entity.Property(e => e.BusinessCategoryId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("BusinessCatergoryId");
+                    .HasColumnName("BusinessCategoryId");
 
                 entity.Property(e => e.CustomerId)
                     .HasColumnType("numeric(18, 0)")
@@ -257,9 +257,9 @@ namespace TrackNowApi.Model
 
                 entity.ToTable("FilingBusinessCategory");
 
-                entity.Property(e => e.BusinessCatergoryId)
+                entity.Property(e => e.BusinessCategoryId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("BusinessCatergoryId");
+                    .HasColumnName("BusinessCategoryId");
 
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
@@ -379,9 +379,9 @@ namespace TrackNowApi.Model
                     .HasMaxLength(250)
                     .IsUnicode(false);
 
-                entity.Property(e => e.BusinessCatergoryId)
+                entity.Property(e => e.BusinessCategoryId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("BusinessCatergoryId");
+                    .HasColumnName("BusinessCategoryId");
 
                 entity.Property(e => e.City)
                     .HasMaxLength(100)

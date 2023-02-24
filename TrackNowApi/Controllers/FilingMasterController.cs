@@ -49,8 +49,8 @@ namespace TrackNowApi.Controllers
                            RuleInf = o.RuleInfo,
                            Required = o.Required,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
-                                               join j in _db.FilingBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
-                                               select new { i.BusinessCatergoryId, i.BusinessCategoryName }).ToList(),
+                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Jsidept = o.Jsidept,
                            JsicontactName = o.JsicontactName,
                            JsicontactEmail = o.JsicontactEmail,
@@ -79,8 +79,8 @@ namespace TrackNowApi.Controllers
                            RuleInf = o.RuleInfo,
                            Required = o.Required,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
-                                               join j in _db.FilingBusinessCategory on i.BusinessCatergoryId equals j.BusinessCatergoryId
-                                               select new { i.BusinessCatergoryId, i.BusinessCategoryName }).ToList(),
+                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Jsidept = o.Jsidept,
                            JsicontactName = o.JsicontactName,
                            JsicontactEmail = o.JsicontactEmail,
