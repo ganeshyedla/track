@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Drawing;
 using System.Runtime.Intrinsics.Arm;
 using System.Text.RegularExpressions;
 using TrackNowApi.Data;
@@ -248,15 +249,19 @@ namespace TrackNowApi.Controllers
             return Ok(CustomerFilingMaster);
         }
 
-        [HttpGet("CustomerFilingList")]
-        public IActionResult CustomerFilingList(int CustomerId)
+        [HttpGet("CustomerFilingMasterList")]
+        public IActionResult CustomerFilingMasterList(int CustomerId)
         {
-            return Ok(from i in _db.CustomerFilingMaster
+            return Ok(from
+                      c in _db.Customer
+                      join i in _db.CustomerFilingMaster on c.CustomerId equals i.CustomerId
                       join b in _db.FilingMaster on i.FilingId equals b.FilingId
-                      where i.CustomerId == CustomerId
+                      where i.CustomerId == (CustomerId == 0 ? i.CustomerId : CustomerId )
 
                       select new
                       {
+                          CustomerId = i.CustomerId,
+                          customeName=c.CustomerName,
                           FilingID = i.FilingId,
                           FilingDescription = b.FilingDescription,
                           FilingFrequency = b.FilingFrequency,
