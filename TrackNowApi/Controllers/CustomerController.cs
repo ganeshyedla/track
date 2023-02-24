@@ -65,6 +65,7 @@ namespace TrackNowApi.Controllers
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.CustomerId== o.CustomerId
                                                select new { i.BusinessCategoryId,i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
@@ -90,6 +91,7 @@ namespace TrackNowApi.Controllers
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.CustomerId == o.CustomerId
                                                select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
@@ -122,6 +124,7 @@ namespace TrackNowApi.Controllers
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.CustomerId == o.CustomerId
                                                select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
@@ -168,6 +171,7 @@ namespace TrackNowApi.Controllers
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.CustomerId == o.CustomerId
                                                select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,

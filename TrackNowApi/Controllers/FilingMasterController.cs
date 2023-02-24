@@ -50,6 +50,7 @@ namespace TrackNowApi.Controllers
                            Required = o.Required,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.FilingId == o.FilingId
                                                select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Jsidept = o.Jsidept,
                            JsicontactName = o.JsicontactName,
@@ -80,6 +81,7 @@ namespace TrackNowApi.Controllers
                            Required = o.Required,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.FilingId == o.FilingId
                                                select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Jsidept = o.Jsidept,
                            JsicontactName = o.JsicontactName,
