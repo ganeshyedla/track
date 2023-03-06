@@ -192,10 +192,71 @@ namespace TrackNowApi.Controllers
         [HttpGet("FilingMasterWorkflowList")]
         public IActionResult FilingMasterWorkflowList()
         {
-            List<FilingMasterWorkflow> FilingMasterWorkflow = new List<FilingMasterWorkflow>();
-            FilingMasterWorkflow = _db.FilingMasterWorkflow.ToList();
+            return Ok((from o in _db.FilingMasterDraft
+                       join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
+                       join s in _db.Approvers on c.CurrentApproverID equals s.ApproverID
+                       
+                       select new
+                       {
+                           FilingID = o.FilingId,
+                           FilingName = o.FilingName,
+                           FilingDescription = o.FilingDescription,
+                           FilingFrequency = o.FilingFrequency,
+                           StateInfo = o.StateInfo,
+                           RuleInf = o.RuleInfo,
+                           Required = o.Required,
+                           BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.FilingId == o.FilingId
+                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                           Jsidept = o.Jsidept,
+                           JsicontactName = o.JsicontactName,
+                           JsicontactEmail = o.JsicontactEmail,
+                           Juristiction = o.Juristiction,
+                           Notes = o.Notes,
+                           CreateDate = o.CreateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateDate = o.UpdateDate,
+                           UpdateUser = o.UpdateUser,
+                           ChangesInprogress = o.ChangesInprogress,
+                           ApproverName = s.ApproverName
+                       }
+                      ));
 
-            return Ok(FilingMasterWorkflow);
+        }
+        [HttpGet("FilingMasterWorkflowListByApprover{UserID:Int}")]
+        public IActionResult FilingMasterWorkflowListByApprover(long UserID)
+        {
+            return Ok((from o in _db.FilingMasterDraft
+                       join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
+                       join s in _db.Approvers on c.CurrentApproverID equals s.ApproverID
+                       where s.ApproverID== UserID
+                       select new
+                       {
+                           FilingID = o.FilingId,
+                           FilingName = o.FilingName,
+                           FilingDescription = o.FilingDescription,
+                           FilingFrequency = o.FilingFrequency,
+                           StateInfo = o.StateInfo,
+                           RuleInf = o.RuleInfo,
+                           Required = o.Required,
+                           BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.FilingId == o.FilingId
+                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                           Jsidept = o.Jsidept,
+                           JsicontactName = o.JsicontactName,
+                           JsicontactEmail = o.JsicontactEmail,
+                           Juristiction = o.Juristiction,
+                           Notes = o.Notes,
+                           CreateDate = o.CreateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateDate = o.UpdateDate,
+                           UpdateUser = o.UpdateUser,
+                           ChangesInprogress = o.ChangesInprogress,
+                           ApproverName = s.ApproverName
+                       }
+                       ));
 
         }
         [HttpGet("FilingMasterWorkflowList{WorkflowId:Int}")]

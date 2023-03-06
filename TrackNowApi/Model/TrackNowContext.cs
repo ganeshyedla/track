@@ -681,7 +681,7 @@ namespace TrackNowApi.Model
                     .HasColumnType("numeric(18, 0)")
                     .HasColumnName("DraftID");
 
-                entity.Property(e => e.Status)
+                entity.Property(e => e.WorkflowStatus)
                     .HasMaxLength(100)
                     .IsUnicode(false);
 

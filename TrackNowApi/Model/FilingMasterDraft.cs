@@ -9,6 +9,7 @@ namespace TrackNowApi.Model
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public decimal DraftId { get; set; }
         public decimal? FilingId { get; set; }
+        public string? FilingName { get; set; }
         public string? FilingDescription { get; set; }
         public string? FilingFrequency { get; set; }
         public string? StateInfo { get; set; }

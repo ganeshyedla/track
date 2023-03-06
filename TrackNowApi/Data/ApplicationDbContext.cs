@@ -27,11 +27,19 @@ namespace TrackNowApi.Data
         public DbSet<CustomerFilingMasterHistory> CustomerFilingMasterHistory { get; set; }
         public DbSet<FilingBusinessCategory> FilingBusinessCategory { get; set; }
         public DbSet<CustomerBusinessCategory> CustomerBusinessCategory { get; set; }
+        public DbSet<ApproverConfiguration> ApproverConfiguration { get; set; }
+        public DbSet<Approvers> Approvers { get; set; }
 
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<ApproverConfiguration>()
+                .HasKey(t => new { t.ApproverConfigID });
+
+            modelBuilder.Entity<Approvers>()
+                .HasKey(t => new { t.ApproverID});
+
             modelBuilder.Entity<CustomerFilingMaster>()
                 .HasKey(t => new { t.CustomerId, t.FilingId });
 
