@@ -281,5 +281,82 @@ namespace TrackNowApi.Controllers
 
         }
 
+        [HttpGet("CustomerFilingMasterWorkflowList")]
+        public IActionResult CustomerFilingMasterWorkflowList()
+        {
+            return Ok(from o in _db.CustomerFilingMasterDraft
+                       join c in _db.Customer on o.CustomerID equals c.CustomerId
+                       join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
+                       join f in _db.FilingMaster on o.FilingID equals f.FilingId
+                       join s in _db.Approvers on w.CurrentApproverID equals s.ApproverID
+                       select new
+                       {
+                           CustomerID = c.CustomerId,
+                           Customername = c.CustomerName,
+                           FilingID = f.FilingId,
+                           FilingName = f.FilingName,
+                           FilingDescription = f.FilingDescription,
+                           FilingFrequency = f.FilingFrequency,
+                           StateInfo = f.StateInfo,
+                           RuleInf = f.RuleInfo,
+                           Required = f.Required,
+                           BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.FilingId == f.FilingId
+                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                           Jsidept = f.Jsidept,
+                           JsicontactName = f.JsicontactName,
+                           JsicontactEmail = f.JsicontactEmail,
+                           Juristiction = f.Juristiction,
+                           Notes = f.Notes,
+                           CreateDate = f.CreateDate,
+                           CreateUser = f.CreateUser,
+                           UpdateDate = f.UpdateDate,
+                           UpdateUser = f.UpdateUser,
+                           ChangesInprogress = f.ChangesInprogress,
+                           ApproverName = s.ApproverName
+                       }
+                      );
+
+        }
+        [HttpGet("CustomerFilingMasterWorkflowListByApprover{UserID:Int}")]
+        public IActionResult CustomerFilingMasterWorkflowListByApprover(long UserID)
+        {
+            return Ok((from o in _db.CustomerFilingMasterDraft
+                       join c in _db.Customer on o.CustomerID equals c.CustomerId
+                       join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
+                       join f in _db.FilingMaster on o.FilingID equals f.FilingId
+                       join s in _db.Approvers on w.CurrentApproverID equals s.ApproverID
+                       where s.ApproverID == UserID
+                       select new
+                       {
+                           CustomerID = c.CustomerId,
+                           Customername = c.CustomerName,
+                           FilingID = f.FilingId,
+                           FilingName = f.FilingName,
+                           FilingDescription = f.FilingDescription,
+                           FilingFrequency = f.FilingFrequency,
+                           StateInfo = f.StateInfo,
+                           RuleInf = f.RuleInfo,
+                           Required = f.Required,
+                           BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.FilingId == f.FilingId
+                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                           Jsidept = f.Jsidept,
+                           JsicontactName = f.JsicontactName,
+                           JsicontactEmail = f.JsicontactEmail,
+                           Juristiction = f.Juristiction,
+                           Notes = f.Notes,
+                           CreateDate = f.CreateDate,
+                           CreateUser = f.CreateUser,
+                           UpdateDate = f.UpdateDate,
+                           UpdateUser = f.UpdateUser,
+                           ChangesInprogress = f.ChangesInprogress,
+                           ApproverName = s.ApproverName
+                       }
+                      ));
+        }
+
     }
 }
