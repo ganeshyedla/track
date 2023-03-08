@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
 using System.Runtime.Intrinsics.Arm;
@@ -356,6 +357,351 @@ namespace TrackNowApi.Controllers
                            ApproverName = s.ApproverName
                        }
                       ));
+        }
+
+        [HttpPost("CreateCustomerComments")]
+        public IActionResult CreateCustomerComments([FromBody] CustomerComments CustomerComments)
+        {
+
+            _db.Add(CustomerComments);
+            _db.SaveChanges();
+
+            return Ok(CustomerComments);
+        }
+        [HttpPost("CreateCustomerFilingComments")]
+        public IActionResult CreateCustomerFilingComments([FromBody] CustomerFilingComments CustomerFilingComments)
+        {
+
+            _db.Add(CustomerFilingComments);
+            _db.SaveChanges();
+
+            return Ok(CustomerFilingComments);
+        }
+        [HttpPost("CreateCustomerFilingDraftComments")]
+        public IActionResult CreateCustomerFilingDraftComments([FromBody] CustomerFilingDraftComments CustomerFilingDraftComments)
+        {
+
+            _db.Add(CustomerFilingDraftComments);
+            _db.SaveChanges();
+
+            return Ok(CustomerFilingDraftComments);
+        }
+        [HttpPost("CreateCustomerFilingTrackingComments")]
+        public IActionResult CreateCustomerFilingTrackingComments([FromBody] CustomerFilingTrackingComments CustomerFilingTrackingComments)
+        {
+
+            _db.Add(CustomerFilingTrackingComments);
+            _db.SaveChanges();
+
+            return Ok(CustomerFilingTrackingComments);
+        }
+        [HttpPost("CreateCustomerFilingWorkflowComments")]
+        public IActionResult CreateCustomerFilingWorkflowComments([FromBody] CustomerFilingWorkflowComments CustomerFilingWorkflowComments)
+        {
+
+            _db.Add(CustomerFilingWorkflowComments);
+            _db.SaveChanges();
+
+            return Ok(CustomerFilingWorkflowComments);
+        }
+
+        [HttpDelete("CustomerCommentsDelete{CommentsID:Int}")]
+        public void CustomerCommentsDelete(int CommentsID)
+        {
+            CustomerComments CustomerComments;
+
+            CustomerComments = _db.CustomerComments.Where(d => d.CommentsID == CommentsID).First();
+            _db.CustomerComments.Remove(CustomerComments);
+            _db.SaveChanges();
+
+        }
+        [HttpDelete("CustomerFilingCommentsDelete{CommentId:Int}")]
+        public void CustomerFilingCommentsDelete(int CommentsID)
+        {
+            CustomerFilingComments CustomerFilingComments;
+
+            CustomerFilingComments = _db.CustomerFilingComments.Where(d => d.CommentsID == CommentsID).First();
+            _db.CustomerFilingComments.Remove(CustomerFilingComments);
+            _db.SaveChanges();
+
+        }
+        [HttpDelete("CustomerFilingDraftCommentsDelete{CommentId:Int}")]
+        public void CustomerFilingDraftCommentsDelete(int CommentsID)
+        {
+            CustomerFilingDraftComments CustomerFilingDraftComments;
+
+            CustomerFilingDraftComments = _db.CustomerFilingDraftComments.Where(d => d.CommentsID == CommentsID).First();
+            _db.CustomerFilingDraftComments.Remove(CustomerFilingDraftComments);
+            _db.SaveChanges();
+
+        }
+        [HttpDelete("CustomerFilingTrackingCommentsDelete{CommentId:Int}")]
+        public void CustomerFilingTrackingCommentsDelete(int CommentsID)
+        {
+            CustomerFilingTrackingComments CustomerFilingTrackingComments;
+
+            CustomerFilingTrackingComments = _db.CustomerFilingTrackingComments.Where(d => d.CommentsID == CommentsID).First();
+            _db.CustomerFilingTrackingComments.Remove(CustomerFilingTrackingComments);
+            _db.SaveChanges();
+
+        }
+        [HttpDelete("CustomerFilingWorkflowCommentsDelete{CommentId:Int}")]
+        public void CustomerFilingWorkflowCommentsDelete(int CommentsID)
+        {
+            CustomerFilingWorkflowComments CustomerFilingWorkflowComments;
+
+            CustomerFilingWorkflowComments = _db.CustomerFilingWorkflowComments.Where(d => d.CommentsID == CommentsID).First();
+            _db.CustomerFilingWorkflowComments.Remove(CustomerFilingWorkflowComments);
+            _db.SaveChanges();
+
+        }
+        
+        [HttpGet("CustomerCommentsbyID{CommentsID:Int}")]
+        public IActionResult CustomerCommentsbyID(int CommentsID)
+        {
+            return Ok((from o in _db.CustomerComments
+                       where o.CommentsID == CommentsID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           CommentsText= o.CommentsText,
+                           InformationRead= o.InformationRead,
+                           InformationDeleted= o.InformationDeleted,
+                           CreateDate = o.CreateDate, UpdateDate = o.UpdateDate,
+                           CreateUser= o.CreateUser,UpdateUser= o.UpdateUser
+
+                        }));
+
+        }
+        [HttpGet("CustomerFilingCommentsbyID{CommentsID:Int}")]
+        public IActionResult CustomerFilingCommentsbyID(int CommentsID)
+        {
+            return Ok((from o in _db.CustomerFilingComments
+                       where o.CommentsID == CommentsID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           CustomerID = o.CustomerID,
+                           FilingID =o.FilingID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+        [HttpGet("CustomerFilingDraftCommentsbyID{CommentsID:Int}")]
+        public IActionResult CustomerFilingDraftCommentsbyID(int CommentsID)
+        {
+            return Ok((from o in _db.CustomerFilingDraftComments
+                       where o.CommentsID == CommentsID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           DraftID = o.DraftId,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+        [HttpGet("CustomerFilingTrackingCommentsbyID{CommentsID:Int}")]
+        public IActionResult CustomerFilingTrackingCommentsbyID(int CommentsID)
+        {
+            return Ok((from o in _db.CustomerFilingTrackingComments
+                       where o.CommentsID == CommentsID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           FileTrackingID = o.FileTrackingID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+        [HttpGet("CustomerFilingWorkflowCommentsbyID{CommentsID:Int}")]
+        public IActionResult CustomerFilingWorkflowCommentsbyID(int CommentsID)
+        {
+            return Ok((from o in _db.CustomerFilingWorkflowComments
+                       where o.CommentsID == CommentsID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           FileTrackingID = o.WorkflowID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+
+        [HttpPut("CustomerCommentsUpdate{CommentsID:Int}")]
+        public IActionResult CustomerCommentsUpdate(int CommentsID, [FromBody] CustomerComments CustomerComments)
+        {
+            if (CustomerComments == null || CustomerComments.CommentsID != CommentsID)
+            {
+                return BadRequest(ModelState);
+            }
+            _db.Update(CustomerComments);
+            _db.SaveChanges();
+            return Ok(CustomerComments);
+        }
+        [HttpPut("CustomerFilingCommentsUpdate{CommentsID:Int}")]
+        public IActionResult CustomerFilingCommentsUpdate(int CommentsID, [FromBody] CustomerFilingComments CustomerFilingComments)
+        {
+            if (CustomerFilingComments == null || CustomerFilingComments.CommentsID != CommentsID)
+            {
+                return BadRequest(ModelState);
+            }
+            _db.Update(CustomerFilingComments);
+            _db.SaveChanges();
+            return Ok(CustomerFilingComments);
+        }
+        [HttpPut("CustomerFilingDraftCommentsUpdate{CommentsID:Int}")]
+        public IActionResult CustomerFilingDraftCommentsUpdate(int CommentsID, [FromBody] CustomerFilingDraftComments CustomerFilingDraftComments)
+        {
+            if (CustomerFilingDraftComments == null || CustomerFilingDraftComments.CommentsID != CommentsID)
+            {
+                return BadRequest(ModelState);
+            }
+            _db.Update(CustomerFilingDraftComments);
+            _db.SaveChanges();
+            return Ok(CustomerFilingDraftComments);
+        }
+        [HttpPut("CustomerFilingTrackingCommentsUpdate{CommentsID:Int}")]
+        public IActionResult CustomerFilingTrackingCommentsUpdate(int CommentsID, [FromBody] CustomerFilingTrackingComments CustomerFilingTrackingComments)
+        {
+            if (CustomerFilingTrackingComments == null || CustomerFilingTrackingComments.CommentsID != CommentsID)
+            {
+                return BadRequest(ModelState);
+            }
+            _db.Update(CustomerFilingTrackingComments);
+            _db.SaveChanges();
+            return Ok(CustomerFilingTrackingComments);
+        }
+        [HttpPut("CustomerFilingWorkflowCommentsUpdate{CommentsID:Int}")]
+        public IActionResult CustomerFilingWorkflowCommentsUpdate(int CommentsID, [FromBody] CustomerFilingWorkflowComments CustomerFilingWorkflowComments)
+        {
+            if (CustomerFilingWorkflowComments == null || CustomerFilingWorkflowComments.CommentsID != CommentsID)
+            {
+                return BadRequest(ModelState);
+            }
+            _db.Update(CustomerFilingWorkflowComments);
+            _db.SaveChanges();
+            return Ok(CustomerFilingWorkflowComments);
+        }
+
+        [HttpGet("CustomerComments{CustomerID:Int}")]
+        public IActionResult CustomerComments(int CustomerID)
+        {
+            return Ok((from o in _db.CustomerComments
+                       where o.CustomerId == CustomerID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+
+                       }));
+
+        }
+        [HttpGet("CustomerFilingComments{CustomerID:Int}")]
+        public IActionResult CustomerFilingComments(int CustomerID)
+        {
+            return Ok((from o in _db.CustomerFilingComments
+                       where o.CustomerID == CustomerID 
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           CustomerID = o.CustomerID,
+                           FilingID = o.FilingID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+        [HttpGet("CustomerFilingDraftComments{DraftId:Int}")]
+        public IActionResult CustomerFilingDraftComments(int DraftId)
+        {
+            return Ok((from o in _db.CustomerFilingDraftComments
+                       where o.DraftId == DraftId
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           DraftID = o.DraftId,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+        [HttpGet("CustomerFilingTrackingComments{FileTrackingID:Int}")]
+        public IActionResult CustomerFilingTrackingComments(int FileTrackingID)
+        {
+            return Ok((from o in _db.CustomerFilingTrackingComments
+                       where o.FileTrackingID == FileTrackingID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           FileTrackingID = o.FileTrackingID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+        [HttpGet("CustomerFilingWorkflowComments{WorkflowID:Int}")]
+        public IActionResult CustomerFilingWorkflowComments(int WorkflowID)
+        {
+            return Ok((from o in _db.CustomerFilingWorkflowComments
+                       where o.WorkflowID == WorkflowID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           FileTrackingID = o.WorkflowID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
         }
 
     }

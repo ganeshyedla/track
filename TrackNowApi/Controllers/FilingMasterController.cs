@@ -43,6 +43,7 @@ namespace TrackNowApi.Controllers
                        select new
                        {
                            FilingID = o.FilingId,
+                           FilingName=o.FilingName,
                            FilingDescription = o.FilingDescription,
                            FilingFrequency = o.FilingFrequency,
                            StateInfo = o.StateInfo,
@@ -74,6 +75,7 @@ namespace TrackNowApi.Controllers
                        select new
                        {
                            FilingID = o.FilingId,
+                           FilingName = o.FilingName,
                            FilingDescription = o.FilingDescription,
                            FilingFrequency = o.FilingFrequency,
                            StateInfo = o.StateInfo,
@@ -392,6 +394,216 @@ namespace TrackNowApi.Controllers
             _db.SystemFilingFollowup.Remove(SystemFilingFollowup);
             _db.SaveChanges();
 
+        }
+
+        [HttpPut("FilingMasterCommentsUpdate{CommentsID:Int}")]
+        public IActionResult FilingMasterCommentsUpdate(int CommentsID, [FromBody] FilingMasterComments FilingMasterComments)
+        {
+            if (FilingMasterComments == null || FilingMasterComments.CommentsID != CommentsID)
+            {
+                return BadRequest(ModelState);
+            }
+            _db.Update(FilingMasterComments);
+            _db.SaveChanges();
+            return Ok(FilingMasterComments);
+        }
+        [HttpPut("FilingMasterDraftCommentsUpdate{CommentsID:Int}")]
+        public IActionResult FilingMasterDraftCommentsUpdate(int CommentsID, [FromBody] FilingMasterDraftComments FilingMasterDraftComments)
+        {
+            if (FilingMasterDraftComments == null || FilingMasterDraftComments.CommentsID != CommentsID)
+            {
+                return BadRequest(ModelState);
+            }
+            _db.Update(FilingMasterDraftComments);
+            _db.SaveChanges();
+            return Ok(FilingMasterDraftComments);
+        }
+        [HttpPut("FilingMasterWorkflowCommentsCommentsUpdate{CommentsID:Int}")]
+        public IActionResult FilingMasterWorkflowCommentsCommentsUpdate(int CommentsID, [FromBody] FilingMasterWorkflowComments FilingMasterWorkflowComments)
+        {
+            if (FilingMasterWorkflowComments == null || FilingMasterWorkflowComments.CommentsID != CommentsID)
+            {
+                return BadRequest(ModelState);
+            }
+            _db.Update(FilingMasterWorkflowComments);
+            _db.SaveChanges();
+            return Ok(FilingMasterWorkflowComments);
+        }
+
+        [HttpGet("FilingMasterComments{FilingID:Int}")]
+        public IActionResult FilingMasterComments(int FilingID)
+        {
+            return Ok((from o in _db.FilingMasterComments
+                       where o.FilingID == FilingID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           FilingID=o.FilingID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+
+                       }));
+
+        }
+        [HttpGet("FilingMasterWorkflowComments{WorkflowID:Int}")]
+        public IActionResult FilingMasterWorkflowComments(int WorkflowID)
+        {
+            return Ok((from o in _db.FilingMasterWorkflowComments
+                       where o.WorkflowID == WorkflowID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           WorkflowID = o.WorkflowID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+        [HttpGet("FilingMasterDraftComments{DraftId:Int}")]
+        public IActionResult FilingMasterDraftComments(int DraftID)
+        {
+            return Ok((from o in _db.FilingMasterDraftComments
+                       where o.DraftID == DraftID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           DraftID = o.DraftID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+
+        [HttpGet("FilingMasterCommentsbyID{CommentsID:Int}")]
+        public IActionResult FilingMasterCommentsbyID(int CommentsID)
+        {
+            return Ok((from o in _db.FilingMasterComments
+                       where o.CommentsID == CommentsID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+
+                       }));
+
+        }
+        [HttpGet("FilingMasterWorkflowCommentsbyID{CommentsID:Int}")]
+        public IActionResult FilingMasterWorkflowCommentsbyID(int CommentsID)
+        {
+            return Ok((from o in _db.FilingMasterWorkflowComments
+                       where o.CommentsID == CommentsID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           WorkflowID = o.WorkflowID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+        [HttpGet("FilingMasterDraftCommentsbyID{CommentsID:Int}")]
+        public IActionResult FilingMasterDraftCommentsbyID(int CommentsID)
+        {
+            return Ok((from o in _db.FilingMasterDraftComments
+                       where o.CommentsID == CommentsID
+                       select new
+                       {
+                           CommentsID = o.CommentsID,
+                           DraftID = o.DraftID,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+
+        [HttpDelete("FilingMasterCommentssDelete{CommentsID:Int}")]
+        public void FilingMasterCommentssDelete(int CommentsID)
+        {
+            FilingMasterComments FilingMasterComments;
+
+            FilingMasterComments = _db.FilingMasterComments.Where(d => d.CommentsID == CommentsID).First();
+            _db.FilingMasterComments.Remove(FilingMasterComments);
+            _db.SaveChanges();
+
+        }
+        [HttpDelete("CustomerFilingCommentsDelete{CommentId:Int}")]
+        public void CustomerFilingCommentsDelete(int CommentsID)
+        {
+            FilingMasterDraftComments FilingMasterDraftComments;
+
+            FilingMasterDraftComments = _db.FilingMasterDraftComments.Where(d => d.CommentsID == CommentsID).First();
+            _db.FilingMasterDraftComments.Remove(FilingMasterDraftComments);
+            _db.SaveChanges();
+
+        }
+        [HttpDelete("FilingMasterWorkflowCommentsDelete{CommentId:Int}")]
+        public void FilingMasterWorkflowCommentsDelete(int CommentsID)
+        {
+            FilingMasterWorkflowComments FilingMasterWorkflowComments;
+
+            FilingMasterWorkflowComments = _db.FilingMasterWorkflowComments.Where(d => d.CommentsID == CommentsID).First();
+            _db.FilingMasterWorkflowComments.Remove(FilingMasterWorkflowComments);
+            _db.SaveChanges();
+
+        }
+
+        [HttpPost("CreateFilingMasterComments")]
+        public IActionResult CreateFilingMasterComments([FromBody] FilingMasterComments FilingMasterComments)
+        {
+
+            _db.Add(FilingMasterComments);
+            _db.SaveChanges();
+
+            return Ok(FilingMasterComments);
+        }
+        [HttpPost("CreateFilingMasterDraftComments")]
+        public IActionResult CreateFilingMasterDraftComments([FromBody] FilingMasterDraftComments FilingMasterDraftComments)
+        {
+
+            _db.Add(FilingMasterDraftComments);
+            _db.SaveChanges();
+
+            return Ok(FilingMasterDraftComments);
+        }
+        [HttpPost("CreateFilingMasterWorkflowComments")]
+        public IActionResult CreateFilingMasterWorkflowComments([FromBody] FilingMasterWorkflowComments FilingMasterWorkflowComments)
+        {
+
+            _db.Add(FilingMasterWorkflowComments);
+            _db.SaveChanges();
+
+            return Ok(FilingMasterWorkflowComments);
         }
 
     }

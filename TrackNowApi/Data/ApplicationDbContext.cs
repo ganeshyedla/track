@@ -29,14 +29,44 @@ namespace TrackNowApi.Data
         public DbSet<CustomerBusinessCategory> CustomerBusinessCategory { get; set; }
         public DbSet<ApproverConfiguration> ApproverConfiguration { get; set; }
         public DbSet<Approvers> Approvers { get; set; }
-        public DbSet<CustomerFilingMasterWorkflow> CustomerFilingMasterWorkflow { get; set; }
+        public DbSet<CustomerFilingWorkflowComments> CustomerFilingWorkflowComments { get; set; }
+        public DbSet<CustomerComments> CustomerComments { get; set; }
+        public DbSet<CustomerFilingDraftComments> CustomerFilingDraftComments { get; set; }
+        public DbSet<CustomerFilingComments> CustomerFilingComments { get; set; }
+        public DbSet<FilingMasterWorkflowComments> FilingMasterWorkflowComments { get; set; }
+        public DbSet<FilingMasterDraftComments> FilingMasterDraftComments { get; set; }
+        public DbSet<FilingMasterComments> FilingMasterComments { get; set; }
         public DbSet<CustomerFilingMasterDraft> CustomerFilingMasterDraft { get; set; }
-
-
-
+        public DbSet<CustomerFilingMasterWorkflow> CustomerFilingMasterWorkflow { get; set; }
+        public DbSet<CustomerFilingTrackingComments> CustomerFilingTrackingComments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<CustomerFilingTrackingComments>()
+          .HasKey(t => new { t.CommentsID });
+
+            modelBuilder.Entity<CustomerFilingComments>()
+             .HasKey(t => new { t.CommentsID});
+             
+
+            modelBuilder.Entity<CustomerFilingDraftComments>()
+             .HasKey(t => new { t.CommentsID });
+
+            modelBuilder.Entity<FilingMasterComments>()
+             .HasKey(t => new { t.CommentsID });
+
+            modelBuilder.Entity<FilingMasterDraftComments>()
+             .HasKey(t => new { t.CommentsID });
+
+            modelBuilder.Entity<FilingMasterWorkflowComments>()
+             .HasKey(t => new { t.CommentsID });
+
+            modelBuilder.Entity<CustomerFilingWorkflowComments>()
+             .HasKey(t => new { t.CommentsID });
+
+            modelBuilder.Entity<CustomerComments>()
+             .HasKey(t => new { t.CommentsID });
+            
             modelBuilder.Entity<CustomerFilingMasterWorkflow>()
                 .HasKey(t => new { t.WorkflowId });
 
@@ -90,11 +120,6 @@ namespace TrackNowApi.Data
 
             modelBuilder.Entity<CustomerHistory>()
           .HasKey(t => new { t.historyid });
-
-
-
-
-
 
         }
 
