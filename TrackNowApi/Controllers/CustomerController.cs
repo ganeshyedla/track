@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.Intrinsics.Arm;
 using System.Text.RegularExpressions;
 using TrackNowApi.Data;
@@ -144,8 +145,8 @@ namespace TrackNowApi.Controllers
                        select new
                        {
                            BusinessCategoryId = i.BusinessCategoryId,
-                           BusinessCategory = i.BusinessCategoryName,
-                           BusinessCategoryName = i.BusinessCategoryName
+                           BusinessCategoryName = i.BusinessCategoryName,
+                           BusinessCategoryDescription = i.BusinessCategoryDescription
 
                        })); ;
 
@@ -703,6 +704,6 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
-
+                
     }
 }
