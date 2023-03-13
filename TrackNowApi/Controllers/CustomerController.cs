@@ -282,7 +282,36 @@ namespace TrackNowApi.Controllers
                       });
 
         }
-        
+        [HttpGet("BusinessBasedFilingMasterList")]
+        public IActionResult BusinessBasedFilingMasterList(int CustomerId)
+        {
+            return Ok(from
+                      c in _db.Customer
+                      join cb in _db.CustomerBusinessCategory on c.CustomerId equals cb.CustomerId
+                      join b in _db.BusinessCategoryMaster on cb.BusinessCategoryId equals b.BusinessCategoryId
+                      join fm in _db.FilingBusinessCategory on b.BusinessCategoryId equals fm.BusinessCategoryId
+                      join f in _db.FilingMaster on fm.FilingId equals f.FilingId
+                      where (cb.CustomerId == CustomerId && f.StateInfo==cb.State ) || (cb.CustomerId == CustomerId && cb.State == null)
+
+                      select new
+                      {
+                          CustomerId = c.CustomerId,
+                          customeName = c.CustomerName,
+                          FilingID = f.FilingId,
+                          FilingDescription = f.FilingDescription,
+                          FilingFrequency = f.FilingFrequency,
+                          StateInfo = f.StateInfo,
+                          RuleInfo = f.RuleInfo,
+                          Juristiction = f.Juristiction,
+                          Required = f.Required,
+                          Jsidept = f.Jsidept,
+                          JsicontactName = f.JsicontactName,
+                          JsiContactEmail = f.JsicontactEmail
+
+                      });
+
+        }
+
         [HttpGet("CustomerFilingMasterWorkflowList")]
         public IActionResult CustomerFilingMasterWorkflowList()
         {
@@ -326,7 +355,7 @@ namespace TrackNowApi.Controllers
         [HttpGet("CustomerFilingMasterWorkflowListByApprover{UserID:Int}")]
         public IActionResult CustomerFilingMasterWorkflowListByApprover(long UserID)
         {
-            return Ok((from o in _db.CustomerFilingMasterDraft
+            return Ok((from o in _db.CustomerFilingMasterDraft          
                        join c in _db.Customer on o.CustomerID equals c.CustomerId
                        join w in _db.CustomerFilingMasterWorkflow on o.DraftID equals w.DraftId
                        join f in _db.FilingMaster on o.FilingID equals f.FilingId
