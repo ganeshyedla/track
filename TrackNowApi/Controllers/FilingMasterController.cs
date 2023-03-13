@@ -200,6 +200,8 @@ namespace TrackNowApi.Controllers
                        
                        select new
                        {
+                           WorkflowId = c.WorkflowId,
+                           DraftId = c.DraftId,
                            FilingID = o.FilingId,
                            FilingName = o.FilingName,
                            FilingDescription = o.FilingDescription,
@@ -235,6 +237,8 @@ namespace TrackNowApi.Controllers
                        where s.ApproverID== UserID
                        select new
                        {
+                           WorkflowId = c.WorkflowId,
+                           DraftId = c.DraftId,
                            FilingID = o.FilingId,
                            FilingName = o.FilingName,
                            FilingDescription = o.FilingDescription,

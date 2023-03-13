@@ -282,17 +282,19 @@ namespace TrackNowApi.Controllers
                       });
 
         }
-
+        
         [HttpGet("CustomerFilingMasterWorkflowList")]
         public IActionResult CustomerFilingMasterWorkflowList()
         {
             return Ok(from o in _db.CustomerFilingMasterDraft
                        join c in _db.Customer on o.CustomerID equals c.CustomerId
-                       join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
+                       join w in _db.CustomerFilingMasterWorkflow on o.DraftID equals w.DraftId
                        join f in _db.FilingMaster on o.FilingID equals f.FilingId
                        join s in _db.Approvers on w.CurrentApproverID equals s.ApproverID
                        select new
                        {
+                           WorkflowId = w.WorkflowId,
+                           DraftId = w.DraftId,
                            CustomerID = c.CustomerId,
                            Customername = c.CustomerName,
                            FilingID = f.FilingId,
@@ -326,12 +328,14 @@ namespace TrackNowApi.Controllers
         {
             return Ok((from o in _db.CustomerFilingMasterDraft
                        join c in _db.Customer on o.CustomerID equals c.CustomerId
-                       join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
+                       join w in _db.CustomerFilingMasterWorkflow on o.DraftID equals w.DraftId
                        join f in _db.FilingMaster on o.FilingID equals f.FilingId
                        join s in _db.Approvers on w.CurrentApproverID equals s.ApproverID
                        where s.ApproverID == UserID
                        select new
                        {
+                           WorkflowId= w.WorkflowId,
+                           DraftId = w.DraftId,
                            CustomerID = c.CustomerId,
                            Customername = c.CustomerName,
                            FilingID = f.FilingId,
