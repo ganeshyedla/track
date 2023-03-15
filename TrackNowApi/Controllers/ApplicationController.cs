@@ -52,6 +52,71 @@ namespace TrackNowApi.Controllers
              );
 
         }
+        [HttpPost("BusinessCategoryMaster")]
+        public IActionResult CreateBusinessCategoryMaster([FromBody] BusinessCategoryMaster[] BusinessCategoryMaster)
+        {
+            foreach (BusinessCategoryMaster Bc in BusinessCategoryMaster)
+            {
+                _db.Add(Bc);
+            }
 
+            _db.SaveChanges();
+            return Ok(BusinessCategoryMaster);
+        }
+        [HttpGet("BusinessCategoryMasterList")]
+        public IActionResult BusinessCategoryMasterList()
+        {
+            return Ok(from o in _db.BusinessCategoryMaster
+                       select new
+                       {
+                           BusinessCategoryId = o.BusinessCategoryId,
+                           BusinessCategoryName = o.BusinessCategoryName,
+                           BusinessCategoryDescription = o.BusinessCategoryDescription,
+                           CreatedDate = o.CreatedDate,
+                           CreatedUser = o.CreatedUser,
+                           UpdateDate = o.UpdateDate,
+                           UpdateUser = o.UpdateUser
+                        );
+        }
+        [HttpGet("BusinessCategoryMasterList{BusinessCategoryId:Int}")]
+        public IActionResult BusinessCategoryMasterList(int BusinessCategoryId)
+        {
+            return Ok(from o in _db.BusinessCategoryMaster
+                       where o.BusinessCategoryId == BusinessCategoryId
+                       select new
+                       {
+                           BusinessCategoryId = o.BusinessCategoryId,
+                           BusinessCategoryName = o.BusinessCategoryName,
+                           BusinessCategoryDescription = o.BusinessCategoryDescription,
+                           CreatedDate = o.CreatedDate,
+                           CreatedUser = o.CreatedUser,
+                           UpdateDate = o.UpdateDate,
+                           UpdateUser = o.UpdateUser
+                       });
+
+        }
+        [HttpDelete("BusinessCategoryMaster{BusinessCategoryId:Int}")]
+        public void DeleteBusinessCategoryMaster(int BusinessCategoryId)
+        {
+            BusinessCategoryMaster BusinessCategoryMaster = _db.BusinessCategoryMaster.Where(d => d.BusinessCategoryId == BusinessCategoryId).First();
+            _db.BusinessCategoryMaster.Remove(BusinessCategoryMaster);
+            _db.SaveChanges();
+        }
+        [HttpPut("BusinessCategoryMasterUpdate{BusinessCategoryId:Int}")]
+        public IActionResult CustomerUpdate(int BusinessCategoryId, [FromBody] BusinessCategoryMaster BusinessCategoryMaster)
+        {
+
+            if (BusinessCategoryMaster == null || BusinessCategoryMaster.BusinessCategoryId != BusinessCategoryId)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _db.Update(BusinessCategoryMaster);
+            
+            _db.SaveChanges();
+
+            return Ok(BusinessCategoryMaster);
+
+        }
     }
 }
