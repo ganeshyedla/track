@@ -76,6 +76,7 @@ namespace TrackNowApi.Controllers
                            CreatedUser = o.CreatedUser,
                            UpdateDate = o.UpdateDate,
                            UpdateUser = o.UpdateUser
+                       }
                         );
         }
         [HttpGet("BusinessCategoryMasterList{BusinessCategoryId:Int}")]
