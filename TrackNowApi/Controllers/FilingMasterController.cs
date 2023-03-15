@@ -87,8 +87,11 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpPut("FilingMasterApprove{WorkflowId:Int}")]
-        public IActionResult FilingMasterApprove(int WorkflowId, string Userid, [FromBody] FilingMasterDraft FilingMasterDraft)
+        public IActionResult FilingMasterApprove(ulong WorkflowId, ulong Userid, ulong DraftId )
         {
+            FilingMasterDraft FilingMasterDraft = (from f in _db.FilingMasterDraft
+                                                   where  f.DraftId == DraftId
+                                                   select f).FirstOrDefault();
 
             FilingMasterWorkflow FilingMasterWorkflow =  (from w in _db.FilingMasterWorkflow
                                                           where w.WorkflowId == WorkflowId
@@ -99,13 +102,11 @@ namespace TrackNowApi.Controllers
             }
             FilingMasterWorkflow.WorkflowStatus = "Approved";
             FilingMasterWorkflow.UpdateDate = DateTime.Now;
-            FilingMasterWorkflow.UpdateUser = Userid;
+            FilingMasterWorkflow.UpdateUser = Userid.ToString();
             _db.FilingMasterWorkflow.Attach(FilingMasterWorkflow);
             _db.Entry(FilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
             _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
             _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
-
-            FilingMaster FilingMaster = new FilingMaster();
 
             var rowsToUpdate =     _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
             if(rowsToUpdate!=null)
@@ -130,8 +131,12 @@ namespace TrackNowApi.Controllers
             return Ok();
         }
         [HttpPut("FilingMasterReject{WorkflowId:Int}")]
-        public IActionResult FilingMasterReject(int WorkflowId, string Userid, [FromBody] FilingMasterDraft FilingMasterDraft)
+        public IActionResult FilingMasterReject(ulong WorkflowId, ulong Userid, ulong DraftId)
         {
+
+            FilingMasterDraft FilingMasterDraft = (from f in _db.FilingMasterDraft
+                                                   where f.DraftId == DraftId
+                                                   select f).FirstOrDefault();
 
             FilingMasterWorkflow FilingMasterWorkflow = (from w in _db.FilingMasterWorkflow
                                                          where w.WorkflowId == WorkflowId
@@ -143,7 +148,7 @@ namespace TrackNowApi.Controllers
          
             FilingMasterWorkflow.WorkflowStatus = "Rejected";
             FilingMasterWorkflow.UpdateDate = DateTime.Now;
-            FilingMasterWorkflow.UpdateUser = Userid;
+            FilingMasterWorkflow.UpdateUser = Userid.ToString();
             _db.FilingMasterWorkflow.Attach(FilingMasterWorkflow);
             _db.Entry(FilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
             _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
