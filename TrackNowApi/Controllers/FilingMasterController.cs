@@ -26,6 +26,54 @@ namespace TrackNowApi.Controllers
 
             return Ok(FilingMaster);
         }
+        [HttpPost("CreateFilingApprovalStatus")]
+        public IActionResult CreateFilingApprovalStatus(FilingApprovalStatus FilingApprovalStatus)
+        {
+
+            _db.Add(FilingApprovalStatus);
+            _db.SaveChanges();
+
+            return Ok(FilingApprovalStatus);
+        }
+        [HttpDelete("FilingApprovalStatusDelete{FilingApprovalID:Int}")]
+        public void FilingApprovalStatusDelete(int FilingApprovalID)
+        {
+            FilingApprovalStatus FilingApprovalStatus = _db.FilingApprovalStatus.Where(d => d.FilingApprovalID == FilingApprovalID).First();
+            _db.FilingApprovalStatus.Remove(FilingApprovalStatus);
+            _db.SaveChanges();
+
+        }
+        [HttpPut("FilingApprovalStatusUpdate{FilingApprovalID:Int}")]
+        public IActionResult FilingApprovalStatusUpdate(int FilingApprovalID, [FromBody] FilingApprovalStatus FilingApprovalStatus)
+        {
+
+            if (FilingApprovalStatus == null || FilingApprovalStatus.FilingApprovalID != FilingApprovalID)
+            {
+                return BadRequest(ModelState);
+            }
+            _db.Update(FilingApprovalStatus);
+            _db.SaveChanges();
+
+            return Ok(FilingApprovalStatus);
+
+        }
+        [HttpGet("FilingApprovalStatusList")]
+        public IActionResult FilingApprovalStatusList(int WorkflowID)
+        {
+            return Ok(from
+                      f in _db.FilingApprovalStatus
+                      where f.WorkflowID == WorkflowID
+                      select new
+                      {
+                         WorkflowID= f.WorkflowID,
+                         ApproverName = f.ApproverName,
+                         Comments = f.Comments,
+                         Status =f.Status,
+                         DoneBy=f.DoneBy,
+                         DoneOn=f.DoneOn,
+                      });
+
+        }
         [HttpPost("CreateFilingBusinessCategory")]
         public IActionResult CreateFilingBusinessCategory([FromBody] FilingBusinessCategory []FilingBusinessCategory)
         {

@@ -42,9 +42,14 @@ namespace TrackNowApi.Data
         public DbSet<Roles> Roles { get; set; }
         public DbSet<UsersRoles> UsersRoles { get; set; }
         public DbSet<Users> Users { get; set; }
+        public DbSet<FilingApprovalStatus> FilingApprovalStatus { get; set; }
 
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<FilingApprovalStatus>()
+           .HasKey(t => new { t.FilingApprovalID });
+
             modelBuilder.Entity<Roles>()
             .HasKey(t => new { t.RoleId });
             
