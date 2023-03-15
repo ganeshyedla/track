@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
+using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
 
@@ -35,6 +37,78 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
             return Ok(FilingBusinessCategory);
 
+        }
+        [HttpPut("FilingMasterApprove{WorkflowId:Int}")]
+        public IActionResult FilingMasterApprove(int WorkflowId, string Userid, [FromBody] FilingMasterDraft FilingMasterDraft)
+        {
+
+            FilingMasterWorkflow FilingMasterWorkflow =  (from w in _db.FilingMasterWorkflow
+                                                          where w.WorkflowId == WorkflowId
+                                                          select w).FirstOrDefault();
+            if (FilingMasterWorkflow == null)
+            {
+                return BadRequest(ModelState);
+            }
+            FilingMasterWorkflow.WorkflowStatus = "Approved";
+            FilingMasterWorkflow.UpdateDate = DateTime.Now;
+            FilingMasterWorkflow.UpdateUser = Userid;
+            _db.FilingMasterWorkflow.Attach(FilingMasterWorkflow);
+            _db.Entry(FilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
+            _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
+            _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
+
+            FilingMaster FilingMaster = new FilingMaster();
+
+            var rowsToUpdate =     _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
+            if(rowsToUpdate!=null)
+            {
+                rowsToUpdate.FilingName= FilingMasterDraft.FilingName;
+                rowsToUpdate.FilingDescription = FilingMasterDraft.FilingDescription;
+                rowsToUpdate.FilingFrequency = FilingMasterDraft.FilingFrequency;
+                rowsToUpdate.StateInfo = FilingMasterDraft.StateInfo;
+                rowsToUpdate.Required = FilingMasterDraft.Required;
+                rowsToUpdate.Jsidept = FilingMasterDraft.Jsidept;
+                rowsToUpdate.JsicontactName = FilingMasterDraft.JsicontactName;
+                rowsToUpdate.JsicontactEmail = FilingMasterDraft.JsicontactEmail;
+                rowsToUpdate.UpdateDate = FilingMasterDraft.UpdateDate;
+                rowsToUpdate.UpdateUser = FilingMasterDraft.UpdateUser;
+                rowsToUpdate.Juristiction = FilingMasterDraft.Juristiction;
+                rowsToUpdate.Notes = FilingMasterDraft.Notes;
+                rowsToUpdate.ChangesInprogress = false;
+                }
+            if(FilingMasterDraft!=null)
+                FilingMasterDraft.ChangesInprogress = false;
+            _db.SaveChanges();
+            return Ok();
+        }
+        [HttpPut("FilingMasterReject{WorkflowId:Int}")]
+        public IActionResult FilingMasterReject(int WorkflowId, string Userid, [FromBody] FilingMasterDraft FilingMasterDraft)
+        {
+
+            FilingMasterWorkflow FilingMasterWorkflow = (from w in _db.FilingMasterWorkflow
+                                                         where w.WorkflowId == WorkflowId
+                                                         select w).FirstOrDefault();
+            if (FilingMasterWorkflow == null)
+            {
+                return BadRequest(ModelState);
+            }
+         
+            FilingMasterWorkflow.WorkflowStatus = "Rejected";
+            FilingMasterWorkflow.UpdateDate = DateTime.Now;
+            FilingMasterWorkflow.UpdateUser = Userid;
+            _db.FilingMasterWorkflow.Attach(FilingMasterWorkflow);
+            _db.Entry(FilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
+            _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
+            _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
+
+            var rowsToUpdate = _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
+            if (rowsToUpdate != null)
+                rowsToUpdate.ChangesInprogress = false;
+            if(FilingMasterDraft !=null)
+                FilingMasterDraft.ChangesInprogress = false;
+            
+            _db.SaveChanges();
+            return Ok();
         }
         [HttpGet("FilingMasterList")]
         public IActionResult FilingMasterList()
@@ -185,7 +259,11 @@ namespace TrackNowApi.Controllers
         [HttpPost("CreateFilingMasterWorkflow")]
         public IActionResult CreateFilingMasterWorkflow([FromBody] FilingMasterWorkflow FilingMasterWorkflow)
         {
-
+            FilingMasterWorkflow.CurrentApproverID = (from a in _db.Approvers
+                                                      join c in _db.ApproverConfiguration on a.ApproverGroupID equals c.ApproverGroupID
+                                                      join f in _db.FilingMaster on a.State equals f.StateInfo
+                                                      where c.FilingType != null && c.FilingType.Equals("MasterFiling") && a.Isdefault == true
+                                                      select a.ApproverID).FirstOrDefault();
             _db.Add(FilingMasterWorkflow);
             _db.SaveChanges();
 
@@ -234,7 +312,7 @@ namespace TrackNowApi.Controllers
             return Ok((from o in _db.FilingMasterDraft
                        join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
                        join s in _db.Approvers on c.CurrentApproverID equals s.ApproverID
-                       where s.ApproverID== UserID
+                       where s.ApproverID== UserID && o.ChangesInprogress==true
                        select new
                        {
                            WorkflowId = c.WorkflowId,

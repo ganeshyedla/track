@@ -151,6 +151,23 @@ namespace TrackNowApi.Controllers
                        })); ;
 
         }
+        [HttpGet("CustomerBusinessCategoryList")]
+        public IActionResult CustomerBusinessCategoryList()
+        {
+            return Ok((from c in _db.Customer                           
+                       join cb in _db.CustomerBusinessCategory on c.CustomerId equals cb.CustomerId
+                       join i in _db.BusinessCategoryMaster on cb.BusinessCategoryId equals i.BusinessCategoryId
+                       select new
+                       {
+                           CustomerID=c.CustomerId, CustomerName=c.CustomerName,
+                           BusinessCategoryId = i.BusinessCategoryId,
+                           BusinessCategoryName = i.BusinessCategoryName,
+                           BusinessCategoryDescription = i.BusinessCategoryDescription
+
+                       })); ;
+
+        }
+
         
         [HttpGet("CustomerfulltextSearch")]
         public IActionResult CustomerfulltextSearch(string? Textsearch)
@@ -199,8 +216,6 @@ namespace TrackNowApi.Controllers
         [HttpPut("CustomerUpdate{CustomerId:Int}")]
         public IActionResult CustomerUpdate(int CustomerId, [FromBody] Customer customer)
         {
-
-            
 
             if (customer == null || customer.CustomerId != CustomerId)
             {
@@ -311,8 +326,7 @@ namespace TrackNowApi.Controllers
                       });
 
         }
-
-        [HttpGet("CustomerFilingMasterWorkflowList")]
+       [HttpGet("CustomerFilingMasterWorkflowList")]
         public IActionResult CustomerFilingMasterWorkflowList()
         {
             return Ok(from o in _db.CustomerFilingMasterDraft

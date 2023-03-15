@@ -39,9 +39,21 @@ namespace TrackNowApi.Data
         public DbSet<CustomerFilingMasterDraft> CustomerFilingMasterDraft { get; set; }
         public DbSet<CustomerFilingMasterWorkflow> CustomerFilingMasterWorkflow { get; set; }
         public DbSet<CustomerFilingTrackingComments> CustomerFilingTrackingComments { get; set; }
+        public DbSet<Roles> Roles { get; set; }
+        public DbSet<UsersRoles> UsersRoles { get; set; }
+        public DbSet<Users> Users { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Roles>()
+            .HasKey(t => new { t.RoleId });
+            
+            modelBuilder.Entity<Users>()
+           .HasKey(t => new { t.UserId });
+
+            modelBuilder.Entity<UsersRoles>()
+             .HasKey(t => new { t.UserRoleId });
+
             modelBuilder.Entity<CustomerFilingTrackingComments>()
           .HasKey(t => new { t.CommentsID });
 

@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TrackNowApi.Model
 {
     public partial class AppConfiguration
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long ConfigId { get; set; }
         public decimal? CustomerId { get; set; }
         public decimal? FilingId { get; set; }
@@ -32,10 +34,43 @@ namespace TrackNowApi.Model
     }
     public partial class ApproverConfiguration
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long? ApproverConfigID { get; set; }
         public long ApproverGroupID { get; set; }
         public long? ApproverLevel { get; set; }
         public string? FilingType { get; set; }
+        public DateTime? CreateDate { get; set; }
+        public string? CreateUser { get; set; }
+        public DateTime? UpdateDate { get; set; }
+        public string? UpdateUser { get; set; }
+    }
+    public partial class Roles
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public long RoleId { get; set; }
+        public string? RoleName { get; set; }
+        public string? RoleDescription { get; set; }
+        public DateTime? CreateDate { get; set; }
+        public string? CreateUser { get; set; }
+        public DateTime? UpdateDate { get; set; }
+        public string? UpdateUser { get; set; }
+    }
+    public partial class UsersRoles
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public long UserRoleId { get; set; }
+        public long UserId { get; set; }
+        public long RoleId { get; set; }
+        public DateTime? CreateDate { get; set; }
+        public string? CreateUser { get; set; }
+        public DateTime? UpdateDate { get; set; }
+        public string? UpdateUser { get; set; }
+    }
+    public partial class Users
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public long UserId { get; set; }
+        public string? UserName { get; set; }
         public DateTime? CreateDate { get; set; }
         public string? CreateUser { get; set; }
         public DateTime? UpdateDate { get; set; }
