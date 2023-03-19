@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
 using System.Reflection.Metadata;
 using TrackNowApi.Model;
 //using System.Data.Entity;
@@ -31,6 +32,7 @@ namespace TrackNowApi.Data
         public DbSet<Approvers> Approvers { get; set; }
         public DbSet<CustomerFilingWorkflowComments> CustomerFilingWorkflowComments { get; set; }
         public DbSet<CustomerComments> CustomerComments { get; set; }
+        public DbSet<CustomerApprovalStatus> CustomerApprovalStatus { get; set; }
         public DbSet<CustomerFilingDraftComments> CustomerFilingDraftComments { get; set; }
         public DbSet<CustomerFilingComments> CustomerFilingComments { get; set; }
         public DbSet<FilingMasterWorkflowComments> FilingMasterWorkflowComments { get; set; }
@@ -43,13 +45,46 @@ namespace TrackNowApi.Data
         public DbSet<UsersRoles> UsersRoles { get; set; }
         public DbSet<Users> Users { get; set; }
         public DbSet<FilingApprovalStatus> FilingApprovalStatus { get; set; }
-
+        public DbSet<FilingMasterAttachments> FilingMasterAttachments { get; set; }
+        public DbSet<CustomerFilingTrackingCommentsAttachments> CustomerFilingTrackingCommentsAttachments { get; set; }
+        public DbSet<CustomerFilingWorkflowNotifications> CustomerFilingWorkflowNotifications { get; set; }
+        public DbSet<AppConfiguration> AppConfiguration { get; set; }
+        public DbSet<CustomerFilingWorkflowCommentsAttachments> CustomerFilingWorkflowCommentsAttachments { get; set; }
+		public DbSet<FilingMasterDraftAttachments> FilingMasterDraftAttachments { get; set; }
+        public DbSet<FilingMasterDraftCommentsAttachments> FilingMasterDraftCommentsAttachments { get; set; }
+        public DbSet<FilingMasterWorkflowCommentsAttachments> FilingMasterWorkflowCommentsAttachments { get; set; }
+        public DbSet<MasterFilingAttachments> MasterFilingAttachments { get; set; }
+        public DbSet<FilingMasterWorkflowNotifications> FilingMasterWorkflowNotifications { get; set; }
+        public DbSet<CustomerAttachments> CustomerAttachments { get; set; }
+        public DbSet<CustomerFilingAttachments> CustomerFilingAttachments { get; set; }
+        public DbSet<CustomerFilingCommentsAttachments> CustomerFilingCommentsAttachments { get; set; }
+        public DbSet<CustomerFilingDraftAttachments> CustomerFilingDraftAttachments { get; set; }
+        public DbSet<CustomerFilingDraftCommentsAttachments> CustomerFilingDraftCommentsAttachments { get; set; }
+        public DbSet<CustomerFilingTrackingAttachments> CustomerFilingTrackingAttachments { get; set; }
+        public DbSet<CustomerFilingTrackingNotifications> CustomerFilingTrackingNotifications { get; set; }
         
+
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<FilingApprovalStatus>()
-           .HasKey(t => new { t.FilingApprovalID });
+            modelBuilder.Entity<AppConfiguration>()
+            .HasKey(t => new { t.ConfigId });
 
+            modelBuilder.Entity<FilingApprovalStatus>()
+           .HasKey(t => new { t.FilingApprovalId });
+
+           modelBuilder.Entity<CustomerFilingWorkflowNotifications>()
+           .HasKey(t => new { t.NotificationId });
+
+            modelBuilder.Entity<CustomerFilingTrackingCommentsAttachments>()
+           .HasKey(t => new { t.AttachmentId });
+
+            modelBuilder.Entity<FilingMasterAttachments>()
+           .HasKey(t => new { t.AttachmentId });
+
+ 			modelBuilder.Entity<CustomerFilingWorkflowCommentsAttachments>()
+          .HasKey(t => new { t.AttachmentId });
+          
             modelBuilder.Entity<Roles>()
             .HasKey(t => new { t.RoleId });
             
@@ -60,30 +95,32 @@ namespace TrackNowApi.Data
              .HasKey(t => new { t.UserRoleId });
 
             modelBuilder.Entity<CustomerFilingTrackingComments>()
-          .HasKey(t => new { t.CommentsID });
+          .HasKey(t => new { t.CommentsId });
 
             modelBuilder.Entity<CustomerFilingComments>()
-             .HasKey(t => new { t.CommentsID});
+             .HasKey(t => new { t.CommentsId});
              
 
             modelBuilder.Entity<CustomerFilingDraftComments>()
-             .HasKey(t => new { t.CommentsID });
+             .HasKey(t => new { t.CommentsId });
 
             modelBuilder.Entity<FilingMasterComments>()
-             .HasKey(t => new { t.CommentsID });
+             .HasKey(t => new { t.CommentsId });
 
             modelBuilder.Entity<FilingMasterDraftComments>()
-             .HasKey(t => new { t.CommentsID });
+             .HasKey(t => new { t.CommentsId });
 
             modelBuilder.Entity<FilingMasterWorkflowComments>()
-             .HasKey(t => new { t.CommentsID });
+             .HasKey(t => new { t.CommentsId });
 
             modelBuilder.Entity<CustomerFilingWorkflowComments>()
-             .HasKey(t => new { t.CommentsID });
+             .HasKey(t => new { t.CommentsId });
 
             modelBuilder.Entity<CustomerComments>()
-             .HasKey(t => new { t.CommentsID });
+             .HasKey(t => new { t.CommentsId });
             
+ 			modelBuilder.Entity<CustomerApprovalStatus>()
+             .HasKey(t => new { t.CustomerApprovalId });
             modelBuilder.Entity<CustomerFilingMasterWorkflow>()
                 .HasKey(t => new { t.WorkflowId });
 
@@ -91,10 +128,10 @@ namespace TrackNowApi.Data
                             .HasKey(t => new { t.DraftId });
 
             modelBuilder.Entity<ApproverConfiguration>()
-                .HasKey(t => new { t.ApproverConfigID });
+                .HasKey(t => new { t.ApproverConfigId });
 
             modelBuilder.Entity<Approvers>()
-                .HasKey(t => new { t.ApproverID});
+                .HasKey(t => new { t.ApproverId});
 
             modelBuilder.Entity<CustomerFilingMaster>()
                 .HasKey(t => new { t.CustomerId, t.FilingId });
@@ -138,6 +175,42 @@ namespace TrackNowApi.Data
             modelBuilder.Entity<CustomerHistory>()
           .HasKey(t => new { t.historyid });
 
+            modelBuilder.Entity<FilingMasterDraftAttachments>()
+          .HasKey(t => new { t.AttachmentId});
+
+            modelBuilder.Entity<FilingMasterDraftCommentsAttachments>()
+              .HasKey(t => new { t.AttachmentId });
+
+            modelBuilder.Entity<FilingMasterWorkflowCommentsAttachments>()
+               .HasKey(t => new { t.AttachmentId });
+
+            modelBuilder.Entity<MasterFilingAttachments>()
+               .HasKey(t => new { t.FollowupId });
+
+            modelBuilder.Entity<FilingMasterWorkflowNotifications>()
+              .HasKey(t => new { t.NotificationId});
+
+           
+            modelBuilder.Entity<CustomerAttachments>()
+              .HasKey(t => new { t.CustomerId});
+
+            modelBuilder.Entity<CustomerFilingAttachments>()
+              .HasKey(t => new { t.FollowupId });
+
+            modelBuilder.Entity<CustomerFilingCommentsAttachments>()
+              .HasKey(t => new { t.AttachmentId });
+
+            modelBuilder.Entity<CustomerFilingDraftAttachments>()
+              .HasKey(t => new { t.DraftId });
+
+            modelBuilder.Entity<CustomerFilingDraftCommentsAttachments>()
+              .HasKey(t => new { t.AttachmentId });
+
+            modelBuilder.Entity<CustomerFilingTrackingAttachments>()
+              .HasKey(t => new { t.FileTrackingId });
+
+            modelBuilder.Entity<CustomerFilingTrackingNotifications>()
+              .HasKey(t => new { t.WorkflowId });
         }
 
     }

@@ -35,19 +35,19 @@ namespace TrackNowApi.Controllers
 
             return Ok(FilingApprovalStatus);
         }
-        [HttpDelete("FilingApprovalStatusDelete{FilingApprovalID:Int}")]
-        public void FilingApprovalStatusDelete(int FilingApprovalID)
+        [HttpDelete("FilingApprovalStatusDelete{FilingApprovalId:Int}")]
+        public void FilingApprovalStatusDelete(int FilingApprovalId)
         {
-            FilingApprovalStatus FilingApprovalStatus = _db.FilingApprovalStatus.Where(d => d.FilingApprovalID == FilingApprovalID).First();
+            FilingApprovalStatus FilingApprovalStatus = _db.FilingApprovalStatus.Where(d => d.FilingApprovalId == FilingApprovalId).First();
             _db.FilingApprovalStatus.Remove(FilingApprovalStatus);
             _db.SaveChanges();
 
         }
-        [HttpPut("FilingApprovalStatusUpdate{FilingApprovalID:Int}")]
-        public IActionResult FilingApprovalStatusUpdate(int FilingApprovalID, [FromBody] FilingApprovalStatus FilingApprovalStatus)
+        [HttpPut("FilingApprovalStatusUpdate{FilingApprovalId:Int}")]
+        public IActionResult FilingApprovalStatusUpdate(int FilingApprovalId, [FromBody] FilingApprovalStatus FilingApprovalStatus)
         {
 
-            if (FilingApprovalStatus == null || FilingApprovalStatus.FilingApprovalID != FilingApprovalID)
+            if (FilingApprovalStatus == null || FilingApprovalStatus.FilingApprovalId != FilingApprovalId)
             {
                 return BadRequest(ModelState);
             }
@@ -58,14 +58,14 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpGet("FilingApprovalStatusList")]
-        public IActionResult FilingApprovalStatusList(int WorkflowID)
+        public IActionResult FilingApprovalStatusList(int WorkflowId)
         {
             return Ok(from
                       f in _db.FilingApprovalStatus
-                      where f.WorkflowID == WorkflowID
+                      where f.WorkflowId == WorkflowId
                       select new
                       {
-                         WorkflowID= f.WorkflowID,
+                         WorkflowId= f.WorkflowId,
                          ApproverName = f.ApproverName,
                          Comments = f.Comments,
                          Status =f.Status,
@@ -169,7 +169,7 @@ namespace TrackNowApi.Controllers
             return Ok((from o in _db.FilingMaster
                        select new
                        {
-                           FilingID = o.FilingId,
+                           FilingId = o.FilingId,
                            FilingName=o.FilingName,
                            FilingDescription = o.FilingDescription,
                            FilingFrequency = o.FilingFrequency,
@@ -201,7 +201,7 @@ namespace TrackNowApi.Controllers
                        where o.FilingId== FilingId
                        select new
                        {
-                           FilingID = o.FilingId,
+                           FilingId = o.FilingId,
                            FilingName = o.FilingName,
                            FilingDescription = o.FilingDescription,
                            FilingFrequency = o.FilingFrequency,
@@ -312,11 +312,11 @@ namespace TrackNowApi.Controllers
         [HttpPost("CreateFilingMasterWorkflow")]
         public IActionResult CreateFilingMasterWorkflow([FromBody] FilingMasterWorkflow FilingMasterWorkflow)
         {
-            FilingMasterWorkflow.CurrentApproverID = (from a in _db.Approvers
-                                                      join c in _db.ApproverConfiguration on a.ApproverGroupID equals c.ApproverGroupID
+            FilingMasterWorkflow.CurrentApproverId = (from a in _db.Approvers
+                                                      join c in _db.ApproverConfiguration on a.ApproverGroupId equals c.ApproverGroupId
                                                       join f in _db.FilingMaster on a.State equals f.StateInfo
                                                       where c.FilingType != null && c.FilingType.Equals("MasterFiling") && a.Isdefault == true
-                                                      select a.ApproverID).FirstOrDefault();
+                                                      select a.ApproverId).FirstOrDefault();
             _db.Add(FilingMasterWorkflow);
             _db.SaveChanges();
 
@@ -327,13 +327,13 @@ namespace TrackNowApi.Controllers
         {
             return Ok((from o in _db.FilingMasterDraft
                        join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
-                       join s in _db.Approvers on c.CurrentApproverID equals s.ApproverID
+                       join s in _db.Approvers on c.CurrentApproverId equals s.ApproverId
                        
                        select new
                        {
                            WorkflowId = c.WorkflowId,
                            DraftId = c.DraftId,
-                           FilingID = o.FilingId,
+                           FilingId = o.FilingId,
                            FilingName = o.FilingName,
                            FilingDescription = o.FilingDescription,
                            FilingFrequency = o.FilingFrequency,
@@ -359,18 +359,18 @@ namespace TrackNowApi.Controllers
                       ));
 
         }
-        [HttpGet("FilingMasterWorkflowListByApprover{UserID:Int}")]
-        public IActionResult FilingMasterWorkflowListByApprover(long UserID)
+        [HttpGet("FilingMasterWorkflowListByApprover{UserId:Int}")]
+        public IActionResult FilingMasterWorkflowListByApprover(long UserId)
         {
             return Ok((from o in _db.FilingMasterDraft
                        join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
-                       join s in _db.Approvers on c.CurrentApproverID equals s.ApproverID
-                       where s.ApproverID== UserID && o.ChangesInprogress==true
+                       join s in _db.Approvers on c.CurrentApproverId equals s.ApproverId
+                       where s.ApproverId== UserId && o.ChangesInprogress==true
                        select new
                        {
                            WorkflowId = c.WorkflowId,
                            DraftId = c.DraftId,
-                           FilingID = o.FilingId,
+                           FilingId = o.FilingId,
                            FilingName = o.FilingName,
                            FilingDescription = o.FilingDescription,
                            FilingFrequency = o.FilingFrequency,
@@ -531,10 +531,10 @@ namespace TrackNowApi.Controllers
 
         }
 
-        [HttpPut("FilingMasterCommentsUpdate{CommentsID:Int}")]
-        public IActionResult FilingMasterCommentsUpdate(int CommentsID, [FromBody] FilingMasterComments FilingMasterComments)
+        [HttpPut("FilingMasterCommentsUpdate{CommentsId:Int}")]
+        public IActionResult FilingMasterCommentsUpdate(int CommentsId, [FromBody] FilingMasterComments FilingMasterComments)
         {
-            if (FilingMasterComments == null || FilingMasterComments.CommentsID != CommentsID)
+            if (FilingMasterComments == null || FilingMasterComments.CommentsId != CommentsId)
             {
                 return BadRequest(ModelState);
             }
@@ -542,10 +542,77 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
             return Ok(FilingMasterComments);
         }
-        [HttpPut("FilingMasterDraftCommentsUpdate{CommentsID:Int}")]
-        public IActionResult FilingMasterDraftCommentsUpdate(int CommentsID, [FromBody] FilingMasterDraftComments FilingMasterDraftComments)
+        [HttpGet("FilingMasterAttachmentsList")]
+        public ActionResult FilingMasterAttachmentsList()
+        {            
+            return Ok(_db.FilingMasterAttachments);
+         }
+
+        [HttpPost("FilingMasterAttachmentsCreate")]
+        public IActionResult FilingMasterAttachmentsCreate([FromBody] FilingMasterAttachments item)
         {
-            if (FilingMasterDraftComments == null || FilingMasterDraftComments.CommentsID != CommentsID)
+            if (item == null)
+            {
+                return BadRequest();
+            }
+
+            _db.FilingMasterAttachments.Add(item);
+            _db.SaveChanges();
+            return Ok(item);
+
+
+        }
+
+
+        [HttpGet("FilingMasterAttachmentsGetById/{FilingId:int}")]
+        public ActionResult<FilingMasterAttachments> FilingMasterAttachmentsGetById(int FilingId)
+        {
+            var res = _db.FilingMasterAttachments.FirstOrDefault(p => p.FilingId == FilingId);
+
+            return Ok(res);
+
+
+        }
+
+
+        [HttpPut("FilingMasterAttachmentsupdate{FilingId}")]
+        public IActionResult FilingMasterAttachmentsupdate(int FilingId, FilingMasterAttachments updatedCustomer)
+        {
+            var customer = _db.FilingMasterAttachments.FirstOrDefault(p => p.FilingId == FilingId);
+
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            customer.AttachmentPath = updatedCustomer.AttachmentPath;
+
+
+            _db.SaveChanges();
+
+            return Ok();
+        }
+
+
+
+        [HttpDelete("(FilingMasterAttachmentsdelete{FilingId:int}")]
+        public IActionResult FilingMasterAttachmentsdelete(int FilingId)
+        {
+            var res = _db.FilingMasterAttachments.FirstOrDefault(t => t.FilingId == FilingId);
+            if (res == null)
+            {
+                return NotFound();
+            }
+
+            _db.FilingMasterAttachments.Remove(res);
+            _db.SaveChanges();
+            return new NoContentResult();
+        }
+
+        [HttpPut("FilingMasterDraftCommentsUpdate{CommentsId:Int}")]
+        public IActionResult FilingMasterDraftCommentsUpdate(int CommentsId, [FromBody] FilingMasterDraftComments FilingMasterDraftComments)
+        {
+            if (FilingMasterDraftComments == null || FilingMasterDraftComments.CommentsId != CommentsId)
             {
                 return BadRequest(ModelState);
             }
@@ -553,10 +620,10 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
             return Ok(FilingMasterDraftComments);
         }
-        [HttpPut("FilingMasterWorkflowCommentsCommentsUpdate{CommentsID:Int}")]
-        public IActionResult FilingMasterWorkflowCommentsCommentsUpdate(int CommentsID, [FromBody] FilingMasterWorkflowComments FilingMasterWorkflowComments)
+        [HttpPut("FilingMasterWorkflowCommentsCommentsUpdate{CommentsId:Int}")]
+        public IActionResult FilingMasterWorkflowCommentsCommentsUpdate(int CommentsId, [FromBody] FilingMasterWorkflowComments FilingMasterWorkflowComments)
         {
-            if (FilingMasterWorkflowComments == null || FilingMasterWorkflowComments.CommentsID != CommentsID)
+            if (FilingMasterWorkflowComments == null || FilingMasterWorkflowComments.CommentsId != CommentsId)
             {
                 return BadRequest(ModelState);
             }
@@ -565,15 +632,15 @@ namespace TrackNowApi.Controllers
             return Ok(FilingMasterWorkflowComments);
         }
 
-        [HttpGet("FilingMasterComments{FilingID:Int}")]
-        public IActionResult FilingMasterComments(int FilingID)
+        [HttpGet("FilingMasterComments{FilingId:Int}")]
+        public IActionResult FilingMasterComments(int FilingId)
         {
             return Ok((from o in _db.FilingMasterComments
-                       where o.FilingID == FilingID
+                       where o.FilingId == FilingId
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           FilingID=o.FilingID,
+                           CommentsId = o.CommentsId,
+                           FilingId=o.FilingId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -585,15 +652,15 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
-        [HttpGet("FilingMasterWorkflowComments{WorkflowID:Int}")]
-        public IActionResult FilingMasterWorkflowComments(int WorkflowID)
+        [HttpGet("FilingMasterWorkflowComments{WorkflowId:Int}")]
+        public IActionResult FilingMasterWorkflowComments(int WorkflowId)
         {
             return Ok((from o in _db.FilingMasterWorkflowComments
-                       where o.WorkflowID == WorkflowID
+                       where o.WorkflowId == WorkflowId
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           WorkflowID = o.WorkflowID,
+                           CommentsId = o.CommentsId,
+                           WorkflowId = o.WorkflowId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -605,14 +672,14 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpGet("FilingMasterDraftComments{DraftId:Int}")]
-        public IActionResult FilingMasterDraftComments(int DraftID)
+        public IActionResult FilingMasterDraftComments(int DraftId)
         {
             return Ok((from o in _db.FilingMasterDraftComments
-                       where o.DraftID == DraftID
+                       where o.DraftId == DraftId
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           DraftID = o.DraftID,
+                           CommentsId = o.CommentsId,
+                           DraftId = o.DraftId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -624,14 +691,14 @@ namespace TrackNowApi.Controllers
 
         }
 
-        [HttpGet("FilingMasterCommentsbyID{CommentsID:Int}")]
-        public IActionResult FilingMasterCommentsbyID(int CommentsID)
+        [HttpGet("FilingMasterCommentsbyId{CommentsId:Int}")]
+        public IActionResult FilingMasterCommentsbyId(int CommentsId)
         {
             return Ok((from o in _db.FilingMasterComments
-                       where o.CommentsID == CommentsID
+                       where o.CommentsId == CommentsId
                        select new
                        {
-                           CommentsID = o.CommentsID,
+                           CommentsId = o.CommentsId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -643,15 +710,15 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
-        [HttpGet("FilingMasterWorkflowCommentsbyID{CommentsID:Int}")]
-        public IActionResult FilingMasterWorkflowCommentsbyID(int CommentsID)
+        [HttpGet("FilingMasterWorkflowCommentsbyId{CommentsId:Int}")]
+        public IActionResult FilingMasterWorkflowCommentsbyId(int CommentsId)
         {
             return Ok((from o in _db.FilingMasterWorkflowComments
-                       where o.CommentsID == CommentsID
+                       where o.CommentsId == CommentsId
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           WorkflowID = o.WorkflowID,
+                           CommentsId = o.CommentsId,
+                           WorkflowId = o.WorkflowId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -662,15 +729,15 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
-        [HttpGet("FilingMasterDraftCommentsbyID{CommentsID:Int}")]
-        public IActionResult FilingMasterDraftCommentsbyID(int CommentsID)
+        [HttpGet("FilingMasterDraftCommentsbyId{CommentsId:Int}")]
+        public IActionResult FilingMasterDraftCommentsbyId(int CommentsId)
         {
             return Ok((from o in _db.FilingMasterDraftComments
-                       where o.CommentsID == CommentsID
+                       where o.CommentsId == CommentsId
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           DraftID = o.DraftID,
+                           CommentsId = o.CommentsId,
+                           DraftId = o.DraftId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -682,32 +749,32 @@ namespace TrackNowApi.Controllers
 
         }
 
-        [HttpDelete("FilingMasterCommentssDelete{CommentsID:Int}")]
-        public void FilingMasterCommentssDelete(int CommentsID)
+        [HttpDelete("FilingMasterCommentssDelete{CommentsId:Int}")]
+        public void FilingMasterCommentssDelete(int CommentsId)
         {
             FilingMasterComments FilingMasterComments;
 
-            FilingMasterComments = _db.FilingMasterComments.Where(d => d.CommentsID == CommentsID).First();
+            FilingMasterComments = _db.FilingMasterComments.Where(d => d.CommentsId == CommentsId).First();
             _db.FilingMasterComments.Remove(FilingMasterComments);
             _db.SaveChanges();
 
         }
         [HttpDelete("CustomerFilingCommentsDelete{CommentId:Int}")]
-        public void CustomerFilingCommentsDelete(int CommentsID)
+        public void CustomerFilingCommentsDelete(int CommentsId)
         {
             FilingMasterDraftComments FilingMasterDraftComments;
 
-            FilingMasterDraftComments = _db.FilingMasterDraftComments.Where(d => d.CommentsID == CommentsID).First();
+            FilingMasterDraftComments = _db.FilingMasterDraftComments.Where(d => d.CommentsId == CommentsId).First();
             _db.FilingMasterDraftComments.Remove(FilingMasterDraftComments);
             _db.SaveChanges();
 
         }
         [HttpDelete("FilingMasterWorkflowCommentsDelete{CommentId:Int}")]
-        public void FilingMasterWorkflowCommentsDelete(int CommentsID)
+        public void FilingMasterWorkflowCommentsDelete(int CommentsId)
         {
             FilingMasterWorkflowComments FilingMasterWorkflowComments;
 
-            FilingMasterWorkflowComments = _db.FilingMasterWorkflowComments.Where(d => d.CommentsID == CommentsID).First();
+            FilingMasterWorkflowComments = _db.FilingMasterWorkflowComments.Where(d => d.CommentsId == CommentsId).First();
             _db.FilingMasterWorkflowComments.Remove(FilingMasterWorkflowComments);
             _db.SaveChanges();
 
@@ -740,6 +807,601 @@ namespace TrackNowApi.Controllers
 
             return Ok(FilingMasterWorkflowComments);
         }
+// ========================================================================================
+        [HttpPost("CreateFilingMasterDraftAttachments")]
+        public IActionResult CreateFilingMasterDraftAttachments(FilingMasterDraftAttachments Attachment)
+        {
+            try
+            {
+                _db.FilingMasterDraftAttachments.Add(Attachment);
+                 _db.SaveChanges();
+                return Ok(Attachment);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewFilingMasterDraftAttachments/{AttachmentId:decimal}")]
+        public IActionResult ViewFilingMasterDraftAttachments(decimal AttachmentId)
+        {
+            try
+            {
+                var FilingMasterDraftAttachments = _db.FilingMasterDraftAttachments
+                                               .FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (FilingMasterDraftAttachments != null)
+                {
+                    return Ok(FilingMasterDraftAttachments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ListFilingMasterDraftAttachments")]
+        public IActionResult ListFilingMasterDraftAttachments()
+        {
+            try
+            {
+                var FilingMasterDraftAttachments = _db.FilingMasterDraftAttachments.ToList();
+                return Ok(FilingMasterDraftAttachments);
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("DeleteFilingMasterDraftAttachments/{AttachmentId:decimal}")]
+        public IActionResult DeleteFilingMasterDraftAttachments(decimal AttachmentId)
+        {
+
+            try
+            {
+
+                var FilingMasterDraftAttachments = _db.FilingMasterDraftAttachments
+                                            .FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (FilingMasterDraftAttachments != null)
+                {
+                    _db.FilingMasterDraftAttachments.Remove(FilingMasterDraftAttachments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+
+        [HttpPut("UpdateFilingMasterDraftAttachments/{AttachmentId:decimal}")]
+        public IActionResult UpdateFilingMasterDraftAttachments(decimal AttachmentId, [FromBody] FilingMasterDraftAttachments FilingMasterDraftAttachments)
+        {
+            try
+            {
+
+                var existingNotification = _db.FilingMasterDraftAttachments.
+                                      FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.AttachmentPath = FilingMasterDraftAttachments.AttachmentPath;
+                    existingNotification.CommentsId = FilingMasterDraftAttachments.CommentsId;
+                    existingNotification.CreateDate = FilingMasterDraftAttachments.CreateDate;
+                    existingNotification.CreateUser = FilingMasterDraftAttachments.CreateUser;
+                    existingNotification.UpdatedDate = FilingMasterDraftAttachments.UpdatedDate;
+                    existingNotification.UpdatedUser = FilingMasterDraftAttachments.UpdatedUser;
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        //=======================================================================================================
+
+        [HttpPost("CreateFilingMasterDraftCommentsAttachments")]
+        public IActionResult CreateFilingMasterDraftCommentsAttachments(FilingMasterDraftCommentsAttachments Attachment)
+        {
+            try
+            {
+                _db.FilingMasterDraftCommentsAttachments.Add(Attachment);
+                _db.SaveChanges();
+                return Ok(Attachment);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewFilingMasterDraftCommentsAttachments/{AttachmentId:int}")]
+        public IActionResult ViewFilingMasterDraftCommentsAttachments(int AttachmentId)
+        {
+            try
+            {
+                var FilingMasterDraftCommentsAttachments = _db.FilingMasterDraftCommentsAttachments
+                                               .FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (FilingMasterDraftCommentsAttachments != null)
+                {
+                    return Ok(FilingMasterDraftCommentsAttachments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ListFilingMasterDraftCommentsAttachments")]
+        public IActionResult ListFilingMasterDraftCommentsAttachments()
+        {
+            try
+            {
+                var FilingMasterDraftCommentsAttachments = _db.FilingMasterDraftCommentsAttachments.ToList();
+                return Ok(FilingMasterDraftCommentsAttachments);
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+
+        [HttpDelete("DeleteFilingMasterDraftCommentsAttachments/{AttachmentId:int}")]
+        public IActionResult DeleteFilingMasterDraftCommentsAttachments(int AttachmentId)
+        {
+
+            try
+            {
+
+                var FilingMasterDraftCommentsAttachments = _db.FilingMasterDraftCommentsAttachments
+                                            .FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (FilingMasterDraftCommentsAttachments != null)
+                {
+                    _db.FilingMasterDraftCommentsAttachments.Remove(FilingMasterDraftCommentsAttachments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPut("UpdateFilingMasterDraftCommentsAttachments/{AttachmentId:int}")]
+        public IActionResult UpdateFilingMasterDraftCommentsAttachments(int AttachmentId, [FromBody] FilingMasterDraftCommentsAttachments FilingMasterDraftCommentsAttachments)
+        {
+            try
+            {
+
+                var existingNotification = _db.FilingMasterDraftCommentsAttachments.
+                                      FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+
+                if (existingNotification != null)
+                {
+                    existingNotification.AttachmentPath = FilingMasterDraftCommentsAttachments.AttachmentPath;
+                    existingNotification.CommentsId = FilingMasterDraftCommentsAttachments.CommentsId;
+                    existingNotification.CreateDate = FilingMasterDraftCommentsAttachments.CreateDate;
+                    existingNotification.CreateUser = FilingMasterDraftCommentsAttachments.CreateUser;
+                    existingNotification.UpdatedDate = FilingMasterDraftCommentsAttachments.UpdatedDate;
+                    existingNotification.UpdatedUser = FilingMasterDraftCommentsAttachments.UpdatedUser;
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        //=================================================================================================
+
+
+        [HttpPost("CreateFilingMasterWorkflowCommentsAttachments")]
+        public IActionResult CreateFilingMasterWorkflowCommentsAttachments(FilingMasterWorkflowCommentsAttachments Attachment)
+        {
+            try
+            {
+                _db.FilingMasterWorkflowCommentsAttachments.Add(Attachment);
+                _db.SaveChanges();
+                return Ok(Attachment);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewFilingMasterWorkflowCommentsAttachments/{AttachmentId:int}")]
+        public IActionResult ViewFilingMasterWorkflowCommentsAttachments(int AttachmentId)
+        {
+            try
+            {
+                var FilingMasterWorkflowCommentsAttachments = _db.FilingMasterWorkflowCommentsAttachments
+                                               .FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (FilingMasterWorkflowCommentsAttachments != null)
+                {
+                    return Ok(FilingMasterWorkflowCommentsAttachments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ListFilingMasterWorkflowCommentsAttachments")]
+        public IActionResult ListFilingMasterWorkflowCommentsAttachments()
+        {
+            try
+            {
+                var FilingMasterWorkflowCommentsAttachments = _db.FilingMasterWorkflowCommentsAttachments.ToList();
+                return Ok(FilingMasterWorkflowCommentsAttachments);
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+
+        [HttpDelete("DeleteFilingMasterWorkflowCommentsAttachments/{AttachmentId:int}")]
+        public IActionResult DeleteFilingMasterWorkflowCommentsAttachments(int AttachmentId)
+        {
+
+            try
+            {
+
+                var FilingMasterWorkflowCommentsAttachments = _db.FilingMasterWorkflowCommentsAttachments
+                                            .FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (FilingMasterWorkflowCommentsAttachments != null)
+                {
+                    _db.FilingMasterWorkflowCommentsAttachments.Remove(FilingMasterWorkflowCommentsAttachments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPut("UpdateFilingMasterWorkflowCommentsAttachments/{AttachmentId:int}")]
+        public IActionResult UpdateFilingMasterWorkflowCommentsAttachments(int AttachmentId, [FromBody] FilingMasterWorkflowCommentsAttachments FilingMasterWorkflowCommentsAttachments)
+        {
+            try
+            {
+
+                var existingNotification = _db.FilingMasterWorkflowCommentsAttachments.
+                                      FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.AttachmentPath = FilingMasterWorkflowCommentsAttachments.AttachmentPath;
+                    existingNotification.CommentsId = FilingMasterWorkflowCommentsAttachments.CommentsId;
+                    existingNotification.CreateDate = FilingMasterWorkflowCommentsAttachments.CreateDate;
+                    existingNotification.CreateUser = FilingMasterWorkflowCommentsAttachments.CreateUser;
+                    existingNotification.UpdatedDate = FilingMasterWorkflowCommentsAttachments.UpdatedDate;
+                    existingNotification.UpdatedUser = FilingMasterWorkflowCommentsAttachments.UpdatedUser;
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+//==============================================================================
+        [HttpPost("CreateMasterFilingAttachments")]
+        public IActionResult CreateMasterFilingAttachments(MasterFilingAttachments Followup)
+        {
+            try
+            {
+                _db.MasterFilingAttachments.Add(Followup);
+               _db.SaveChanges();
+                return Ok(Followup);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewMasterFilingAttachments/{FollowupId:int}")]
+        public IActionResult ViewMasterFilingAttachments(int FollowupId)
+        {
+            try
+            {
+                var MasterFilingAttachments = _db.MasterFilingAttachments
+                                               .FirstOrDefault(n => n.FollowupId == FollowupId);
+
+                if (MasterFilingAttachments != null)
+                {
+                    return Ok(MasterFilingAttachments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ListMasterFilingAttachments")]
+        public IActionResult ListMasterFilingAttachments()
+        {
+            try
+            {
+                var MasterFilingAttachments = _db.MasterFilingAttachments.ToList();
+                return Ok(MasterFilingAttachments);
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpDelete("DeleteMasterFilingAttachments/{AttachmentId:int}")]
+        public IActionResult DeleteMasterFilingAttachments(int AttachmentId)
+        {
+            try
+            {
+
+                var MasterFilingAttachments = _db.MasterFilingAttachments
+                                            .FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (MasterFilingAttachments != null)
+                {
+                    _db.MasterFilingAttachments.Remove(MasterFilingAttachments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpPut("UpdateMasterFilingAttachments/{FollowupId:int}")]
+        public IActionResult UpdateMasterFilingAttachments(int FollowupId, [FromBody] MasterFilingAttachments MasterFilingAttachments)
+        {
+            try
+            {
+
+                var existingNotification = _db.MasterFilingAttachments.
+                                      FirstOrDefault(n => n.FollowupId == FollowupId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.AttachmentId = MasterFilingAttachments.AttachmentId;
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+//=====================================================================================
+
+
+        [HttpPost("createFilingMasterWorkflowNotifications")]
+        public IActionResult createFilingMasterWorkflowNotifications(FilingMasterWorkflowNotifications workflow)
+        {
+            try
+            {
+
+                {
+                    _db.FilingMasterWorkflowNotifications.Add(workflow);
+                    _db.SaveChanges();
+                    return Ok(workflow);
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpGet("ListFilingMasterWorkflowNotifications")]
+        public IActionResult ListFilingMasterWorkflowNotifications()
+        {
+            try
+            {
+                //  using (var Customer = new Models.TrackNowContext())
+                {
+                    var FilingMasterWorkflowNotifications = _db.FilingMasterWorkflowNotifications.ToList();
+                    return Ok(FilingMasterWorkflowNotifications);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewFilingMasterWorkflowNotifications/{NotificationId:Int}")]
+        public IActionResult ViewFilingMasterWorkflowNotifications(int NotificationId)
+        {
+            try
+            {
+                //  using (var Customer = new Models.TrackNowContext())
+
+                var FilingMasterWorkflowNotifications = _db.FilingMasterWorkflowNotifications
+                                       .FirstOrDefault(F => F.NotificationId == NotificationId);
+                if (FilingMasterWorkflowNotifications != null)
+                {
+                    return Ok(FilingMasterWorkflowNotifications);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("DeleteFilingMasterWorkflowNotifications/{NotificationId:Int}")]
+        public IActionResult DeleteFilingMasterWorkflowNotifications(int NotificationId)
+        {
+            try
+            {
+
+                var FilingMasterWorkflowNotifications = _db.FilingMasterWorkflowNotifications
+                                                 .FirstOrDefault(a => a.NotificationId == NotificationId);
+
+                if (FilingMasterWorkflowNotifications != null)
+                {
+                    _db.FilingMasterWorkflowNotifications.Remove(FilingMasterWorkflowNotifications);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpPut("UpdateFilingMasterWorkflowNotifications/{NotificationId:int}")]
+        public IActionResult UpdateFilingMasterWorkflowNotifications(int NotificationId, [FromBody] FilingMasterWorkflowNotifications FilingMasterWorkflowNotifications)
+        {
+            try
+            {
+
+                var existingNotification = _db.FilingMasterWorkflowNotifications.
+                                      FirstOrDefault(n => n.NotificationId == NotificationId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.WorkflowId = FilingMasterWorkflowNotifications.WorkflowId;
+                    existingNotification.EmailFrom = FilingMasterWorkflowNotifications.EmailFrom;
+                    existingNotification.EmailTo = FilingMasterWorkflowNotifications.EmailTo;
+                    existingNotification.EmailCc = FilingMasterWorkflowNotifications.EmailCc;
+                    existingNotification.EmailSubject= FilingMasterWorkflowNotifications.EmailSubject;
+                    existingNotification.NotificationType = FilingMasterWorkflowNotifications.NotificationType;
+                    existingNotification.NotificationText = FilingMasterWorkflowNotifications.NotificationText;
+                    existingNotification.InformationRead = FilingMasterWorkflowNotifications.InformationRead;
+                    existingNotification.InformationDeleted = FilingMasterWorkflowNotifications.InformationDeleted;
+                    existingNotification.CreateDate = FilingMasterWorkflowNotifications.CreateDate;
+                    existingNotification.CreateUser = FilingMasterWorkflowNotifications.CreateUser;
+                   
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
 
     }
 }

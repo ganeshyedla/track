@@ -5,8 +5,8 @@ namespace TrackNowApi.Model
     public class FilingApprovalStatus
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal FilingApprovalID { get; set; }
-        public decimal WorkflowID { get; set; }
+        public decimal FilingApprovalId { get; set; }
+        public decimal WorkflowId { get; set; }
         public string? ApproverName { get; set; }
         public string? AlternateApprovers { get; set; }
         public string? Comments { get; set; }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
@@ -7,6 +8,7 @@ using TrackNowApi.Model;
 
 namespace TrackNowApi.Controllers
 {
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
 
@@ -18,8 +20,8 @@ namespace TrackNowApi.Controllers
         {
             _db = db;
         }
-        [HttpGet("UserRoleList")]
-        public IActionResult UserRoleList()
+        [HttpGet("UserRole")]
+        public IActionResult UserRole()
         {
             return Ok((from r in _db.Roles
                        join ur in _db.UsersRoles on r.RoleId equals ur.RoleId
@@ -34,8 +36,8 @@ namespace TrackNowApi.Controllers
                     )
              );
         }
-        [HttpGet("UserRoleList{UserId:Int}")]
-        public IActionResult UserRoleList(int UserId)
+        [HttpGet("UserRole{UserId:Int}")]
+        public IActionResult UserRole(int UserId)
         {
             return Ok((from r in _db.Roles
                        join ur in _db.UsersRoles on r.RoleId equals ur.RoleId
@@ -104,7 +106,7 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
         }
         [HttpPut("BusinessCategoryMasterUpdate{BusinessCategoryId:Int}")]
-        public IActionResult CustomerUpdate(int BusinessCategoryId, [FromBody] BusinessCategoryMaster BusinessCategoryMaster)
+        public IActionResult BusinessCategoryMasterUpdate(int BusinessCategoryId, [FromBody] BusinessCategoryMaster BusinessCategoryMaster)
         {
 
             if (BusinessCategoryMaster == null || BusinessCategoryMaster.BusinessCategoryId != BusinessCategoryId)
@@ -119,5 +121,64 @@ namespace TrackNowApi.Controllers
             return Ok(BusinessCategoryMaster);
 
         }
+
+        [HttpGet("AppConfigurationList")]
+        public IActionResult AppConfigurationList()
+        {
+            var AppConfiguration = _db.AppConfiguration.ToList();
+            return Ok(AppConfiguration);
+        }
+
+        [HttpPost("AppConfigurationCreate")]
+        public IActionResult AppConfigurationCreate([FromBody] AppConfiguration item)
+        {
+            if (item == null)
+            {
+                return BadRequest();
+            }
+            _db.AppConfiguration.Add(item);
+            _db.SaveChanges();
+            return Ok(item);
+        }
+
+        [HttpGet("AppConfigurationbyid/{ConfigId:int}")]
+        public ActionResult<AppConfiguration> AppConfigurationGetById(int ConfigId)
+        {
+            var res = _db.AppConfiguration.FirstOrDefault(p => p.ConfigId == ConfigId);
+            if (res != null)
+            {
+                return Ok(res);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+
+        [HttpPut("AppConfigurationupdate/{ConfigId}")]
+        public IActionResult AppConfigurationUpdate(int ConfigId, AppConfiguration updatedFilingMaster)
+        {
+            var FilingMaster = _db.AppConfiguration.FirstOrDefault(p => p.ConfigId == ConfigId); if (FilingMaster == null)
+            {
+                return NotFound();
+            }
+            FilingMaster.UpdateUser = updatedFilingMaster.UpdateUser;
+            _db.SaveChanges(); return Ok();
+        }
+
+        [HttpDelete("AppConfigurationdelete/{ConfigId:int}")]
+        public IActionResult AppConfiguration(int ConfigId)
+        {
+            var res = _db.AppConfiguration.FirstOrDefault(t => t.ConfigId == ConfigId);
+            if (res == null)
+            {
+                return NotFound();
+            }
+            _db.AppConfiguration.Remove(res);
+            _db.SaveChanges();
+            return new NoContentResult();
+        }
     }
+    
+
 }

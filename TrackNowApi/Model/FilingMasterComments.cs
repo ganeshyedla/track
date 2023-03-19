@@ -9,8 +9,8 @@ namespace TrackNowApi.Model
     {
 
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal? CommentsID { get; set; }
-        public decimal? FilingID { get; set; }
+        public decimal? CommentsId { get; set; }
+        public decimal? FilingId { get; set; }
         public string? CommentsText { get; set; }
         public bool? InformationRead { get; set; }
         public bool? InformationDeleted { get; set; }
@@ -23,8 +23,8 @@ namespace TrackNowApi.Model
     public class FilingMasterDraftComments
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal? CommentsID { get; set; }
-        public decimal? DraftID { get; set; }
+        public decimal? CommentsId { get; set; }
+        public decimal? DraftId { get; set; }
         public string? CommentsText { get; set; }
         public bool? InformationRead { get; set; }
         public bool? InformationDeleted { get; set; }
@@ -36,8 +36,8 @@ namespace TrackNowApi.Model
     public class FilingMasterWorkflowComments
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal? CommentsID { get; set; }
-        public decimal? WorkflowID { get; set; }
+        public decimal? CommentsId { get; set; }
+        public decimal? WorkflowId { get; set; }
         public string? CommentsText { get; set; }
         public bool? InformationRead { get; set; }
         public bool? InformationDeleted { get; set; }

@@ -7,8 +7,8 @@ namespace TrackNowApi.Model
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public decimal DraftId { get; set; }
-        public decimal? CustomerID { get; set; }
-        public decimal? FilingID { get; set; }
+        public decimal? CustomerId { get; set; }
+        public decimal? FilingId { get; set; }
         public string? Notes { get; set; }
         public DateTime? CreateDate { get; set; }
         public string? CreateUser { get; set; }

@@ -26,7 +26,17 @@ namespace TrackNowApi.Model
         public string? Notes { get; set; }
         public string? JSI_POC { get; set; }
         public string? Customer_POC { get; set; }
-        public decimal? ParentCustomerID { get; set; }
+        public decimal? ParentCustomerId { get; set; }
         
+    }
+    public partial class CustomerFilingWorkflowCommentsAttachments
+    {
+        public long AttachmentId { get; set; }
+        public string? AttachmentPath { get; set; }
+        public decimal CommentsId { get; set; }
+        public DateTime? CreateDate { get; set; }
+        public string? CreateUser { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+        public string? UpdatedUser { get; set; }
     }
 }

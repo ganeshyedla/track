@@ -5,7 +5,7 @@ namespace TrackNowApi.Model
     public class CustomerComments
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal CommentsID { get; set; }
+        public decimal CommentsId { get; set; }
         public decimal? CustomerId { get; set; }
         public string? CommentsText { get; set; }
         public bool? InformationRead { get; set; }
@@ -18,9 +18,9 @@ namespace TrackNowApi.Model
     public class CustomerFilingComments
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal CommentsID { get; set; }
-        public decimal? FilingID { get; set; }
-        public decimal? CustomerID { get; set; }
+        public decimal CommentsId { get; set; }
+        public decimal? FilingId { get; set; }
+        public decimal? CustomerId { get; set; }
         public string? CommentsText { get; set; }
         public bool? InformationRead { get; set; }
         public bool? InformationDeleted { get; set; }
@@ -33,7 +33,7 @@ namespace TrackNowApi.Model
     public class CustomerFilingDraftComments
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal CommentsID { get; set; }
+        public decimal CommentsId { get; set; }
         public decimal? DraftId { get; set; }
         public string? CommentsText { get; set; }
         public bool? InformationRead { get; set; }
@@ -47,8 +47,8 @@ namespace TrackNowApi.Model
     public class CustomerFilingTrackingComments
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal CommentsID { get; set; }
-        public decimal? FileTrackingID { get; set; }
+        public decimal CommentsId { get; set; }
+        public decimal? FileTrackingId { get; set; }
         public string? CommentsText { get; set; }
         public bool? InformationRead { get; set; }
         public bool? InformationDeleted { get; set; }
@@ -61,8 +61,8 @@ namespace TrackNowApi.Model
     public class CustomerFilingWorkflowComments
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal CommentsID { get; set; }
-        public decimal? WorkflowID { get; set; }
+        public decimal CommentsId { get; set; }
+        public decimal? WorkflowId { get; set; }
         public string? CommentsText { get; set; }
         public bool? InformationRead { get; set; }
         public bool? InformationDeleted { get; set; }

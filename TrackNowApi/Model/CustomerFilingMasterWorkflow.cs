@@ -7,7 +7,7 @@ namespace TrackNowApi.Model
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public decimal WorkflowId { get; set; }
-        public long CurrentApproverID { get; set; }
+        public long CurrentApproverId { get; set; }
         public decimal? DraftId { get; set; }
         public string? WorkflowStatus { get; set; }
         public DateTime? CreateDate { get; set; }

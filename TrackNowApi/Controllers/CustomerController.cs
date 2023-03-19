@@ -63,7 +63,7 @@ namespace TrackNowApi.Controllers
             return Ok((from o in _db.Customer
                        select new
                        {
-                           CustomerID = o.CustomerId,
+                           CustomerId = o.CustomerId,
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
@@ -75,7 +75,10 @@ namespace TrackNowApi.Controllers
                            Email = o.Email,
                            ZipCode = o.ZipCode,
                            Juristiction = o.Juristiction,
-                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerID).Select(u => u.CustomerName).SingleOrDefault()
+                           Notes= o.Notes,
+                           City= o.City,
+                           State= o.State,
+                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerId).Select(u => u.CustomerName).SingleOrDefault()
                         }
                         )
                        );
@@ -89,7 +92,7 @@ namespace TrackNowApi.Controllers
                        where o.CustomerId == CustomerId
                        select new
                        {
-                           CustomerID = o.CustomerId,
+                           CustomerId = o.CustomerId,
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
@@ -101,7 +104,10 @@ namespace TrackNowApi.Controllers
                            Email = o.Email,
                            ZipCode = o.ZipCode,
                            Juristiction = o.Juristiction,
-                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerID).Select(u => u.CustomerName).SingleOrDefault()
+                           Notes = o.Notes,
+                           City = o.City,
+                           State = o.State,
+                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerId).Select(u => u.CustomerName).SingleOrDefault()
                        }
             )
            );
@@ -122,7 +128,7 @@ namespace TrackNowApi.Controllers
 
                        select new
                        {
-                           CustomerID = o.CustomerId,
+                           CustomerId = o.CustomerId,
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
@@ -134,7 +140,9 @@ namespace TrackNowApi.Controllers
                            Email = o.Email,
                            ZipCode = o.ZipCode,
                            Juristiction = o.Juristiction,
-
+                           Notes = o.Notes,
+                           City = o.City,
+                           State = o.State
                        })); ;
 
         }
@@ -147,7 +155,6 @@ namespace TrackNowApi.Controllers
                            BusinessCategoryId = i.BusinessCategoryId,
                            BusinessCategoryName = i.BusinessCategoryName,
                            BusinessCategoryDescription = i.BusinessCategoryDescription
-
                        })); ;
 
         }
@@ -159,11 +166,11 @@ namespace TrackNowApi.Controllers
                        join i in _db.BusinessCategoryMaster on cb.BusinessCategoryId equals i.BusinessCategoryId
                        select new
                        {
-                           CustomerID=c.CustomerId, CustomerName=c.CustomerName,
+                           CustomerId=c.CustomerId, CustomerName=c.CustomerName,
                            BusinessCategoryId = i.BusinessCategoryId,
                            BusinessCategoryName = i.BusinessCategoryName,
-                           BusinessCategoryDescription = i.BusinessCategoryDescription
-
+                           BusinessCategoryDescription = i.BusinessCategoryDescription,
+                           State = cb.State
                        })); ;
 
         }
@@ -186,7 +193,7 @@ namespace TrackNowApi.Controllers
                                 )
                        select new
                        {
-                           CustomerID = o.CustomerId,
+                           CustomerId = o.CustomerId,
                            CustomerName = o.CustomerName,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
@@ -198,6 +205,9 @@ namespace TrackNowApi.Controllers
                            Email = o.Email,
                            ZipCode = o.ZipCode,
                            Juristiction = o.Juristiction,
+                           Notes = o.Notes,
+                           City = o.City,
+                           State = o.State
 
                        })); ;
 
@@ -283,7 +293,7 @@ namespace TrackNowApi.Controllers
                       {
                           CustomerId = i.CustomerId,
                           customeName=c.CustomerName,
-                          FilingID = i.FilingId,
+                          FilingId = i.FilingId,
                           FilingDescription = b.FilingDescription,
                           FilingFrequency = b.FilingFrequency,
                           StateInfo = b.StateInfo,
@@ -293,7 +303,6 @@ namespace TrackNowApi.Controllers
                           Jsidept = b.Jsidept,
                           JsicontactName = b.JsicontactName,
                           JsiContactEmail = b.JsicontactEmail
-
                       });
 
         }
@@ -312,7 +321,7 @@ namespace TrackNowApi.Controllers
                       {
                           CustomerId = c.CustomerId,
                           customeName = c.CustomerName,
-                          FilingID = f.FilingId,
+                          FilingId = f.FilingId,
                           FilingDescription = f.FilingDescription,
                           FilingFrequency = f.FilingFrequency,
                           StateInfo = f.StateInfo,
@@ -326,21 +335,83 @@ namespace TrackNowApi.Controllers
                       });
 
         }
-       [HttpGet("CustomerFilingMasterWorkflowList")]
+        [HttpPut("CustomerFilingReject{WorkflowId:Int}")]
+        public IActionResult CustomerFilingReject(int WorkflowId, string Userid, [FromBody] CustomerFilingMasterDraft CustomerFilingMasterDraft)
+        {
+            CustomerFilingMasterWorkflow CustomerFilingMasterWorkflow = (CustomerFilingMasterWorkflow)
+                                                                        (from w in _db.CustomerFilingMasterWorkflow
+                                                                         where w.WorkflowId == WorkflowId
+                                                                         select w);
+            if (CustomerFilingMasterWorkflow == null)
+            {
+                return BadRequest(ModelState);
+            }
+            CustomerFilingMasterWorkflow.WorkflowStatus = "Rejected";
+            CustomerFilingMasterWorkflow.UpdateDate = DateTime.Now;
+            CustomerFilingMasterWorkflow.UpdateUser = Userid;
+            _db.CustomerFilingMasterWorkflow.Attach(CustomerFilingMasterWorkflow);
+            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
+            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
+            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
+
+            //CustomerFilingMaster CustomerFilingMaster = (CustomerFilingMaster)
+            //                                                         (from w in _db.CustomerFilingMaster
+            //                                                          where w.FilingId == CustomerFilingMasterDraft.FilingId
+
+
+            //CustomerFilingMaster. = "Rejected";
+            //CustomerFilingMasterWorkflow.UpdateDate = DateTime.Now;
+            //CustomerFilingMasterWorkflow.UpdateUser = Userid;
+            //_db.CustomerFilingMasterWorkflow.Attach(CustomerFilingMasterWorkflow);
+            //_db.Entry(CustomerFilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
+            //_db.Entry(CustomerFilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
+            //select w);
+
+
+            _db.SaveChanges();
+
+            return Ok(CustomerFilingMasterWorkflow);
+        }
+        [HttpPut("CustomerFilingApprove{WorkflowId:Int}")]
+        public IActionResult CustomerFilingApprove(int WorkflowId, string Userid, [FromBody] CustomerFilingMasterDraft CustomerFilingMasterDraft)
+        {
+            CustomerFilingMasterWorkflow CustomerFilingMasterWorkflow = (CustomerFilingMasterWorkflow)
+                                                                        (from w in _db.CustomerFilingMasterWorkflow
+                                                                         where w.WorkflowId == WorkflowId
+                                                                         select w);
+            if (CustomerFilingMasterWorkflow == null)
+            {
+                return BadRequest(ModelState);
+            }
+            CustomerFilingMasterWorkflow.WorkflowStatus = "Rejected";
+            CustomerFilingMasterWorkflow.UpdateDate = DateTime.Now;
+            CustomerFilingMasterWorkflow.UpdateUser = Userid;
+            _db.CustomerFilingMasterWorkflow.Attach(CustomerFilingMasterWorkflow);
+            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
+            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
+            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
+
+
+            _db.SaveChanges();
+
+            return Ok(CustomerFilingMasterWorkflow);
+        }
+
+        [HttpGet("CustomerFilingMasterWorkflowList")]
         public IActionResult CustomerFilingMasterWorkflowList()
         {
             return Ok(from o in _db.CustomerFilingMasterDraft
-                       join c in _db.Customer on o.CustomerID equals c.CustomerId
+                       join c in _db.Customer on o.CustomerId equals c.CustomerId
                        join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
-                       join f in _db.FilingMaster on o.FilingID equals f.FilingId
-                       join s in _db.Approvers on w.CurrentApproverID equals s.ApproverID
+                       join f in _db.FilingMaster on o.FilingId equals f.FilingId
+                       join s in _db.Approvers on w.CurrentApproverId equals s.ApproverId
                        select new
                        {
                            WorkflowId = w.WorkflowId,
                            DraftId = w.DraftId,
-                           CustomerID = c.CustomerId,
+                           CustomerId = c.CustomerId,
                            Customername = c.CustomerName,
-                           FilingID = f.FilingId,
+                           FilingId = f.FilingId,
                            FilingName = f.FilingName,
                            FilingDescription = f.FilingDescription,
                            FilingFrequency = f.FilingFrequency,
@@ -366,22 +437,22 @@ namespace TrackNowApi.Controllers
                       );
 
         }
-        [HttpGet("CustomerFilingMasterWorkflowListByApprover{UserID:Int}")]
-        public IActionResult CustomerFilingMasterWorkflowListByApprover(long UserID)
+        [HttpGet("CustomerFilingMasterWorkflowListByApprover{UserId:Int}")]
+        public IActionResult CustomerFilingMasterWorkflowListByApprover(long UserId)
         {
             return Ok((from o in _db.CustomerFilingMasterDraft          
-                       join c in _db.Customer on o.CustomerID equals c.CustomerId
+                       join c in _db.Customer on o.CustomerId equals c.CustomerId
                        join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
-                       join f in _db.FilingMaster on o.FilingID equals f.FilingId
-                       join s in _db.Approvers on w.CurrentApproverID equals s.ApproverID
-                       where s.ApproverID == UserID
+                       join f in _db.FilingMaster on o.FilingId equals f.FilingId
+                       join s in _db.Approvers on w.CurrentApproverId equals s.ApproverId
+                       where s.ApproverId == UserId
                        select new
                        {
                            WorkflowId= w.WorkflowId,
                            DraftId = w.DraftId,
-                           CustomerID = c.CustomerId,
+                           CustomerId = c.CustomerId,
                            Customername = c.CustomerName,
-                           FilingID = f.FilingId,
+                           FilingId = f.FilingId,
                            FilingName = f.FilingName,
                            FilingDescription = f.FilingDescription,
                            FilingFrequency = f.FilingFrequency,
@@ -425,6 +496,13 @@ namespace TrackNowApi.Controllers
 
             return Ok(CustomerFilingComments);
         }
+        [HttpGet("CustomerFilingWorkflowNotificationsList")]
+        public IActionResult CustomerFilingWorkflowNotificationsList()
+        {
+            var CustomerFilingWorkflowNotifications = _db.CustomerFilingWorkflowNotifications.ToList();
+            return Ok(CustomerFilingWorkflowNotifications);
+            //    return await _db.CustomerFilingWorkflowNotifications.ToListAsync();
+        }
         [HttpPost("CreateCustomerFilingDraftComments")]
         public IActionResult CreateCustomerFilingDraftComments([FromBody] CustomerFilingDraftComments CustomerFilingDraftComments)
         {
@@ -452,66 +530,129 @@ namespace TrackNowApi.Controllers
 
             return Ok(CustomerFilingWorkflowComments);
         }
+[       HttpPost("CustomerFilingWorkflowNotifications/Create")]
+        public IActionResult Create([FromBody] CustomerFilingWorkflowNotifications item)
+        {
+            if (item == null)
+            {
+                return BadRequest();
+            }
 
-        [HttpDelete("CustomerCommentsDelete{CommentsID:Int}")]
-        public void CustomerCommentsDelete(int CommentsID)
+            _db.CustomerFilingWorkflowNotifications.Add(item);
+            _db.SaveChanges();
+            return Ok(item);
+
+        }
+
+        [HttpDelete("CustomerCommentsDelete{CommentsId:Int}")]
+        public void CustomerCommentsDelete(int CommentsId)
         {
             CustomerComments CustomerComments;
 
-            CustomerComments = _db.CustomerComments.Where(d => d.CommentsID == CommentsID).First();
+            CustomerComments = _db.CustomerComments.Where(d => d.CommentsId == CommentsId).First();
             _db.CustomerComments.Remove(CustomerComments);
             _db.SaveChanges();
 
         }
         [HttpDelete("CustomerFilingCommentsDelete{CommentId:Int}")]
-        public void CustomerFilingCommentsDelete(int CommentsID)
+        public void CustomerFilingCommentsDelete(int CommentsId)
         {
             CustomerFilingComments CustomerFilingComments;
 
-            CustomerFilingComments = _db.CustomerFilingComments.Where(d => d.CommentsID == CommentsID).First();
+            CustomerFilingComments = _db.CustomerFilingComments.Where(d => d.CommentsId == CommentsId).First();
             _db.CustomerFilingComments.Remove(CustomerFilingComments);
             _db.SaveChanges();
 
         }
         [HttpDelete("CustomerFilingDraftCommentsDelete{CommentId:Int}")]
-        public void CustomerFilingDraftCommentsDelete(int CommentsID)
+        public void CustomerFilingDraftCommentsDelete(int CommentsId)
         {
             CustomerFilingDraftComments CustomerFilingDraftComments;
 
-            CustomerFilingDraftComments = _db.CustomerFilingDraftComments.Where(d => d.CommentsID == CommentsID).First();
+            CustomerFilingDraftComments = _db.CustomerFilingDraftComments.Where(d => d.CommentsId == CommentsId).First();
             _db.CustomerFilingDraftComments.Remove(CustomerFilingDraftComments);
             _db.SaveChanges();
 
         }
+        //[HttpGet("getbyid/{WorkflowId:int}")]
+        //public ActionResult<CustomerFilingWorkflowNotifications> GetById(int WorkflowId)
+        //{
+        //    var res = _db.CustomerFilingWorkflowNotifications.FirstOrDefault(p => p.WorkflowId == WorkflowId);
+
+
+        //    if (res != null)
+        //    {
+        //        return Ok(res);
+        //    }
+        //    else
+        //    {
+        //        return NotFound();
+        //    }
+
+           
+        //}
+
+
+        //[HttpPut("{WorkflowId}")]
+        //public IActionResult Update(int WorkflowId, CustomerFilingWorkflowNotifications updatedCustomer)
+        //{
+        //    var customer = _db.CustomerFilingWorkflowNotifications.FirstOrDefault(p => p.WorkflowId == WorkflowId);
+
+        //    if (customer == null)
+        //    {
+        //        return NotFound();
+        //    }
+
+        //    customer.EmailFrom = updatedCustomer.EmailFrom;
+           
+
+        //    _db.SaveChanges();
+
+        //    return Ok();
+        //}
+
         [HttpDelete("CustomerFilingTrackingCommentsDelete{CommentId:Int}")]
-        public void CustomerFilingTrackingCommentsDelete(int CommentsID)
+        public void CustomerFilingTrackingCommentsDelete(int CommentsId)
         {
             CustomerFilingTrackingComments CustomerFilingTrackingComments;
 
-            CustomerFilingTrackingComments = _db.CustomerFilingTrackingComments.Where(d => d.CommentsID == CommentsID).First();
+            CustomerFilingTrackingComments = _db.CustomerFilingTrackingComments.Where(d => d.CommentsId == CommentsId).First();
             _db.CustomerFilingTrackingComments.Remove(CustomerFilingTrackingComments);
             _db.SaveChanges();
 
         }
         [HttpDelete("CustomerFilingWorkflowCommentsDelete{CommentId:Int}")]
-        public void CustomerFilingWorkflowCommentsDelete(int CommentsID)
+        public void CustomerFilingWorkflowCommentsDelete(int CommentsId)
         {
             CustomerFilingWorkflowComments CustomerFilingWorkflowComments;
 
-            CustomerFilingWorkflowComments = _db.CustomerFilingWorkflowComments.Where(d => d.CommentsID == CommentsID).First();
+            CustomerFilingWorkflowComments = _db.CustomerFilingWorkflowComments.Where(d => d.CommentsId == CommentsId).First();
             _db.CustomerFilingWorkflowComments.Remove(CustomerFilingWorkflowComments);
             _db.SaveChanges();
 
         }
+		//[HttpDelete("(delete/{WorkflowId:int}")]
+  //      public IActionResult Delete(int WorkflowId)
+  //      {
+  //          var res = _db.CustomerFilingWorkflowNotifications.FirstOrDefault(t => t.WorkflowId == WorkflowId);
+  //          if (res == null)
+  //          {
+  //              return NotFound();
+  //          }
+
+  //          _db.CustomerFilingWorkflowNotifications.Remove(res);
+  //          _db.SaveChanges();
+  //          return new NoContentResult();
+  //      }
         
-        [HttpGet("CustomerCommentsbyID{CommentsID:Int}")]
-        public IActionResult CustomerCommentsbyID(int CommentsID)
+        [HttpGet("CustomerCommentsbyId{CommentsId:Int}")]
+        public IActionResult CustomerCommentsbyId(int CommentsId)
         {
             return Ok((from o in _db.CustomerComments
-                       where o.CommentsID == CommentsID
+                       where o.CommentsId == CommentsId
                        select new
                        {
-                           CommentsID = o.CommentsID,
+                           CommentsId = o.CommentsId,
                            CommentsText= o.CommentsText,
                            InformationRead= o.InformationRead,
                            InformationDeleted= o.InformationDeleted,
@@ -521,16 +662,16 @@ namespace TrackNowApi.Controllers
                         }));
 
         }
-        [HttpGet("CustomerFilingCommentsbyID{CommentsID:Int}")]
-        public IActionResult CustomerFilingCommentsbyID(int CommentsID)
+        [HttpGet("CustomerFilingCommentsbyId{CommentsId:Int}")]
+        public IActionResult CustomerFilingCommentsbyId(int CommentsId)
         {
             return Ok((from o in _db.CustomerFilingComments
-                       where o.CommentsID == CommentsID
+                       where o.CommentsId == CommentsId
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           CustomerID = o.CustomerID,
-                           FilingID =o.FilingID,
+                           CommentsId = o.CommentsId,
+                           CustomerId = o.CustomerId,
+                           FilingId =o.FilingId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -541,15 +682,15 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
-        [HttpGet("CustomerFilingDraftCommentsbyID{CommentsID:Int}")]
-        public IActionResult CustomerFilingDraftCommentsbyID(int CommentsID)
+        [HttpGet("CustomerFilingDraftCommentsbyId{CommentsId:Int}")]
+        public IActionResult CustomerFilingDraftCommentsbyId(int CommentsId)
         {
             return Ok((from o in _db.CustomerFilingDraftComments
-                       where o.CommentsID == CommentsID
+                       where o.CommentsId == CommentsId
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           DraftID = o.DraftId,
+                           CommentsId = o.CommentsId,
+                           DraftId = o.DraftId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -560,15 +701,15 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
-        [HttpGet("CustomerFilingTrackingCommentsbyID{CommentsID:Int}")]
-        public IActionResult CustomerFilingTrackingCommentsbyID(int CommentsID)
+        [HttpGet("CustomerFilingTrackingCommentsbyId{CommentsId:Int}")]
+        public IActionResult CustomerFilingTrackingCommentsbyId(int CommentsId)
         {
             return Ok((from o in _db.CustomerFilingTrackingComments
-                       where o.CommentsID == CommentsID
+                       where o.CommentsId == CommentsId
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           FileTrackingID = o.FileTrackingID,
+                           CommentsId = o.CommentsId,
+                           FileTrackingId = o.FileTrackingId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -579,15 +720,15 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
-        [HttpGet("CustomerFilingWorkflowCommentsbyID{CommentsID:Int}")]
-        public IActionResult CustomerFilingWorkflowCommentsbyID(int CommentsID)
+        [HttpGet("CustomerFilingWorkflowCommentsbyId{CommentsId:Int}")]
+        public IActionResult CustomerFilingWorkflowCommentsbyId(int CommentsId)
         {
             return Ok((from o in _db.CustomerFilingWorkflowComments
-                       where o.CommentsID == CommentsID
+                       where o.CommentsId == CommentsId
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           FileTrackingID = o.WorkflowID,
+                           CommentsId = o.CommentsId,
+                           FileTrackingId = o.WorkflowId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -598,11 +739,31 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
+        
 
-        [HttpPut("CustomerCommentsUpdate{CommentsID:Int}")]
-        public IActionResult CustomerCommentsUpdate(int CommentsID, [FromBody] CustomerComments CustomerComments)
+        [HttpGet("CustomerFilingDraftComments{DraftId:Int}")]
+        public IActionResult CustomerFilingDraftComments(int DraftId)
         {
-            if (CustomerComments == null || CustomerComments.CommentsID != CommentsID)
+            return Ok((from o in _db.CustomerFilingDraftComments
+                       where o.DraftId == DraftId
+                       select new
+                       {
+                           CommentsId = o.CommentsId,
+                           DraftId = o.DraftId,
+                           CommentsText = o.CommentsText,
+                           InformationRead = o.InformationRead,
+                           InformationDeleted = o.InformationDeleted,
+                           CreateDate = o.CreateDate,
+                           UpdateDate = o.UpdateDate,
+                           CreateUser = o.CreateUser,
+                           UpdateUser = o.UpdateUser
+                       }));
+
+        }
+        [HttpPut("CustomerCommentsUpdate{CommentsId:Int}")]
+        public IActionResult CustomerCommentsUpdate(int CommentsId, [FromBody] CustomerComments CustomerComments)
+        {
+            if (CustomerComments == null || CustomerComments.CommentsId != CommentsId)
             {
                 return BadRequest(ModelState);
             }
@@ -610,10 +771,10 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
             return Ok(CustomerComments);
         }
-        [HttpPut("CustomerFilingCommentsUpdate{CommentsID:Int}")]
-        public IActionResult CustomerFilingCommentsUpdate(int CommentsID, [FromBody] CustomerFilingComments CustomerFilingComments)
+        [HttpPut("CustomerFilingCommentsUpdate{CommentsId:Int}")]
+        public IActionResult CustomerFilingCommentsUpdate(int CommentsId, [FromBody] CustomerFilingComments CustomerFilingComments)
         {
-            if (CustomerFilingComments == null || CustomerFilingComments.CommentsID != CommentsID)
+            if (CustomerFilingComments == null || CustomerFilingComments.CommentsId != CommentsId)
             {
                 return BadRequest(ModelState);
             }
@@ -621,10 +782,10 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
             return Ok(CustomerFilingComments);
         }
-        [HttpPut("CustomerFilingDraftCommentsUpdate{CommentsID:Int}")]
-        public IActionResult CustomerFilingDraftCommentsUpdate(int CommentsID, [FromBody] CustomerFilingDraftComments CustomerFilingDraftComments)
+        [HttpPut("CustomerFilingDraftCommentsUpdate{CommentsId:Int}")]
+        public IActionResult CustomerFilingDraftCommentsUpdate(int CommentsId, [FromBody] CustomerFilingDraftComments CustomerFilingDraftComments)
         {
-            if (CustomerFilingDraftComments == null || CustomerFilingDraftComments.CommentsID != CommentsID)
+            if (CustomerFilingDraftComments == null || CustomerFilingDraftComments.CommentsId != CommentsId)
             {
                 return BadRequest(ModelState);
             }
@@ -632,10 +793,10 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
             return Ok(CustomerFilingDraftComments);
         }
-        [HttpPut("CustomerFilingTrackingCommentsUpdate{CommentsID:Int}")]
-        public IActionResult CustomerFilingTrackingCommentsUpdate(int CommentsID, [FromBody] CustomerFilingTrackingComments CustomerFilingTrackingComments)
+        [HttpPut("CustomerFilingTrackingCommentsUpdate{CommentsId:Int}")]
+        public IActionResult CustomerFilingTrackingCommentsUpdate(int CommentsId, [FromBody] CustomerFilingTrackingComments CustomerFilingTrackingComments)
         {
-            if (CustomerFilingTrackingComments == null || CustomerFilingTrackingComments.CommentsID != CommentsID)
+            if (CustomerFilingTrackingComments == null || CustomerFilingTrackingComments.CommentsId != CommentsId)
             {
                 return BadRequest(ModelState);
             }
@@ -643,10 +804,10 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
             return Ok(CustomerFilingTrackingComments);
         }
-        [HttpPut("CustomerFilingWorkflowCommentsUpdate{CommentsID:Int}")]
-        public IActionResult CustomerFilingWorkflowCommentsUpdate(int CommentsID, [FromBody] CustomerFilingWorkflowComments CustomerFilingWorkflowComments)
+        [HttpPut("CustomerFilingWorkflowCommentsUpdate{CommentsId:Int}")]
+        public IActionResult CustomerFilingWorkflowCommentsUpdate(int CommentsId, [FromBody] CustomerFilingWorkflowComments CustomerFilingWorkflowComments)
         {
-            if (CustomerFilingWorkflowComments == null || CustomerFilingWorkflowComments.CommentsID != CommentsID)
+            if (CustomerFilingWorkflowComments == null || CustomerFilingWorkflowComments.CommentsId != CommentsId)
             {
                 return BadRequest(ModelState);
             }
@@ -655,14 +816,83 @@ namespace TrackNowApi.Controllers
             return Ok(CustomerFilingWorkflowComments);
         }
 
-        [HttpGet("CustomerComments{CustomerID:Int}")]
-        public IActionResult CustomerComments(int CustomerID)
+        [HttpPost("CreateCustomerFilingTrackingCommentsAttachments")]
+        public IActionResult CreateCustomerFilingTrackingCommentsAttachments([FromBody] CustomerFilingTrackingCommentsAttachments item)
+        {
+            if (item == null)
+            {
+                return BadRequest();
+            }
+
+            _db.CustomerFilingTrackingCommentsAttachments.Add(item);
+            _db.SaveChanges();
+            return Ok(item);
+
+
+        }
+
+
+        [HttpGet("CustomerFilingTrackingCommentsAttachmentstrackbyid/{AttachmentId:int}")]
+        public ActionResult<CustomerFilingTrackingCommentsAttachments> CustomerFilingTrackingCommentsAttachmentsGetById(int AttachmentId)
+        {
+            var res = _db.CustomerFilingTrackingCommentsAttachments.FirstOrDefault(p => p.AttachmentId == AttachmentId);
+
+
+            if (res != null)
+            {
+                return Ok(res);
+            }
+            else
+            {
+                return NotFound();
+            }
+
+
+        }
+
+
+        [HttpPut("CustomerFilingTrackingCommentsAttachmentsupdate/{AttachmentId}")]
+        public IActionResult CustomerFilingTrackingCommentsAttachmentsUpdate(int AttachmentId, CustomerFilingTrackingCommentsAttachments updatedCustomer)
+        {
+            var customer = _db.CustomerFilingTrackingCommentsAttachments.FirstOrDefault(p => p.AttachmentId == AttachmentId);
+
+            if (customer == null)
+            {
+                return NotFound();
+            }
+
+            customer.AttachmentPath= updatedCustomer.AttachmentPath;
+
+
+            _db.SaveChanges();
+
+            return Ok();
+        }
+
+
+
+        [HttpDelete("(CustomerFilingTrackingCommentsAttachmentsdelete/{AttachmentId:int}")]
+        public IActionResult CustomerFilingTrackingCommentsAttachmentsDelete(int AttachmentId)
+        {
+            var res = _db.CustomerFilingTrackingCommentsAttachments.FirstOrDefault(t => t.AttachmentId == AttachmentId);
+            if (res == null)
+            {
+                return NotFound();
+            }
+
+            _db.CustomerFilingTrackingCommentsAttachments.Remove(res);
+            _db.SaveChanges();
+            return new NoContentResult();
+        }
+
+        [HttpGet("CustomerComments{CustomerId:Int}")]
+        public IActionResult CustomerComments(int CustomerId)
         {
             return Ok((from o in _db.CustomerComments
-                       where o.CustomerId == CustomerID
+                       where o.CustomerId == CustomerId
                        select new
                        {
-                           CommentsID = o.CommentsID,
+                           CommentsId = o.CommentsId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -674,16 +904,16 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
-        [HttpGet("CustomerFilingComments{CustomerID:Int}")]
-        public IActionResult CustomerFilingComments(int CustomerID)
+        [HttpGet("CustomerFilingComments{CustomerId:Int}")]
+        public IActionResult CustomerFilingComments(int CustomerId)
         {
             return Ok((from o in _db.CustomerFilingComments
-                       where o.CustomerID == CustomerID 
+                       where o.CustomerId == CustomerId 
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           CustomerID = o.CustomerID,
-                           FilingID = o.FilingID,
+                           CommentsId = o.CommentsId,
+                           CustomerId = o.CustomerId,
+                           FilingId = o.FilingId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -694,34 +924,15 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
-        [HttpGet("CustomerFilingDraftComments{DraftId:Int}")]
-        public IActionResult CustomerFilingDraftComments(int DraftId)
-        {
-            return Ok((from o in _db.CustomerFilingDraftComments
-                       where o.DraftId == DraftId
-                       select new
-                       {
-                           CommentsID = o.CommentsID,
-                           DraftID = o.DraftId,
-                           CommentsText = o.CommentsText,
-                           InformationRead = o.InformationRead,
-                           InformationDeleted = o.InformationDeleted,
-                           CreateDate = o.CreateDate,
-                           UpdateDate = o.UpdateDate,
-                           CreateUser = o.CreateUser,
-                           UpdateUser = o.UpdateUser
-                       }));
-
-        }
-        [HttpGet("CustomerFilingTrackingComments{FileTrackingID:Int}")]
-        public IActionResult CustomerFilingTrackingComments(int FileTrackingID)
+        [HttpGet("CustomerFilingTrackingComments{FileTrackingId:Int}")]
+        public IActionResult CustomerFilingTrackingComments(int FileTrackingId)
         {
             return Ok((from o in _db.CustomerFilingTrackingComments
-                       where o.FileTrackingID == FileTrackingID
+                       where o.FileTrackingId == FileTrackingId
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           FileTrackingID = o.FileTrackingID,
+                           CommentsId = o.CommentsId,
+                           FileTrackingId = o.FileTrackingId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -732,15 +943,15 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
-        [HttpGet("CustomerFilingWorkflowComments{WorkflowID:Int}")]
-        public IActionResult CustomerFilingWorkflowComments(int WorkflowID)
+        [HttpGet("CustomerFilingWorkflowComments{WorkflowId:Int}")]
+        public IActionResult CustomerFilingWorkflowComments(int WorkflowId)
         {
             return Ok((from o in _db.CustomerFilingWorkflowComments
-                       where o.WorkflowID == WorkflowID
+                       where o.WorkflowId == WorkflowId
                        select new
                        {
-                           CommentsID = o.CommentsID,
-                           FileTrackingID = o.WorkflowID,
+                           CommentsId = o.CommentsId,
+                           FileTrackingId = o.WorkflowId,
                            CommentsText = o.CommentsText,
                            InformationRead = o.InformationRead,
                            InformationDeleted = o.InformationDeleted,
@@ -751,6 +962,1111 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
+//===================================================================================
+
+        [HttpPost("createCustomerAttachments")]
+        public IActionResult createCustomerAttachments(CustomerAttachments Customer)
+        {
+            try
+            {
+                    _db.CustomerAttachments.Add(Customer);
+                    _db.SaveChanges();
+                    return Ok(Customer); 
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpGet("ListCustomerAttachments")]
+        public IActionResult ListCustomerAttachments()
+        {
+            try
+            {
                 
+                    var CustomerAttachments = _db.CustomerAttachments.ToList();
+                    return Ok(CustomerAttachments);
+                
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewCustomerAttachments/{CustomerId:Int}")]
+        public IActionResult ViewCustomerAttachments(int CustomerId)
+        {
+            try
+            {
+
+                var CustomerAttachments = _db.CustomerAttachments
+                                       .FirstOrDefault(F => F.CustomerId == CustomerId);
+                if (CustomerAttachments != null)
+                {
+                    return Ok(CustomerAttachments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("DeleteCustomerAttachments/{CustomerId:Int}")]
+        public IActionResult DeleteCustomerAttachments(int CustomerId)
+        {
+            try
+            {
+
+                var CustomerAttachments = _db.CustomerAttachments
+                                                 .FirstOrDefault(a => a.CustomerId == CustomerId);
+
+                if (CustomerAttachments != null)
+                {
+                    _db.CustomerAttachments.Remove(CustomerAttachments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpPut("UpdateCustomerAttachments/{CustomerId:int}")]
+        public IActionResult UpdateCustomerAttachments(int CustomerId, [FromBody] CustomerAttachments CustomerAttachments)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerAttachments.
+                                      FirstOrDefault(n => n.CustomerId == CustomerId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.CustomerId = CustomerAttachments.CustomerId;
+                    existingNotification.AttachmentId = CustomerAttachments.AttachmentId;
+                    existingNotification.AttachmentPath = CustomerAttachments.AttachmentPath;
+                    existingNotification.CreateDate = CustomerAttachments.CreateDate;
+                    existingNotification.CreateUser = CustomerAttachments.CreateUser;
+                    existingNotification.UpdatedDate = CustomerAttachments.UpdatedDate;
+                    existingNotification.UpdatedUser = CustomerAttachments.UpdatedUser;
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+//================================================================================================
+        [HttpPost("createCustomerFilingAttachments")]
+        public IActionResult createCustomerFilingAttachments(CustomerFilingAttachments Customer)
+        {
+            try
+            {
+                _db.CustomerFilingAttachments.Add(Customer);
+                _db.SaveChanges();
+                return Ok(Customer);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpGet("ListCustomerFilingAttachments")]
+        public IActionResult ListCustomerFilingAttachments()
+        {
+            try
+            {
+
+                var CustomerFilingAttachments = _db.CustomerFilingAttachments.ToList();
+                return Ok(CustomerFilingAttachments);
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewCustomerFilingAttachments/{FollowupId:Int}")]
+        public IActionResult ViewCustomerFilingAttachments(int FollowupId)
+        {
+            try
+            {
+
+                var CustomerFilingAttachments = _db.CustomerFilingAttachments
+                                       .FirstOrDefault(F => F.FollowupId == FollowupId);
+                if (CustomerFilingAttachments != null)
+                {
+                    return Ok(CustomerFilingAttachments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("DeleteCustomerFilingAttachments/{FollowupId:Int}")]
+        public IActionResult DeleteCustomerFilingAttachments(int FollowupId)
+        {
+            try
+            {
+
+                var CustomerFilingAttachments = _db.CustomerFilingAttachments
+                                                 .FirstOrDefault(a => a.FollowupId == FollowupId);
+
+                if (CustomerFilingAttachments != null)
+                {
+                    _db.CustomerFilingAttachments.Remove(CustomerFilingAttachments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpPut("UpdateCustomerFilingAttachments/{FollowupId:int}")]
+        public IActionResult UpdateCustomerFilingAttachments(int FollowupId, [FromBody] CustomerFilingAttachments CustomerFilingAttachments)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerFilingAttachments.
+                                      FirstOrDefault(n => n.FollowupId == FollowupId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.AttachmentId = CustomerFilingAttachments.AttachmentId;
+                    
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+//===================================================================================================================
+
+
+        [HttpPost("CreateCustomerFilingCommentsAttachments")]
+        public IActionResult CreateCustomerFilingCommentsAttachments(CustomerFilingCommentsAttachments Customer)
+        {
+            try
+            {
+                _db.CustomerFilingCommentsAttachments.Add(Customer);
+                _db.SaveChanges();
+                return Ok(Customer);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpGet("ListCustomerFilingCommentsAttachments")]
+        public IActionResult ListCustomerFilingCommentsAttachments()
+        {
+            try
+            {
+
+                var CustomerFilingCommentsAttachments = _db.CustomerFilingCommentsAttachments.ToList();
+                return Ok(CustomerFilingCommentsAttachments);
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewCustomerFilingCommentsAttachments/{AttachmentId:Int}")]
+        public IActionResult ViewCustomerFilingCommentsAttachments(int AttachmentId)
+        {
+            try
+            {
+
+                var CustomerFilingCommentsAttachments = _db.CustomerFilingCommentsAttachments
+                                       .FirstOrDefault(F => F.AttachmentId == AttachmentId);
+                if (CustomerFilingCommentsAttachments != null)
+                {
+                    return Ok(CustomerFilingCommentsAttachments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("DeleteCustomerFilingCommentsAttachments/{AttachmentId:Int}")]
+        public IActionResult DeleteCustomerFilingCommentsAttachments(int AttachmentId)
+        {
+            try
+            {
+
+                var CustomerFilingCommentsAttachments = _db.CustomerFilingCommentsAttachments
+                                                 .FirstOrDefault(a => a.AttachmentId == AttachmentId);
+
+                if (CustomerFilingCommentsAttachments != null)
+                {
+                    _db.CustomerFilingCommentsAttachments.Remove(CustomerFilingCommentsAttachments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpPut("UpdateCustomerFilingCommentsAttachments/{AttachmentId:int}")]
+        public IActionResult UpdateCustomerFilingCommentsAttachments(int AttachmentId, [FromBody] CustomerFilingCommentsAttachments CustomerFilingCommentsAttachments)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerFilingCommentsAttachments.
+                                      FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.AttachmentPath = CustomerFilingCommentsAttachments.AttachmentPath;
+                    existingNotification.CommentsId = CustomerFilingCommentsAttachments.CommentsId;
+                    existingNotification.CreateDate = CustomerFilingCommentsAttachments.CreateDate;
+                    existingNotification.CreateUser = CustomerFilingCommentsAttachments.CreateUser;
+                    existingNotification.UpdatedDate = CustomerFilingCommentsAttachments.UpdatedDate;
+                    existingNotification.UpdatedUser = CustomerFilingCommentsAttachments.UpdatedUser;
+
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+//==================================================================================================================
+
+        [HttpPost("CreateCustomerFilingDraftAttachments")]
+        public IActionResult CreateCustomerFilingDraftAttachments(CustomerFilingDraftAttachments Customer)
+        {
+            try
+            {
+                _db.CustomerFilingDraftAttachments.Add(Customer);
+                _db.SaveChanges();
+                return Ok(Customer);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpGet("ListCustomerFilingDraftAttachments")]
+        public IActionResult ListCustomerFilingDraftAttachments()
+        {
+            try
+            {
+
+                var CustomerFilingDraftAttachments = _db.CustomerFilingDraftAttachments.ToList();
+                return Ok(CustomerFilingDraftAttachments);
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewCustomerFilingDraftAttachments/{DraftId:Int}")]
+        public IActionResult ViewCustomerFilingDraftAttachments(int DraftId)
+        {
+            try
+            {
+
+                var CustomerFilingDraftAttachments = _db.CustomerFilingDraftAttachments
+                                       .FirstOrDefault(F => F.DraftId == DraftId);
+                if (CustomerFilingDraftAttachments != null)
+                {
+                    return Ok(CustomerFilingDraftAttachments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("DeleteCustomerFilingDraftAttachments/{DraftId:Int}")]
+        public IActionResult DeleteCustomerFilingDraftAttachments(int DraftId)
+        {
+            try
+            {
+
+                var CustomerFilingDraftAttachments = _db.CustomerFilingDraftAttachments
+                                                 .FirstOrDefault(a => a.DraftId == DraftId);
+
+                if (CustomerFilingDraftAttachments != null)
+                {
+                    _db.CustomerFilingDraftAttachments.Remove(CustomerFilingDraftAttachments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpPut("UpdateCustomerFilingDraftAttachments/{DraftId:int}")]
+        public IActionResult UpdateCustomerFilingDraftAttachments(int DraftId, [FromBody] CustomerFilingDraftAttachments CustomerFilingDraftAttachments)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerFilingDraftAttachments.
+                                      FirstOrDefault(n => n.DraftId == DraftId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.AttachmentId = CustomerFilingDraftAttachments.AttachmentId;
+                    existingNotification.AttachmentPath = CustomerFilingDraftAttachments.AttachmentPath;
+                    existingNotification.CreateDate = CustomerFilingDraftAttachments.CreateDate;
+                    existingNotification.CreateUser = CustomerFilingDraftAttachments.CreateUser;
+                    existingNotification.UpdatedDate = CustomerFilingDraftAttachments.UpdatedDate;
+                    existingNotification.UpdatedUser = CustomerFilingDraftAttachments.UpdatedUser;
+
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+ //==================================================================================================================
+
+        [HttpPost("CreateCustomerFilingDraftCommentsAttachments")]
+        public IActionResult CreateCustomerFilingDraftCommentsAttachments(CustomerFilingDraftCommentsAttachments Customer)
+        {
+            try
+            {
+                _db.CustomerFilingDraftCommentsAttachments.Add(Customer);
+                _db.SaveChanges();
+                return Ok(Customer);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpGet("ListCustomerFilingDraftCommentsAttachments")]
+        public IActionResult ListCustomerFilingDraftCommentsAttachments()
+        {
+            try
+            {
+
+                var CustomerFilingDraftCommentsAttachments = _db.CustomerFilingDraftCommentsAttachments.ToList();
+                return Ok(CustomerFilingDraftCommentsAttachments);
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewCustomerFilingDraftCommentsAttachments/{AttachmentId:Int}")]
+        public IActionResult ViewCustomerFilingDraftCommentsAttachments(int AttachmentId)
+        {
+            try
+            {
+
+                var CustomerFilingDraftCommentsAttachments = _db.CustomerFilingDraftCommentsAttachments
+                                       .FirstOrDefault(F => F.AttachmentId == AttachmentId);
+                if (CustomerFilingDraftCommentsAttachments != null)
+                {
+                    return Ok(CustomerFilingDraftCommentsAttachments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("DeleteCustomerFilingDraftCommentsAttachments/{AttachmentId:Int}")]
+        public IActionResult DeleteCustomerFilingDraftCommentsAttachments(int AttachmentId)
+        {
+            try
+            {
+
+                var CustomerFilingDraftCommentsAttachments = _db.CustomerFilingDraftCommentsAttachments
+                                                 .FirstOrDefault(a => a.AttachmentId == AttachmentId);
+
+                if (CustomerFilingDraftCommentsAttachments != null)
+                {
+                    _db.CustomerFilingDraftCommentsAttachments.Remove(CustomerFilingDraftCommentsAttachments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpPut("UpdateCustomerFilingDraftCommentsAttachments/{AttachmentId:int}")]
+        public IActionResult UpdateCustomerFilingDraftCommentsAttachments(int AttachmentId, [FromBody] CustomerFilingDraftCommentsAttachments CustomerFilingDraftCommentsAttachments)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerFilingDraftCommentsAttachments.
+                                      FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.AttachmentPath = CustomerFilingDraftCommentsAttachments.AttachmentPath;
+                    existingNotification.CommentsId = CustomerFilingDraftCommentsAttachments.CommentsId;
+                    existingNotification.CreateDate = CustomerFilingDraftCommentsAttachments.CreateDate;
+                    existingNotification.CreateUser = CustomerFilingDraftCommentsAttachments.CreateUser;
+                    existingNotification.UpdatedDate = CustomerFilingDraftCommentsAttachments.UpdatedDate;
+                    existingNotification.UpdatedUser = CustomerFilingDraftCommentsAttachments.UpdatedUser;
+
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+ //================================================================================================================
+
+        [HttpPost("CreateCustomerFilingTrackingAttachments")]
+        public IActionResult CreateCustomerFilingTrackingAttachments(CustomerFilingTrackingAttachments Customer)
+        {
+            try
+            {
+                _db.CustomerFilingTrackingAttachments.Add(Customer);
+                _db.SaveChanges();
+                return Ok(Customer);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpGet("ListCustomerFilingTrackingAttachments")]
+        public IActionResult ListCustomerFilingTrackingAttachments()
+        {
+            try
+            {
+
+                var CustomerFilingTrackingAttachments = _db.CustomerFilingTrackingAttachments.ToList();
+                return Ok(CustomerFilingTrackingAttachments);
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewCustomerFilingTrackingAttachments/{FileTrackingId:Int}")]
+        public IActionResult ViewCustomerFilingTrackingAttachments(int FileTrackingId)
+        {
+            try
+            {
+
+                var CustomerFilingTrackingAttachments = _db.CustomerFilingTrackingAttachments
+                                       .FirstOrDefault(F => F.FileTrackingId == FileTrackingId);
+                if (CustomerFilingTrackingAttachments != null)
+                {
+                    return Ok(CustomerFilingTrackingAttachments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("DeleteCustomerFilingTrackingAttachments/{FileTrackingId:Int}")]
+        public IActionResult DeleteCustomerFilingTrackingAttachments(int FileTrackingId)
+        {
+            try
+            {
+
+                var CustomerFilingTrackingAttachments = _db.CustomerFilingTrackingAttachments
+                                                 .FirstOrDefault(a => a.FileTrackingId == FileTrackingId);
+
+                if (CustomerFilingTrackingAttachments != null)
+                {
+                    _db.CustomerFilingTrackingAttachments.Remove(CustomerFilingTrackingAttachments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpPut("UpdateCustomerFilingTrackingAttachments/{FileTrackingId:int}")]
+        public IActionResult UpdateCustomerFilingTrackingAttachments(int FileTrackingId, [FromBody] CustomerFilingTrackingAttachments CustomerFilingTrackingAttachments)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerFilingTrackingAttachments.
+                                      FirstOrDefault(n => n.FileTrackingId == FileTrackingId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.AttachmentId = CustomerFilingTrackingAttachments.AttachmentId;
+                    existingNotification.AttachmentPath = CustomerFilingTrackingAttachments.AttachmentPath;
+                    existingNotification.CreateDate = CustomerFilingTrackingAttachments.CreateDate;
+                    existingNotification.CreateUser = CustomerFilingTrackingAttachments.CreateUser;
+                    existingNotification.UpdatedDate = CustomerFilingTrackingAttachments.UpdatedDate;
+                    existingNotification.UpdatedUser = CustomerFilingTrackingAttachments.UpdatedUser;
+
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+//=====================================================================================================================
+        [HttpDelete("DeleteCustomerFilingTrackingNotification/{NotificationId:decimal}")]
+        public IActionResult DeleteCustomerFilingTrackingNotification(decimal NotificationId)
+        {
+            try
+            {
+                //using (var Customer = new Model.TrackNowContext())
+                {
+                    var CustomerFilingTrackingNotification = _db.CustomerFilingTrackingNotifications
+                                                .FirstOrDefault(n => n.NotificationId == NotificationId);
+
+                    if (CustomerFilingTrackingNotification != null)
+                    {
+                        _db.CustomerFilingTrackingNotifications.Remove(CustomerFilingTrackingNotification);
+                        _db.SaveChanges();
+                        return Ok();
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+
+                // return StatusCode(StatusCodes.Status500InternalServerError);
+
+                return NotFound(ex.Message);
+            }
+        }
+
+
+        [HttpPost("CreateCustomerFilingTrackingNotifications")]
+        public IActionResult CreateCustomerFilingTrackingNotifications(CustomerFilingTrackingNotifications notification)
+        {
+            try
+            {
+                // using (var Customer = new Models.TrackNowContext())
+                {
+                    _db.CustomerFilingTrackingNotifications.Add(notification);
+                    int i = _db.SaveChanges();
+                    //return CreatedAtRoute("GetNotification", new { WorkflowId = notification.WorkflowId }, notification);
+                    return Ok("number of row effected is " + i);
+                }
+            }
+            catch (Exception ex)
+            {
+
+                // return StatusCode(StatusCodes.Status500InternalServerError);
+                //Console.WriteLine(ex.Message);
+                //return null;
+                return NotFound(ex.Message);
+
+            }
+        }
+
+
+        [HttpGet("ViewCustomerFilingTrackingNotification/{NotificationId:decimal}")]
+        public IActionResult ViewCustomerFilingTrackingNotification(decimal NotificationId)
+        {
+            try
+            {
+                //using (var Customer = new Models.TrackNowContext())
+                {
+                    var CustomerFilingTrackingNotification = _db.CustomerFilingTrackingNotifications
+                                                            .FirstOrDefault(n => n.NotificationId == NotificationId);
+
+                    //var CustomerFilingTrackingNotification = from t in Customer.CustomerFilingTrackingNotifications
+                    //                                         where t.NotificationId == NotificationId
+                    //                                         select t;
+
+                    if (CustomerFilingTrackingNotification != null)
+                    {
+                        return Ok(CustomerFilingTrackingNotification);
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occurred during the view operation
+                // return StatusCode(StatusCodes.Status500InternalServerError);
+                return NotFound(ex.Message);
+            }
+        }
+
+
+
+        [HttpGet("ListCustomerFilingTrackingNotifications")]
+        public IActionResult ListCustomerFilingTrackingNotifications()
+        {
+            try
+            {
+                //using (var Customer = new Models.TrackNowContext())
+                {
+                    var CustomerFilingTrackingNotifications = _db.CustomerFilingTrackingNotifications.ToList();
+                    return Ok(CustomerFilingTrackingNotifications);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occurred during the list operation
+                //return StatusCode(StatusCodes.Status500InternalServerError);
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpPut("UpdateCustomerFilingTrackingNotification/{NotificationId:decimal}")]
+        public IActionResult UpdateCustomerFilingTrackingNotification(decimal NotificationId, [FromBody] CustomerFilingTrackingNotifications customerFilingTrackingNotification)
+        {
+            try
+            {
+                //  using (var Customer = new Models.TrackNowContext())
+                {
+                    var existingNotification = _db.CustomerFilingTrackingNotifications.
+                                          FirstOrDefault(n => n.NotificationId == NotificationId);
+
+                    if (existingNotification != null)
+
+                    {
+                        existingNotification.WorkflowId = customerFilingTrackingNotification.WorkflowId;
+                        existingNotification.EmailFrom = customerFilingTrackingNotification.EmailFrom;
+                        existingNotification.EmailTo = customerFilingTrackingNotification.EmailTo;
+                        existingNotification.EmailCc = customerFilingTrackingNotification.EmailCc;
+                        existingNotification.EmailSubject = customerFilingTrackingNotification.EmailSubject;
+                        existingNotification.NotificationType = customerFilingTrackingNotification.NotificationType;
+                        existingNotification.NotificationText = customerFilingTrackingNotification.NotificationText;
+                        existingNotification.InformationRead = customerFilingTrackingNotification.InformationRead;
+                        existingNotification.InformationDeleted = customerFilingTrackingNotification.InformationDeleted;
+                        existingNotification.CreateDate = customerFilingTrackingNotification.CreateDate;
+                        existingNotification.CreateUser = customerFilingTrackingNotification.CreateUser;
+
+
+
+                        _db.SaveChanges();
+                        return Ok(existingNotification);
+                    }
+                    else
+                    {
+                        return NotFound();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle any exceptions that occurred during the update operation
+                // return StatusCode(StatusCodes.Status500InternalServerError);
+                return NotFound(ex.Message);
+            }
+
+
+        }
+ //=====================================================================================================
+
+        [HttpPost("CreateCustomerApprovalStatus")]
+        public IActionResult CreateCustomerApprovalStatus(CustomerApprovalStatus Approver)
+        {
+            try
+            {
+                _db.CustomerApprovalStatus.Add(Approver);
+                _db.SaveChanges();
+                return Ok(Approver);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewCustomerApprovalStatus/{CustomerApprovalId:int}")]
+        public IActionResult ViewCustomerApprovalStatus(int CustomerApprovalId)
+        {
+            try
+            {
+                var CustomerApprovalStatus = _db.CustomerApprovalStatus
+                                               .FirstOrDefault(n => n.CustomerApprovalId == CustomerApprovalId);
+
+                if (CustomerApprovalStatus != null)
+                {
+                    return Ok(CustomerApprovalStatus);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ListCustomerApprovalStatus")]
+        public IActionResult ListCustomerApprovalStatus()
+        {
+            try
+            {
+                var CustomerApprovalStatus = _db.CustomerApprovalStatus.ToList();
+                return Ok(CustomerApprovalStatus);
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpDelete("DeleteCustomerApprovalStatus/{CustomerApprovalId:int}")]
+        public IActionResult DeleteCustomerApprovalStatus(int CustomerApprovalId)
+        {
+            try
+            {
+
+                var CustomerApprovalStatus = _db.CustomerApprovalStatus
+                                            .FirstOrDefault(n => n.CustomerApprovalId == CustomerApprovalId);
+
+                if (CustomerApprovalStatus != null)
+                {
+                    _db.CustomerApprovalStatus.Remove(CustomerApprovalStatus);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpPut("UpdateCustomerApprovalStatus/{CustomerApprovalId:int}")]
+        public IActionResult UpdateCustomerApprovalStatus(int CustomerApprovalId, [FromBody] CustomerApprovalStatus CustomerApprovalStatus)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerApprovalStatus.
+                                      FirstOrDefault(n => n.CustomerApprovalId == CustomerApprovalId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.WorkflowId = CustomerApprovalStatus.WorkflowId;
+                    existingNotification.ApproverName = CustomerApprovalStatus.ApproverName;
+                    existingNotification.AlternateApprovers = CustomerApprovalStatus.AlternateApprovers;
+                    existingNotification.Comments = CustomerApprovalStatus.Comments;
+                    existingNotification.Attachments = CustomerApprovalStatus.Attachments;
+                    existingNotification.Status = CustomerApprovalStatus.Status;
+                    existingNotification.CreatedDate = CustomerApprovalStatus.CreatedDate;
+                    existingNotification.CreatedUser = CustomerApprovalStatus.CreatedUser;
+                    existingNotification.UpdateDate = CustomerApprovalStatus.UpdateDate;
+                    existingNotification.UpdateUser = CustomerApprovalStatus.UpdateUser;
+                    existingNotification.DoneBy = CustomerApprovalStatus.Comments;
+                    existingNotification.DoneOn = CustomerApprovalStatus.DoneOn;
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+//=========================================================================================================================
+
+       
+        [HttpGet("ViewCustomerApprovalStatus/{CommentsId:int}")]
+        public IActionResult ViewCustomerComments(int CommentsId)
+        {
+            try
+            {
+                var CustomerComments = _db.CustomerComments
+                                               .FirstOrDefault(n => n.CommentsId == CommentsId);
+
+                if (CustomerComments != null)
+                {
+                    return Ok(CustomerComments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ListCustomerComments")]
+        public IActionResult ListCustomerComments()
+        {
+            try
+            {
+                var CustomerComments = _db.CustomerComments.ToList();
+                return Ok(CustomerComments);
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpDelete("DeleteCustomerComments/{CommentsId:int}")]
+        public IActionResult DeleteCustomerComments(int CommentsId)
+        {
+            try
+            {
+
+                var CustomerComments = _db.CustomerComments
+                                            .FirstOrDefault(n => n.CommentsId == CommentsId);
+
+                if (CustomerComments != null)
+                {
+                    _db.CustomerComments.Remove(CustomerComments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpPut("UpdateCustomerComments/{CommentsId:int}")]
+        public IActionResult UpdateCustomerComments(int CommentsId, [FromBody] CustomerComments CustomerComments)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerComments.
+                                      FirstOrDefault(n => n.CommentsId == CommentsId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.CustomerId = CustomerComments.CustomerId;
+                    existingNotification.CommentsText = CustomerComments.CommentsText;
+                    existingNotification.InformationRead = CustomerComments.InformationRead;
+                    existingNotification.InformationDeleted = CustomerComments.InformationDeleted;
+                    existingNotification.CreateDate = CustomerComments.CreateDate;
+                    existingNotification.CreateUser = CustomerComments.CreateUser;
+                    existingNotification.UpdateDate = CustomerComments.UpdateDate;
+                    existingNotification.UpdateUser = CustomerComments.UpdateUser;
+                   
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
     }
 }

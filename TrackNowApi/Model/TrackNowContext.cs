@@ -22,7 +22,6 @@ namespace TrackNowApi.Model
         public virtual DbSet<CustomerFileTracking> CustomerFileTrackings { get; set; } = null!;
         public virtual DbSet<CustomerBusinessCategory> CustomerBusinessCategory { get; set; } = null!;
         public virtual DbSet<FilingBusinessCategory> FilingBusinessCategory { get; set; } = null!;
-        public virtual DbSet<CustomerFilingFollowup> CustomerFilingFollowups { get; set; } = null!;
         public virtual DbSet<CustomerFilingMaster> CustomerFilingMasters { get; set; } = null!;
         public virtual DbSet<CustomerFilingMasterHistory> CustomerFilingMasterHistories { get; set; } = null!;
         public virtual DbSet<CustomerHistory> CustomerHistories { get; set; } = null!;
@@ -52,7 +51,7 @@ namespace TrackNowApi.Model
 
                 entity.ToTable("AppConfiguration");
 
-                entity.Property(e => e.ConfigId).HasColumnName("ConfigID");
+                entity.Property(e => e.ConfigId).HasColumnName("ConfigId");
 
                 entity.Property(e => e.ApproverLevel)
                     .HasMaxLength(100)
@@ -76,7 +75,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FilingID");
+                    .HasColumnName("FilingId");
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
@@ -141,7 +140,7 @@ namespace TrackNowApi.Model
                 entity.Property(e => e.CustomerId)
                     .HasColumnType("numeric(18, 0)")
                     .ValueGeneratedOnAdd()
-                    .HasColumnName("CustomerID");
+                    .HasColumnName("CustomerId");
 
                 entity.Property(e => e.CustomerName)
                     .HasMaxLength(100)
@@ -193,10 +192,10 @@ namespace TrackNowApi.Model
                     .HasMaxLength(100)
                     .IsUnicode(false);
 
-                entity.Property(e => e.ParentCustomerID)
+                entity.Property(e => e.ParentCustomerId)
                     .HasColumnType("numeric(18, 0)")
                     .ValueGeneratedOnAdd()
-                    .HasColumnName("ParentCustomerID");
+                    .HasColumnName("ParentCustomerId");
 
             });
 
@@ -218,11 +217,11 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.FileTrackingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FileTrackingID");
+                    .HasColumnName("FileTrackingId");
 
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FilingID");
+                    .HasColumnName("FilingId");
 
                 entity.Property(e => e.Status)
                     .HasMaxLength(100)
@@ -247,7 +246,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.CustomerId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("CustomerID");
+                    .HasColumnName("CustomerId");
 
                 });
 
@@ -263,45 +262,11 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FilingID");
+                    .HasColumnName("FilingId");
 
             });
 
-            modelBuilder.Entity<CustomerFilingFollowup>(entity =>
-            {
-                entity.HasNoKey();
-
-                entity.ToTable("CustomerFilingFollowup");
-
-                entity.Property(e => e.AttachmentPath)
-                    .HasMaxLength(500)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.CommText)
-                    .HasMaxLength(8000)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.CommunicationType)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.CreateDate).HasColumnType("datetime");
-
-                entity.Property(e => e.CreateUser)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
-                entity.Property(e => e.CustomerId).HasColumnType("numeric(18, 0)");
-
-                entity.Property(e => e.FileTrackingId)
-                    .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FileTrackingID");
-
-                entity.Property(e => e.FilingId)
-                    .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FilingID");
-            });
-
+           
             modelBuilder.Entity<CustomerFilingMaster>(entity =>
             {
                 entity.HasNoKey();
@@ -318,7 +283,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FilingID");
+                    .HasColumnName("FilingId");
 
                 entity.Property(e => e.Notes)
                     .HasMaxLength(2000)
@@ -352,7 +317,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FilingID");
+                    .HasColumnName("FilingId");
 
                 entity.Property(e => e.Notes)
                     .HasMaxLength(2000)
@@ -395,7 +360,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.CustomerId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("CustomerID");
+                    .HasColumnName("CustomerId");
 
                 entity.Property(e => e.CustomerName)
                     .HasMaxLength(100)
@@ -467,7 +432,7 @@ namespace TrackNowApi.Model
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
                     .ValueGeneratedOnAdd()
-                    .HasColumnName("FilingID");
+                    .HasColumnName("FilingId");
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
@@ -531,7 +496,7 @@ namespace TrackNowApi.Model
                 entity.Property(e => e.DraftId)
                     .HasColumnType("numeric(18, 0)")
                     .ValueGeneratedOnAdd()
-                    .HasColumnName("DraftID");
+                    .HasColumnName("DraftId");
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
@@ -551,7 +516,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FilingID");
+                    .HasColumnName("FilingId");
 
                 entity.Property(e => e.JsicontactEmail)
                     .HasMaxLength(250)
@@ -621,7 +586,7 @@ namespace TrackNowApi.Model
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
                     .ValueGeneratedOnAdd()
-                    .HasColumnName("FilingID");
+                    .HasColumnName("FilingId");
 
                 entity.Property(e => e.JsicontactEmail)
                     .HasMaxLength(250)
@@ -679,7 +644,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.DraftId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("DraftID");
+                    .HasColumnName("DraftId");
 
                 entity.Property(e => e.WorkflowStatus)
                     .HasMaxLength(100)
@@ -688,7 +653,7 @@ namespace TrackNowApi.Model
                 entity.Property(e => e.WorkflowId)
                     .HasColumnType("numeric(18, 0)")
                     .ValueGeneratedOnAdd()
-                    .HasColumnName("WorkflowID");
+                    .HasColumnName("WorkflowId");
             });
 
             modelBuilder.Entity<ReferenceDoc>(entity =>
@@ -707,11 +672,11 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.DraftId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("DraftID");
+                    .HasColumnName("DraftId");
 
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FilingID");
+                    .HasColumnName("FilingId");
 
                 entity.Property(e => e.UpdateDate).HasColumnType("datetime");
 
@@ -752,7 +717,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FilingID");
+                    .HasColumnName("FilingId");
             });
 
             modelBuilder.Entity<WorkflowTracking>(entity =>
@@ -787,7 +752,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.WorkflowId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("WorkflowID");
+                    .HasColumnName("WorkflowId");
             });
 
             OnModelCreatingPartial(modelBuilder);
