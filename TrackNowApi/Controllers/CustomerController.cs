@@ -174,8 +174,25 @@ namespace TrackNowApi.Controllers
                        })); ;
 
         }
+        [HttpGet("CustomerBusinessCategoryList{CustomerId:Int}")]
+        public IActionResult CustomerBusinessCategoryList(int CustomerId)
+        {
+            return Ok((from c in _db.Customer
+                       join cb in _db.CustomerBusinessCategory on c.CustomerId equals cb.CustomerId
+                       join i in _db.BusinessCategoryMaster on cb.BusinessCategoryId equals i.BusinessCategoryId
+                       where c.CustomerId== CustomerId
+                       select new
+                       {
+                           CustomerId = c.CustomerId,
+                           CustomerName = c.CustomerName,
+                           BusinessCategoryId = i.BusinessCategoryId,
+                           BusinessCategoryName = i.BusinessCategoryName,
+                           BusinessCategoryDescription = i.BusinessCategoryDescription,
+                           State = cb.State
+                       })); ;
 
-        
+        }
+
         [HttpGet("CustomerfulltextSearch")]
         public IActionResult CustomerfulltextSearch(string? Textsearch)
         {
