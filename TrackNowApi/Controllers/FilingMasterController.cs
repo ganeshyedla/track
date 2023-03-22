@@ -620,8 +620,8 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
             return Ok(FilingMasterDraftComments);
         }
-        [HttpPut("FilingMasterWorkflowCommentsCommentsUpdate{CommentsId:Int}")]
-        public IActionResult FilingMasterWorkflowCommentsCommentsUpdate(int CommentsId, [FromBody] FilingMasterWorkflowComments FilingMasterWorkflowComments)
+        [HttpPut("FilingMasterWorkflowCommentsUpdate{CommentsId:Int}")]
+        public IActionResult FilingMasterWorkflowCommentsUpdate(int CommentsId, [FromBody] FilingMasterWorkflowComments FilingMasterWorkflowComments)
         {
             if (FilingMasterWorkflowComments == null || FilingMasterWorkflowComments.CommentsId != CommentsId)
             {
