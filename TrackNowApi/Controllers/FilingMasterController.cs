@@ -8,7 +8,7 @@ using TrackNowApi.Model;
 
 namespace TrackNowApi.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class FilingMasterController : ControllerBase
@@ -424,15 +424,7 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
 
         }
-        [HttpPost("CreateFilingMasterHistory")]
-        public IActionResult CreateFilingMasterHistory([FromBody] FilingMasterHistory FilingMasterHistory)
-        {
-
-            _db.Add(FilingMasterHistory);
-            _db.SaveChanges();
-
-            return Ok(FilingMasterHistory);
-        }
+       
         [HttpPost("CreateDraftFilingMaster")]
         public IActionResult CreateDraftFilingMaster([FromBody] FilingMasterDraft FilingMasterDraft)
         {

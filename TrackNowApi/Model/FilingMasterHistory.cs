@@ -7,7 +7,7 @@ namespace TrackNowApi.Model
     public partial class FilingMasterHistory
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal historyid { get; set; }
+        public decimal Historyid { get; set; }
         public decimal FilingId { get; set; }
         public string? FilingName { get; set; }
         public string? FilingDescription { get; set; }

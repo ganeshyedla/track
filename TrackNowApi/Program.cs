@@ -1,29 +1,41 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
+using TrackNowApi.Data;
+using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
-namespace jwt_auth
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+
+builder.Services.AddControllers();
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//                .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"))
+//                .EnableTokenAcquisitionToCallDownstreamApi()
+// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+builder.Services.AddCors(p => p.AddPolicy("CorsPolicy", build => {
+    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+}));
+
+builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
 {
-    public class Program
-    {
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-           Host.CreateDefaultBuilder(args)
-               .ConfigureWebHostDefaults(webBuilder =>
-               {
-                   webBuilder.UseStartup<Startup>();
-
-               });
-
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
-
-       
-    }
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
+
+
+app.UseHttpsRedirection();
+
+app.UseCors("CorsPolicy");
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.Run();

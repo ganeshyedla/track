@@ -66,11 +66,16 @@ namespace TrackNowApi.Data
         public DbSet<CustomerFilingMaster> CustomerFilingMaster { get; set; }
         public DbSet<CustomerDraftBusinessCategory> CustomerDraftBusinessCategory { get; set; }
         public DbSet<CustomerFilingMasterDraft> CustomerFilingMasterDraft { get; set; }
-
-
+        public DbSet<FilingDraftBusinessCategory> FilingDraftBusinessCategory { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            
+
+            modelBuilder.Entity<FilingDraftBusinessCategory>()
+            .HasKey(t => new { t.Id });
+
             modelBuilder.Entity<AppConfiguration>()
             .HasKey(t => new { t.ConfigId });
 
@@ -171,7 +176,7 @@ namespace TrackNowApi.Data
             .HasKey(t => new { t.FileTrackingId });
 
             modelBuilder.Entity<FilingMasterHistory>()
-           .HasKey(t => new { t.historyid });
+           .HasKey(t => new { t.Historyid });
 
             modelBuilder.Entity<CustomerFilingMasterHistory>()
           .HasKey(t => new { t.historyid });

@@ -1,6 +1,7 @@
-﻿namespace TrackNowApi.Model
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TrackNowApi.Model
 {
-    
     public partial class FilingBusinessCategory
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

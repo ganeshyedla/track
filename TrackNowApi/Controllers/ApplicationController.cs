@@ -8,7 +8,7 @@ using TrackNowApi.Model;
 
 namespace TrackNowApi.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
 
