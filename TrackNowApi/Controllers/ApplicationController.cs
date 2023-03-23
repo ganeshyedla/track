@@ -8,7 +8,7 @@ using TrackNowApi.Model;
 
 namespace TrackNowApi.Controllers
 {
-    //[Authorize]
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
 
@@ -69,33 +69,33 @@ namespace TrackNowApi.Controllers
         public IActionResult BusinessCategoryMasterList()
         {
             return Ok(from o in _db.BusinessCategoryMaster
-                       select new
-                       {
-                           BusinessCategoryId = o.BusinessCategoryId,
-                           BusinessCategoryName = o.BusinessCategoryName,
-                           BusinessCategoryDescription = o.BusinessCategoryDescription,
-                           CreatedDate = o.CreatedDate,
-                           CreatedUser = o.CreatedUser,
-                           UpdateDate = o.UpdateDate,
-                           UpdateUser = o.UpdateUser
-                       }
+                      select new
+                      {
+                          BusinessCategoryId = o.BusinessCategoryId,
+                          BusinessCategoryName = o.BusinessCategoryName,
+                          BusinessCategoryDescription = o.BusinessCategoryDescription,
+                          CreatedDate = o.CreatedDate,
+                          CreatedUser = o.CreatedUser,
+                          UpdateDate = o.UpdateDate,
+                          UpdateUser = o.UpdateUser
+                      }
                         );
         }
         [HttpGet("BusinessCategoryMasterList{BusinessCategoryId:Int}")]
         public IActionResult BusinessCategoryMasterList(int BusinessCategoryId)
         {
             return Ok(from o in _db.BusinessCategoryMaster
-                       where o.BusinessCategoryId == BusinessCategoryId
-                       select new
-                       {
-                           BusinessCategoryId = o.BusinessCategoryId,
-                           BusinessCategoryName = o.BusinessCategoryName,
-                           BusinessCategoryDescription = o.BusinessCategoryDescription,
-                           CreatedDate = o.CreatedDate,
-                           CreatedUser = o.CreatedUser,
-                           UpdateDate = o.UpdateDate,
-                           UpdateUser = o.UpdateUser
-                       });
+                      where o.BusinessCategoryId == BusinessCategoryId
+                      select new
+                      {
+                          BusinessCategoryId = o.BusinessCategoryId,
+                          BusinessCategoryName = o.BusinessCategoryName,
+                          BusinessCategoryDescription = o.BusinessCategoryDescription,
+                          CreatedDate = o.CreatedDate,
+                          CreatedUser = o.CreatedUser,
+                          UpdateDate = o.UpdateDate,
+                          UpdateUser = o.UpdateUser
+                      });
 
         }
         [HttpDelete("BusinessCategoryMaster{BusinessCategoryId:Int}")]
@@ -115,7 +115,7 @@ namespace TrackNowApi.Controllers
             }
 
             _db.Update(BusinessCategoryMaster);
-            
+
             _db.SaveChanges();
 
             return Ok(BusinessCategoryMaster);
@@ -178,7 +178,243 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
             return new NoContentResult();
         }
-    }
-    
 
-}
+
+
+        [HttpPost("CreateApproverConfiguration")]
+        public IActionResult CreateApproverConfiguration(ApproverConfiguration Approver)
+        {
+            try
+            {
+                _db.ApproverConfiguration.Add(Approver);
+                _db.SaveChanges();
+                return Ok(Approver);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewApproverConfiguration/{ApproverConfigId:int}")]
+        public IActionResult ViewApproverConfigurations(int ApproverConfigId)
+        {
+            try
+            {
+                var ApproverConfiguration = _db.ApproverConfiguration
+                                               .FirstOrDefault(n => n.ApproverConfigId == ApproverConfigId);
+
+                if (ApproverConfiguration != null)
+                {
+                    return Ok(ApproverConfiguration);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ListApproverConfiguration")]
+        public IActionResult ListApproverConfiguration()
+        {
+            try
+            {
+                var ApproverConfiguration = _db.ApproverConfiguration.ToList();
+                return Ok(ApproverConfiguration);
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpDelete("DeleteApproverConfiguration/{ApproverConfigId:int}")]
+        public IActionResult DeleteApproverConfiguration(int ApproverConfigId)
+        {
+            try
+            {
+
+                var ApproverConfiguration = _db.ApproverConfiguration
+                                            .FirstOrDefault(n => n.ApproverConfigId == ApproverConfigId);
+
+                if (ApproverConfiguration != null)
+                {
+                    _db.ApproverConfiguration.Remove(ApproverConfiguration);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpPut("UpdateApproverConfiguration/{ApproverConfigId:int}")]
+        public IActionResult UpdateApproverConfigurations(int ApproverConfigId, [FromBody] ApproverConfiguration ApproverConfiguration)
+        {
+            try
+            {
+
+                var existingNotification = _db.ApproverConfiguration.
+                                      FirstOrDefault(n => n.ApproverConfigId == ApproverConfigId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.ApproverLevel = ApproverConfiguration.ApproverLevel;
+                    existingNotification.ApproverGroupId = ApproverConfiguration.ApproverGroupId;
+                    existingNotification.FilingType = ApproverConfiguration.FilingType;
+                    existingNotification.CreateDate = ApproverConfiguration.CreateDate;
+                    existingNotification.CreateUser = ApproverConfiguration.CreateUser;
+                    existingNotification.UpdateDate = ApproverConfiguration.UpdateDate;
+                    existingNotification.UpdateUser = ApproverConfiguration.UpdateUser;
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        //=============================================================================================================
+
+        [HttpPost("CreateApprovers")]
+        public IActionResult CreateApprovers(Approvers Approver)
+        {
+            try
+            {
+                _db.Approvers.Add(Approver);
+                _db.SaveChanges();
+                return Ok(Approver);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ViewApprovers/{ApproverId:int}")]
+        public IActionResult ViewApproverId(int ApproverId)
+        {
+            try
+            {
+                var Approvers = _db.Approvers
+                                               .FirstOrDefault(n => n.ApproverId == ApproverId);
+
+                if (Approvers != null)
+                {
+                    return Ok(Approvers);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ListApprovers")]
+        public IActionResult ListApprovers()
+        {
+            try
+            {
+                var Approvers = _db.Approvers.ToList();
+                return Ok(Approvers);
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpDelete("DeleteApprovers/{ApproverId:int}")]
+        public IActionResult DeleteApprovers(int ApproverId)
+        {
+            try
+            {
+
+                var Approvers = _db.Approvers
+                                            .FirstOrDefault(n => n.ApproverId == ApproverId);
+
+                if (Approvers != null)
+                {
+                    _db.Approvers.Remove(Approvers);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpPut("UpdateApproverConfiguration/{ApproverId:int}")]
+        public IActionResult UpdateApprovers(int ApproverId, [FromBody] Approvers Approvers)
+        {
+            try
+            {
+
+                var existingNotification = _db.Approvers.
+                                      FirstOrDefault(n => n.ApproverId == ApproverId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.ApproverId = Approvers.ApproverId;
+                    existingNotification.CustomerId = Approvers.CustomerId;
+                    existingNotification.State = Approvers.State;
+                    existingNotification.ApproverGroupId = Approvers.ApproverGroupId;
+                    existingNotification.Isdefault = Approvers.Isdefault;
+                    existingNotification.ApproverName = Approvers.ApproverName;
+                    existingNotification.Juristiction = Approvers.Juristiction;
+                    existingNotification.CreateDate = Approvers.CreateDate;
+                    existingNotification.CreateUser = Approvers.CreateUser;
+                    existingNotification.UpdateDate = Approvers.UpdateDate;
+                    existingNotification.UpdateUser = Approvers.UpdateUser;
+
+
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+    }
+    }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -12,20 +13,7 @@ using TrackNowApi.Model;
 
 namespace TrackNowApi.Controllers
 {
-    //public static class MyStringExtensions
-    //{
-    //    public static bool Like(this string toSearch, string toFind)
-    //    {
-    //        if (toFind != null)
-    //        {
-    //            return new Regex(@"\A" + new Regex(@"\.|\$|\^|\{|\[|\(|\||\)|\*|\+|\?|\\").Replace(toFind, ch => @"\" + ch).Replace('_', '.').Replace("%", ".*") + @"\z", RegexOptions.Singleline).IsMatch(toSearch);
-    //        }
-    //        else
-    //            return true;
-
-    //    }   
-
-    //}
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CustomerController : ControllerBase
