@@ -7,6 +7,8 @@ namespace TrackNowApi.Model
 {
     public partial class CustomerFilingMaster
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal Id { get; set; }
         public decimal CustomerId { get; set; }
         public decimal FilingId { get; set; }
         public string? Notes { get; set; }

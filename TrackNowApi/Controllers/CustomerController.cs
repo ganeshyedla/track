@@ -287,15 +287,15 @@ namespace TrackNowApi.Controllers
             return Ok(CustomerHistory);
         }
 
-        [HttpPost("CreateCustomerFilingMaster")]
-        public IActionResult CreateCustomerFilingMaster([FromBody] CustomerFilingMaster CustomerFilingMaster)
-        {
+        //[HttpPost("CreateCustomerFilingMaster")]
+        //public IActionResult CreateCustomerFilingMaster([FromBody] CustomerFilingMaster CustomerFilingMaster)
+        //{
 
-            _db.Add(CustomerFilingMaster);
-            _db.SaveChanges();
+        //    _db.Add(CustomerFilingMaster);
+        //    _db.SaveChanges();
 
-            return Ok(CustomerFilingMaster);
-        }
+        //    return Ok(CustomerFilingMaster);
+        //}
 
         [HttpGet("CustomerFilingMasterList")]
         public IActionResult CustomerFilingMasterList(int CustomerId)
@@ -2070,6 +2070,511 @@ namespace TrackNowApi.Controllers
                     existingNotification.UpdateDate = CustomerComments.UpdateDate;
                     existingNotification.UpdateUser = CustomerComments.UpdateUser;
                    
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+//=====================================================================================================================
+
+        [HttpPost("CustomerFileTracking")]
+        public IActionResult CreateCustomerFileTracking(CustomerFileTracking customer)
+        {
+            try
+            {
+                // Exclude the 'FileTrackingId' column when adding a new record to the database
+                _db.CustomerFileTracking.Add(new CustomerFileTracking
+                {
+                    CustomerId = customer.CustomerId,
+                    FilingId = customer.FilingId,
+                    DueDate = customer.DueDate,
+                    Status = customer.Status,
+                    CreateDate = customer.CreateDate,
+                    CreateUser = customer.CreateUser,
+                    UpdateDate = customer.UpdateDate,
+                    UpdateUser = customer.UpdateUser
+                });
+
+                _db.SaveChanges();
+
+                return Ok(customer);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+
+        [HttpGet("CustomerFileTracking")]
+        public IActionResult ListCustomerFileTracking()
+        {
+            try
+            {
+
+                var CustomerFileTracking = _db.CustomerFileTracking.ToList();
+                return Ok(CustomerFileTracking);
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("CustomerFileTracking/{FileTrackingId:Int}")]
+        public IActionResult ViewCustomerFileTracking(int FileTrackingId)
+        {
+            try
+            {
+
+                var CustomerFileTracking = _db.CustomerFileTracking
+                                       .FirstOrDefault(F => F.FileTrackingId == FileTrackingId);
+                if (CustomerFileTracking != null)
+                {
+                    return Ok(CustomerFileTracking);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("CustomerFileTracking/{FileTrackingId:Int}")]
+        public IActionResult DeleteCustomerFileTracking(int FileTrackingId)
+        {
+            try
+            {
+
+                var CustomerFileTracking = _db.CustomerFileTracking
+                                                 .FirstOrDefault(a => a.FileTrackingId == FileTrackingId);
+
+                if (CustomerFileTracking != null)
+                {
+                    _db.CustomerFileTracking.Remove(CustomerFileTracking);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpPut("CustomerFileTracking/{FileTrackingId:int}")]
+        public IActionResult UpdateCustomerFileTracking(int FileTrackingId, [FromBody] CustomerFileTracking CustomerFileTracking)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerFileTracking.
+                                      FirstOrDefault(n => n.FileTrackingId == FileTrackingId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.CustomerId = CustomerFileTracking.CustomerId;
+                    existingNotification.FilingId = CustomerFileTracking.FilingId;
+                    existingNotification.DueDate = CustomerFileTracking.DueDate;
+                    existingNotification.Status = CustomerFileTracking.Status;
+                    existingNotification.CreateDate = CustomerFileTracking.CreateDate;
+                    existingNotification.CreateUser = CustomerFileTracking.CreateUser;
+                    existingNotification.UpdateDate = CustomerFileTracking.UpdateDate;
+                    existingNotification.UpdateUser = CustomerFileTracking.UpdateUser;
+
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+//===============================================================================================================
+
+        [HttpPost("CustomerFilingMaster")]
+        public IActionResult CreateCustomerFilingMaster(CustomerFilingMaster Customer)
+        {
+            try
+            {
+                _db.CustomerFilingMaster.Add(Customer);
+                _db.SaveChanges();
+                return Ok(Customer);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpGet("CustomerFilingMaster")]
+        public IActionResult ListCustomerFilingMaster()
+        {
+            try
+            {
+
+                var CustomerFilingMaster = _db.CustomerFilingMaster.ToList();
+                return Ok(CustomerFilingMaster);
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("CustomerFilingMaster/{CustomerId:Int}")]
+        public IActionResult ViewCustomerFilingMaster(int CustomerId)
+        {
+            try
+            {
+
+                var CustomerFilingMaster = _db.CustomerFilingMaster
+                                       .FirstOrDefault(F => F.CustomerId == CustomerId);
+                if (CustomerFilingMaster != null)
+                {
+                    return Ok(CustomerFilingMaster);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("CustomerFilingMaster/{CustomerId:Int}")]
+        public IActionResult DeleteCustomerFilingMaster(int CustomerId)
+        {
+            try
+            {
+
+                var CustomerFilingMaster = _db.CustomerFilingMaster
+                                                 .FirstOrDefault(a => a.CustomerId == CustomerId);
+
+                if (CustomerFilingMaster != null)
+                {
+                    _db.CustomerFilingMaster.Remove(CustomerFilingMaster);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+
+        [HttpPut("CustomerFilingMaster/{Id:int}")]
+        public IActionResult UpdateCustomerFilingMaster(int Id, [FromBody] CustomerFilingMaster CustomerFilingMaster)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerFilingMaster.
+                                      FirstOrDefault(n => n.Id == Id);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.CustomerId = CustomerFilingMaster.CustomerId;
+                    existingNotification.FilingId = CustomerFilingMaster.FilingId;
+                    existingNotification.Notes = CustomerFilingMaster.Notes;
+                    existingNotification.CreateDate = CustomerFilingMaster.CreateDate;
+                    existingNotification.CreateUser = CustomerFilingMaster.CreateUser;
+                    existingNotification.UpdateDate = CustomerFilingMaster.UpdateDate;
+                    existingNotification.UpdateUser = CustomerFilingMaster.UpdateUser;
+
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+//===============================================================================================================
+
+        [HttpPost("CustomerFilingMasterDraft")]
+        public IActionResult CreateCustomerFilingMasterDraft(CustomerFilingMasterDraft Customer)
+        {
+            try
+            {
+                _db.CustomerFilingMasterDraft.Add(Customer);
+                _db.SaveChanges();
+                return Ok(Customer);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpGet("CustomerFilingMasterDraft")]
+        public IActionResult ListCustomerFilingMasterDraft()
+        {
+            try
+            {
+
+                var CustomerFilingMasterDraft = _db.CustomerFilingMasterDraft.ToList();
+                return Ok(CustomerFilingMasterDraft);
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("CustomerFilingMasterDraft/{DraftId:Int}")]
+        public IActionResult ViewCustomerFilingMasterDraft(int DraftId)
+        {
+            try
+            {
+
+                var CustomerFilingMasterDraft = _db.CustomerFilingMasterDraft
+                                       .FirstOrDefault(F => F.DraftId == DraftId);
+                if (CustomerFilingMasterDraft != null)
+                {
+                    return Ok(CustomerFilingMasterDraft);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("CustomerFilingMasterDraft/{DraftId:Int}")]
+        public IActionResult DeleteCustomerFilingMasterDraft(int DraftId)
+        {
+            try
+            {
+
+                var CustomerFilingMasterDraft = _db.CustomerFilingMasterDraft
+                                                 .FirstOrDefault(a => a.DraftId == DraftId);
+
+                if (CustomerFilingMasterDraft != null)
+                {
+                    _db.CustomerFilingMasterDraft.Remove(CustomerFilingMasterDraft);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpPut("CustomerFilingMasterDraft/{DraftId:int}")]
+        public IActionResult UpdateCustomerFilingMasterDraft(int DraftId, [FromBody] CustomerFilingMasterDraft CustomerFilingMasterDraft)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerFilingMasterDraft.
+                                      FirstOrDefault(n => n.DraftId == DraftId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.CustomerId = CustomerFilingMasterDraft.CustomerId;
+                    existingNotification.FilingId = CustomerFilingMasterDraft.FilingId;
+                    existingNotification.Notes = CustomerFilingMasterDraft.Notes;
+                    existingNotification.CreateDate = CustomerFilingMasterDraft.CreateDate;
+                    existingNotification.CreateUser = CustomerFilingMasterDraft.CreateUser;
+                    existingNotification.UpdateDate = CustomerFilingMasterDraft.UpdateDate;
+                    existingNotification.UpdateUser = CustomerFilingMasterDraft.UpdateUser;
+                    existingNotification.Status = CustomerFilingMasterDraft.Status;
+
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+ //===============================================================================================================
+
+        [HttpPost("CustomerDraftBusinessCategory")]
+        public IActionResult CreateCustomerDraftBusinessCategory(CustomerDraftBusinessCategory Customer)
+        {
+            try
+            {
+                _db.CustomerDraftBusinessCategory.Add(Customer);
+                _db.SaveChanges();
+                return Ok(Customer);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpGet("CustomerDraftBusinessCategory")]
+        public IActionResult ListCustomerDraftBusinessCategory()
+        {
+            try
+            {
+
+                var CustomerDraftBusinessCategory = _db.CustomerDraftBusinessCategory.ToList();
+                return Ok(CustomerDraftBusinessCategory);
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("CustomerDraftBusinessCategory/{Id:Int}")]
+        public IActionResult ViewCustomerDraftBusinessCategory(int Id)
+        {
+            try
+            {
+
+                var CustomerDraftBusinessCategory = _db.CustomerDraftBusinessCategory
+                                       .FirstOrDefault(F => F.Id == Id);
+                if (CustomerDraftBusinessCategory != null)
+                {
+                    return Ok(CustomerDraftBusinessCategory);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("CustomerDraftBusinessCategory/{Id:Int}")]
+        public IActionResult DeleteCustomerDraftBusinessCategory(int Id)
+        {
+            try
+            {
+
+                var CustomerDraftBusinessCategory = _db.CustomerDraftBusinessCategory
+                                                 .FirstOrDefault(a => a.Id == Id);
+
+                if (CustomerDraftBusinessCategory != null)
+                {
+                    _db.CustomerDraftBusinessCategory.Remove(CustomerDraftBusinessCategory);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpPut("CustomerDraftBusinessCategory/{Id:int}")]
+        public IActionResult UpdateCustomerDraftBusinessCategory(int Id, [FromBody] CustomerDraftBusinessCategory CustomerDraftBusinessCategory)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerDraftBusinessCategory.
+                                      FirstOrDefault(n => n.Id == Id);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.DraftId = CustomerDraftBusinessCategory.DraftId;
+                    existingNotification.BusinessCategoryId = CustomerDraftBusinessCategory.BusinessCategoryId;
+                    existingNotification.State = CustomerDraftBusinessCategory.State;
+                   
+
 
                     _db.SaveChanges();
                     return Ok(existingNotification);

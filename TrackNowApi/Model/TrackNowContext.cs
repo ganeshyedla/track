@@ -16,13 +16,16 @@ namespace TrackNowApi.Model
         {
         }
 
+       
         public virtual DbSet<AppConfiguration> AppConfigurations { get; set; } = null!;
         public virtual DbSet<BusinessCategoryMaster> BusinessCategoryMasters { get; set; } = null!;
         public virtual DbSet<Customer> Customers { get; set; } = null!;
-        public virtual DbSet<CustomerFileTracking> CustomerFileTrackings { get; set; } = null!;
         public virtual DbSet<CustomerBusinessCategory> CustomerBusinessCategory { get; set; } = null!;
         public virtual DbSet<FilingBusinessCategory> FilingBusinessCategory { get; set; } = null!;
-        public virtual DbSet<CustomerFilingMaster> CustomerFilingMasters { get; set; } = null!;
+        public virtual DbSet<CustomerFileTracking> CustomerFileTracking { get; set; } = null!;
+        public virtual DbSet<CustomerFilingMaster> CustomerFilingMaster { get; set; } = null!;
+        public virtual DbSet<CustomerDraftBusinessCategory> CustomerDraftBusinessCategory { get; set; } = null!;
+        public virtual DbSet<CustomerFilingMasterDraft> CustomerFilingMasterDraft { get; set; } = null!;
         public virtual DbSet<CustomerFilingMasterHistory> CustomerFilingMasterHistories { get; set; } = null!;
         public virtual DbSet<CustomerHistory> CustomerHistories { get; set; } = null!;
         public virtual DbSet<FilingMaster> FilingMasters { get; set; } = null!;
@@ -201,9 +204,13 @@ namespace TrackNowApi.Model
 
             modelBuilder.Entity<CustomerFileTracking>(entity =>
             {
-                entity.HasNoKey();
+                entity.HasKey(e => e.FileTrackingId)
+                    .HasName("PK__Customer__F44F92F81A5EDD61");
 
-                entity.ToTable("CustomerFileTracking");
+                entity.Property(e => e.FileTrackingId)
+                    .HasColumnType("numeric(18, 0)")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("FileTrackingID");
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
@@ -215,13 +222,9 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.DueDate).HasColumnType("datetime");
 
-                entity.Property(e => e.FileTrackingId)
-                    .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FileTrackingId");
-
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FilingId");
+                    .HasColumnName("FilingID");
 
                 entity.Property(e => e.Status)
                     .HasMaxLength(100)
@@ -266,12 +269,13 @@ namespace TrackNowApi.Model
 
             });
 
-           
+
             modelBuilder.Entity<CustomerFilingMaster>(entity =>
             {
-                entity.HasNoKey();
-
-                entity.ToTable("CustomerFilingMaster");
+                entity.Property(e => e.Id)
+                    .HasColumnType("numeric(18, 0)")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("id");
 
                 entity.Property(e => e.CreateDate).HasColumnType("datetime");
 
@@ -283,7 +287,7 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
-                    .HasColumnName("FilingId");
+                    .HasColumnName("FilingID");
 
                 entity.Property(e => e.Notes)
                     .HasMaxLength(2000)
@@ -718,6 +722,61 @@ namespace TrackNowApi.Model
                 entity.Property(e => e.FilingId)
                     .HasColumnType("numeric(18, 0)")
                     .HasColumnName("FilingId");
+            });
+
+            modelBuilder.Entity<CustomerDraftBusinessCategory>(entity =>
+            {
+                entity.Property(e => e.Id)
+                    .HasColumnType("numeric(18, 0)")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("id");
+
+                entity.Property(e => e.BusinessCategoryId).HasColumnType("numeric(18, 0)");
+
+                entity.Property(e => e.DraftId).HasColumnType("numeric(18, 0)");
+
+                entity.Property(e => e.State)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("state");
+            });
+
+            modelBuilder.Entity<CustomerFilingMasterDraft>(entity =>
+            {
+                entity.HasKey(e => e.DraftId)
+                    .HasName("PK__Customer__3E93D63B48C65B2D");
+
+                entity.Property(e => e.DraftId)
+                    .HasColumnType("numeric(18, 0)")
+                    .ValueGeneratedOnAdd()
+                    .HasColumnName("DraftID");
+
+                entity.Property(e => e.CreateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.CreateUser)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.CustomerId).HasColumnType("numeric(18, 0)");
+
+                entity.Property(e => e.FilingId)
+                    .HasColumnType("numeric(18, 0)")
+                    .HasColumnName("FilingID");
+
+                entity.Property(e => e.Notes)
+                    .HasMaxLength(2000)
+                    .IsUnicode(false);
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(100)
+                    .IsUnicode(false)
+                    .HasColumnName("status");
+
+                entity.Property(e => e.UpdateDate).HasColumnType("datetime");
+
+                entity.Property(e => e.UpdateUser)
+                    .HasMaxLength(100)
+                    .IsUnicode(false);
             });
 
             modelBuilder.Entity<WorkflowTracking>(entity =>
