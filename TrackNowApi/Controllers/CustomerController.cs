@@ -1998,6 +1998,175 @@ namespace TrackNowApi.Controllers
             }
         }
 
+        [HttpGet("CustomerFilingWorkflowCommentsAttachmentsList")]
+        public IActionResult CustomerFilingWorkflowCommentsAttachmentsList()
+        {
+            var res = _db.CustomerFilingWorkflowCommentsAttachments.ToList();
+            return Ok(res);
+        }
+
+        [HttpPost("CustomerFilingWorkflowCommentsAttachmentsCreate")]
+        public IActionResult CustomerFilingWorkflowCommentsAttachments([FromBody] CustomerFilingWorkflowCommentsAttachments item)
+        {
+            if (item == null)
+            {
+                return BadRequest();
+            }
+            _db.CustomerFilingWorkflowCommentsAttachments.Add(item);
+            _db.SaveChanges();
+            return Ok(item);
+        }
+        [HttpGet("CustomerFilingWorkflowCommentsAttachmentsbyid/{AttachmentId:int}")]
+        public ActionResult<CustomerFilingWorkflowCommentsAttachments> CustomerFilingWorkflowCommentsAttachmentsGetById(int AttachmentId)
+        {
+            var res = _db.CustomerFilingWorkflowCommentsAttachments.FirstOrDefault(p => p.AttachmentId == AttachmentId);
+            if (res != null)
+            {
+                return Ok(res);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+        [HttpPut("CustomerFilingWorkflowCommentsAttachmentsupdate/{AttachmentId}")]
+        public IActionResult CustomerFilingWorkflowCommentsAttachmentsUpdate(int AttachmentId, CustomerFilingWorkflowCommentsAttachments updatedCustomer)
+        {
+            var customer = _db.CustomerFilingWorkflowCommentsAttachments.FirstOrDefault(p => p.AttachmentId == AttachmentId);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+            customer.AttachmentPath = updatedCustomer.AttachmentPath;
+            _db.SaveChanges();
+            return Ok();
+        }
+        [HttpDelete("CustomerFilingWorkflowCommentsAttachmentsdelete/{AttachmentId:int}")]
+        public IActionResult CustomerFilingWorkflowCommentsAttachmentsDelete(int AttachmentId)
+        {
+            var res = _db.CustomerFilingWorkflowCommentsAttachments.FirstOrDefault(t => t.AttachmentId == AttachmentId);
+            if (res == null)
+            {
+                return NotFound();
+            }
+            _db.CustomerFilingWorkflowCommentsAttachments.Remove(res);
+            _db.SaveChanges();
+            return new NoContentResult();
+        }
+
+
+        [HttpGet("CustomerFilingMasterHistoryList")]
+        public IActionResult CustomerFilingMasterHistoryList()
+        {
+            var res = _db.CustomerFilingMasterHistory.ToList();
+            return Ok(res);
+        }
+
+        [HttpPost("CustomerFilingMasterHistoryCreate")]
+        public IActionResult CustomerFilingMasterHistory([FromBody] CustomerFilingMasterHistory item)
+        {
+            if (item == null)
+            {
+                return BadRequest();
+            }
+            _db.CustomerFilingMasterHistory.Add(item);
+            _db.SaveChanges();
+            return Ok(item);
+        }
+        [HttpGet("CustomerFilingMasterHistorybyid/{historyid:int}")]
+        public ActionResult<CustomerFilingMasterHistory> CustomerFilingMasterHistoryGetById(int historyid)
+        {
+            var res = _db.CustomerFilingMasterHistory.FirstOrDefault(p => p.historyid == historyid);
+            if (res != null)
+            {
+                return Ok(res);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+        [HttpPut("CustomerFilingMasterHistoryupdate/{historyid}")]
+        public IActionResult CustomerFilingMasterHistoryUpdate(int historyid, CustomerFilingMasterHistory updatedCustomer)
+        {
+            var customer = _db.CustomerFilingMasterHistory.FirstOrDefault(p => p.historyid == historyid);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+            customer.UpdateUser = updatedCustomer.UpdateUser;
+            _db.SaveChanges();
+            return Ok();
+        }
+        [HttpDelete("CustomerFilingMasterHistorydelete/{historyid:int}")]
+        public IActionResult CustomerFilingMasterHistoryDelete(int historyid)
+        {
+            var res = _db.CustomerFilingMasterHistory.FirstOrDefault(t => t.historyid == historyid);
+            if (res == null)
+            {
+                return NotFound();
+            }
+            _db.CustomerFilingMasterHistory.Remove(res);
+            _db.SaveChanges();
+            return new NoContentResult();
+        }
+
+        [HttpGet("CustomerFilingMasterWorkflowLists")]
+        public IActionResult CustomerFilingMasterWorkflowLists()
+        {
+            var res = _db.CustomerFilingMasterWorkflow.ToList();
+            return Ok(res);
+        }
+
+        [HttpPost("CustomerFilingMasterWorkflowCreate")]
+        public IActionResult CustomerFilingMasterWorkflow([FromBody] CustomerFilingMasterWorkflow item)
+        {
+            if (item == null)
+            {
+                return BadRequest();
+            }
+            _db.CustomerFilingMasterWorkflow.Add(item);
+            _db.SaveChanges();
+            return Ok(item);
+        }
+        [HttpGet("CustomerFilingMasterWorkflowbyid/{WorkflowId:int}")]
+        public ActionResult<CustomerFilingMasterWorkflow> CustomerFilingMasterWorkflowGetById(int WorkflowId)
+        {
+            var res = _db.CustomerFilingMasterWorkflow.FirstOrDefault(p => p.WorkflowId == WorkflowId);
+            if (res != null)
+            {
+                return Ok(res);
+            }
+            else
+            {
+                return NotFound();
+            }
+        }
+        [HttpPut("CustomerFilingMasterWorkflowupdate/{WorkflowId}")]
+        public IActionResult CustomerFilingMasterWorkflowUpdate(int WorkflowId, CustomerFilingMasterWorkflow updatedCustomer)
+        {
+            var customer = _db.CustomerFilingMasterWorkflow.FirstOrDefault(p => p.WorkflowId == WorkflowId);
+            if (customer == null)
+            {
+                return NotFound();
+            }
+            customer.UpdateUser = updatedCustomer.UpdateUser;
+            _db.SaveChanges();
+            return Ok();
+        }
+        [HttpDelete("CustomerFilingMasterWorkflowdelete/{WorkflowId:int}")]
+        public IActionResult CustomerFilingMasterWorkflowDelete(int WorkflowId)
+        {
+            var res = _db.CustomerFilingMasterWorkflow.FirstOrDefault(t => t.WorkflowId == WorkflowId);
+            if (res == null)
+            {
+                return NotFound();
+            }
+            _db.CustomerFilingMasterWorkflow.Remove(res);
+            _db.SaveChanges();
+            return new NoContentResult();
+        }
+
         [HttpGet("ListCustomerComments")]
         public IActionResult ListCustomerComments()
         {
