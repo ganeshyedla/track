@@ -76,6 +76,18 @@ namespace TrackNowApi.Controllers
                       });
 
         }
+
+
+        [HttpGet("FilingBusinessCategoryList{FilingId:Int}")]
+        public IActionResult FilingBusinessCategoryList(int FilingId)
+        {
+            FilingBusinessCategory FilingMaster = _db.FilingBusinessCategory.FirstOrDefault(x => x.FilingId== FilingId);
+
+            return Ok(FilingMaster);
+
+        }
+
+
         [HttpPost("CreateFilingBusinessCategory")]
         public IActionResult CreateFilingBusinessCategory([FromBody] FilingBusinessCategory []FilingBusinessCategory)
         {
@@ -88,6 +100,166 @@ namespace TrackNowApi.Controllers
             return Ok(FilingBusinessCategory);
 
         }
+
+        [HttpDelete("FilingBusinessCategory{id:Int}")]
+        public void FilingBusinessCategoryDelete1(int id)
+        {
+            FilingBusinessCategory filingbusinesscategory;
+
+            filingbusinesscategory = _db.FilingBusinessCategory.Where(d => d.Id == id).First();
+            _db.FilingBusinessCategory.Remove(filingbusinesscategory);
+            _db.SaveChanges();
+
+        }
+
+
+
+
+        //=====================================
+
+
+        [HttpGet("FilingDraftBusinessCategoryList{DraftId:Int}")]
+        public IActionResult FilingDraftBusinessCategoryList(int DraftId)
+        {
+            FilingDraftBusinessCategory res = _db.FilingDraftBusinessCategory.FirstOrDefault(x => x.DraftId == DraftId);
+
+            return Ok(res);
+
+        }
+
+
+
+
+        [HttpPost("CreateFilingDraftBusinessCategory")]
+        public IActionResult CreateFilingDraftBusinessCategory([FromBody] FilingDraftBusinessCategory Filingdraft)
+        {
+
+            _db.Add(Filingdraft);
+            _db.SaveChanges();
+
+            return Ok(Filingdraft);
+        }
+
+       
+        [HttpGet("FilingDraftBusinessCategoryGetById1/{DraftId:int}")]
+        public ActionResult<FilingMasterHistory> FilingDraftBusinessCategoryGetById(int DraftId)
+        {
+            var res = _db.FilingDraftBusinessCategory.FirstOrDefault(p => p.DraftId== DraftId);
+
+            return Ok(res);
+
+
+        }
+
+        [HttpGet("FilingDraftBusinessCategoryGetById/{id:int}")]
+        public ActionResult<FilingMasterHistory> FilingDraftBusinessCategoryGetById1(int id)
+        {
+            var res = _db.FilingDraftBusinessCategory.FirstOrDefault(p => p.Id == id);
+
+            return Ok(res);
+
+
+        }
+
+        [HttpPut("FilingDraftBusinessCategoryUpdate{id:Int}")]
+        public IActionResult FilingDraftBusinessCategoryUpdate(int id, [FromBody] FilingDraftBusinessCategory Filingdraft)
+        {
+
+            if (Filingdraft == null || Filingdraft.Id != id)
+            {
+                return BadRequest(ModelState);
+            }
+            _db.Update(Filingdraft);
+            _db.SaveChanges();
+
+            return Ok(Filingdraft);
+
+        }
+
+
+        [HttpDelete("FilingDraftBusinessCategoryDelete1/{Id:Int}")]
+        public void FilingDraftBusinessCategoryDelete(int Id)
+        {
+            FilingDraftBusinessCategory Filingdraft;
+
+            Filingdraft = _db.FilingDraftBusinessCategory.Where(d => d.Id == Id).First();
+            _db.FilingDraftBusinessCategory.Remove(Filingdraft);
+            _db.SaveChanges();
+
+        }
+
+        [HttpDelete("FilingDraftBusinessCategoryDelete/{DraftId:Int}")]
+        public void FilingDraftBusinessCategoryDelete1(int DraftId)
+        {
+            FilingDraftBusinessCategory Filingdraft;
+
+            Filingdraft = _db.FilingDraftBusinessCategory.Where(d => d.DraftId == DraftId).First();
+            _db.FilingDraftBusinessCategory.Remove(Filingdraft);
+            _db.SaveChanges();
+
+        }
+
+        //=====================================
+
+
+        [HttpPost("CreateFilingMasterHistory")]
+        public IActionResult CreateFilingMasterHistory([FromBody] FilingMasterHistory filingMasterHistory)
+        {
+
+            _db.Add(filingMasterHistory);
+            _db.SaveChanges();
+
+            return Ok(filingMasterHistory);
+        }
+
+        [HttpGet("FilingMasterHistoryList{FilingId:Int}")]
+        public IActionResult FilingMasterHistoryList(int FilingId)
+        {
+            FilingMasterHistory res = _db.FilingMasterHistory.FirstOrDefault(x => x.FilingId == FilingId);
+
+            return Ok(res);
+
+        }
+
+        [HttpGet("FilingMasterHistoryGetById/{Historyid:int}")]
+        public ActionResult<FilingMasterHistory> FilingMasterHistoryGetById(int Historyid)
+        {
+            var res = _db.FilingMasterHistory.FirstOrDefault(p => p.Historyid == Historyid);
+
+            return Ok(res);
+
+
+        }
+
+        [HttpPut("FilingMasterHistoryUpdate{Historyid:Int}")]
+        public IActionResult FilingMasterHistoryUpdate(int Historyid, [FromBody] FilingMasterHistory FilingMaster)
+        {
+
+            if (FilingMaster == null || FilingMaster.Historyid != Historyid)
+            {
+                return BadRequest(ModelState);
+            }
+            _db.Update(FilingMaster);
+            _db.SaveChanges();
+
+            return Ok(FilingMaster);
+
+        }
+
+
+        [HttpDelete("FilingMasterHistoryDelete{Historyid:Int}")]
+        public void FilingMasterHistoryDelete(int Historyid)
+        {
+            FilingMasterHistory FilingMaster;
+
+            FilingMaster = _db.FilingMasterHistory.Where(d => d.Historyid == Historyid).First();
+            _db.FilingMasterHistory.Remove(FilingMaster);
+            _db.SaveChanges();
+
+        }
+
+        //====================================
+       
         [HttpPut("FilingMasterApprove{WorkflowId:Int}")]
         public IActionResult FilingMasterApprove(ulong WorkflowId, ulong Userid, ulong DraftId )
         {

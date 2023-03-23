@@ -20,23 +20,23 @@ namespace jwt_auth
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddAuthentication(shareoptions =>
-            {
-                shareoptions.DefaultScheme = AzureADDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer("AzureAd", options =>
-            {
-                options.Audience = Configuration.GetValue<string>("AzureAd:Audience");
-                options.Authority = Configuration.GetValue<string>("AzureAd:Instance")
-                                    + Configuration.GetValue<string>("AzureAd:TenantId");
+            //services.AddAuthentication(shareoptions =>
+            //{
+            //    shareoptions.DefaultScheme = AzureADDefaults.AuthenticationScheme;
+            //})
+            //.AddJwtBearer("AzureAd", options =>
+            //{
+            //    options.Audience = Configuration.GetValue<string>("AzureAd:Audience");
+            //    options.Authority = Configuration.GetValue<string>("AzureAd:Instance")
+            //                        + Configuration.GetValue<string>("AzureAd:TenantId");
 
-                options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
-                {
-                    ValidIssuer = Configuration.GetValue<string>("AzureAd:Issuer"),
-                    ValidAudience = Configuration.GetValue<string>("AzureAd:Audience")
-                };
-            }
-            );
+            //    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
+            //    {
+            //        ValidIssuer = Configuration.GetValue<string>("AzureAd:Issuer"),
+            //        ValidAudience = Configuration.GetValue<string>("AzureAd:Audience")
+            //    };
+            //}
+            //);
 
             services.AddControllers();
 
