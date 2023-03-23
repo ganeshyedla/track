@@ -19,7 +19,7 @@ namespace TrackNowApi.Data
         public DbSet<FilingMaster> FilingMaster { get; set; }
         public DbSet<ReferenceDoc> ReferenceDoc { get; set; }
         public DbSet<BusinessCategoryMaster> BusinessCategoryMaster { get; set; }
-        public DbSet<CustomerFilingMaster> CustomerFilingMaster { get; set; }
+       // public DbSet<CustomerFilingMaster> CustomerFilingMaster { get; set; }
         public DbSet<FilingMasterDraft> FilingMasterDraft { get; set; }
         public DbSet<FilingMasterWorkflow> FilingMasterWorkflow { get; set; }
         public DbSet<WorkflowTracking> WorkflowTracking { get; set; }
@@ -38,7 +38,7 @@ namespace TrackNowApi.Data
         public DbSet<FilingMasterWorkflowComments> FilingMasterWorkflowComments { get; set; }
         public DbSet<FilingMasterDraftComments> FilingMasterDraftComments { get; set; }
         public DbSet<FilingMasterComments> FilingMasterComments { get; set; }
-        public DbSet<CustomerFilingMasterDraft> CustomerFilingMasterDraft { get; set; }
+        //public DbSet<CustomerFilingMasterDraft> CustomerFilingMasterDraft { get; set; }
         public DbSet<CustomerFilingMasterWorkflow> CustomerFilingMasterWorkflow { get; set; }
         public DbSet<CustomerFilingTrackingComments> CustomerFilingTrackingComments { get; set; }
         public DbSet<Roles> Roles { get; set; }
@@ -62,7 +62,11 @@ namespace TrackNowApi.Data
         public DbSet<CustomerFilingDraftCommentsAttachments> CustomerFilingDraftCommentsAttachments { get; set; }
         public DbSet<CustomerFilingTrackingAttachments> CustomerFilingTrackingAttachments { get; set; }
         public DbSet<CustomerFilingTrackingNotifications> CustomerFilingTrackingNotifications { get; set; }
-        
+        public DbSet<CustomerFileTracking> CustomerFileTracking { get; set; }
+        public DbSet<CustomerFilingMaster> CustomerFilingMaster { get; set; }
+        public DbSet<CustomerDraftBusinessCategory> CustomerDraftBusinessCategory { get; set; }
+        public DbSet<CustomerFilingMasterDraft> CustomerFilingMasterDraft { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -211,6 +215,18 @@ namespace TrackNowApi.Data
 
             modelBuilder.Entity<CustomerFilingTrackingNotifications>()
               .HasKey(t => new { t.WorkflowId });
+
+            modelBuilder.Entity<CustomerFileTracking>()
+             .HasKey(t => new { t.FileTrackingId });
+
+            modelBuilder.Entity<CustomerFilingMaster>()
+            .HasKey(t => new { t.Id});
+
+            modelBuilder.Entity<CustomerDraftBusinessCategory>()
+            .HasKey(t => new { t.Id });
+
+            modelBuilder.Entity<CustomerFilingMasterDraft>()
+            .HasKey(t => new { t.DraftId });
         }
 
     }
