@@ -66,7 +66,9 @@ namespace TrackNowApi.Controllers
                            Notes= o.Notes,
                            City= o.City,
                            State= o.State,
-                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerId).Select(u => u.CustomerName).SingleOrDefault()
+                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerId).Select(u => u.CustomerName).SingleOrDefault(),
+                           JSI_POC = o.JSI_POC,
+                           Customer_POC = o.Customer_POC
                         }
                         )
                        );
@@ -95,7 +97,9 @@ namespace TrackNowApi.Controllers
                            Notes = o.Notes,
                            City = o.City,
                            State = o.State,
-                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerId).Select(u => u.CustomerName).SingleOrDefault()
+                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerId).Select(u => u.CustomerName).SingleOrDefault(),
+                           JSI_POC = o.JSI_POC,
+                           Customer_POC = o.Customer_POC
                        }
             )
            );
@@ -130,7 +134,10 @@ namespace TrackNowApi.Controllers
                            Juristiction = o.Juristiction,
                            Notes = o.Notes,
                            City = o.City,
-                           State = o.State
+                           State = o.State,
+                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerId).Select(u => u.CustomerName).SingleOrDefault(),
+                           JSI_POC = o.JSI_POC,
+                           Customer_POC = o.Customer_POC
                        })); ;
 
         }
