@@ -131,10 +131,13 @@ namespace TrackNowApi.Controllers
 
 
         [HttpPost("CreateFilingDraftBusinessCategory")]
-        public IActionResult CreateFilingDraftBusinessCategory([FromBody] FilingDraftBusinessCategory Filingdraft)
+        public IActionResult CreateFilingDraftBusinessCategory([FromBody] FilingDraftBusinessCategory  []Filingdraft)
         {
-
-            _db.Add(Filingdraft);
+            foreach (FilingDraftBusinessCategory Bc in Filingdraft)
+            {
+                _db.Add(Bc);
+            }
+            
             _db.SaveChanges();
 
             return Ok(Filingdraft);
