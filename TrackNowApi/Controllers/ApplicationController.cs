@@ -297,11 +297,14 @@ namespace TrackNowApi.Controllers
         //=============================================================================================================
 
         [HttpPost("CreateApprovers")]
-        public IActionResult CreateApprovers(Approvers Approver)
+        public IActionResult CreateApprovers(Approvers []Approver)
         {
             try
             {
-                _db.Approvers.Add(Approver);
+                foreach (Approvers Bc in Approver)
+                {
+                    _db.Add(Bc);
+                }
                 _db.SaveChanges();
                 return Ok(Approver);
             }
