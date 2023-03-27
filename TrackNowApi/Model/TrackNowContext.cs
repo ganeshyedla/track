@@ -56,10 +56,6 @@ namespace TrackNowApi.Model
 
                 entity.Property(e => e.ConfigId).HasColumnName("ConfigId");
 
-                entity.Property(e => e.ApproverLevel)
-                    .HasMaxLength(100)
-                    .IsUnicode(false);
-
                 entity.Property(e => e.ConfigItem)
                     .HasMaxLength(250)
                     .IsUnicode(false);
