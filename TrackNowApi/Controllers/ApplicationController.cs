@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.StaticFiles;
 using System.Data;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
+using System.Net;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
 
@@ -16,10 +18,10 @@ namespace TrackNowApi.Controllers
     {
         private readonly ApplicationDbContext _db;
 
-        public ApplicationController(ApplicationDbContext db)
-        {
-            _db = db;
-        }
+        //public ApplicationController(ApplicationDbContext db)
+        //{
+        //    _db = db;
+        //}
         [HttpGet("UserRole")]
         public IActionResult UserRole()
         {
@@ -130,7 +132,7 @@ namespace TrackNowApi.Controllers
         }
 
         [HttpPost("AppConfigurationCreate")]
-        public IActionResult AppConfigurationCreate([FromBody] AppConfiguration []item)
+        public IActionResult AppConfigurationCreate([FromBody] AppConfiguration[] item)
         {
             foreach (AppConfiguration Bc in item)
             {
@@ -296,7 +298,7 @@ namespace TrackNowApi.Controllers
         //=============================================================================================================
 
         [HttpPost("CreateApprovers")]
-        public IActionResult CreateApprovers(Approvers []Approver)
+        public IActionResult CreateApprovers(Approvers[] Approver)
         {
             try
             {
@@ -418,5 +420,82 @@ namespace TrackNowApi.Controllers
 
         }
 
+
+        //public static IWebHostEnvironment _webHostEnvironment;
+
+        //public ApplicationController(IWebHostEnvironment webHostEnvironment)
+        //{
+        //    _webHostEnvironment = webHostEnvironment;
+        //}
+
+      
+
+
+        [HttpPost("upload")]
+        public ActionResult<string> Upload(IFormFile file, string folderPath)
+        {
+            try
+            {
+                if (file != null && file.Length > 0)
+                {
+                    var fileName = Path.GetFileName(file.FileName);
+                    var targetPath = Path.Combine(folderPath, fileName);
+                    using (var fileStream = new FileStream(targetPath, FileMode.Create))
+                    {
+                        file.CopyTo(fileStream);
+                    }
+                    return Ok(targetPath);
+                }
+                else
+                {
+                    return BadRequest("File is null or empty.");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+
+       
+
+        [HttpGet("{fileName}")]
+        public IActionResult Download(string fileName, string folderPath)
+        {
+            // string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
+            string filePath = string.Empty;
+
+
+
+            string[] filePaths = Directory.GetFiles(folderPath, fileName);
+            if (filePaths != null)
+            {
+                //var targetPath = Path.Combine(folderPath, fileName);
+                filePath = Path.Combine(folderPath, fileName);
+            }
+
+            if (!System.IO.File.Exists(filePath))
+            {
+                return NotFound();
+            }
+
+
+
+            var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            return File(fileStream, "application/octet-stream", fileName);
+        }
+
+
+
+
+
+
+
+
     }
     }
+
+
+
+

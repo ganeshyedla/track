@@ -8,7 +8,7 @@ namespace TrackNowApi.Model
 {
     public partial class FilingMasterWorkflowNotifications
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+       
         public decimal WorkflowId { get; set; }
         public string EmailFrom { get; set; }
         public string EmailTo { get; set; }
@@ -20,6 +20,7 @@ namespace TrackNowApi.Model
         public bool? InformationDeleted { get; set; }
         public DateTime? CreateDate { get; set; }
         public string CreateUser { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public decimal NotificationId { get; set; }
     }
 }
