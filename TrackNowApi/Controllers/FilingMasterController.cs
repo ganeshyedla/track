@@ -481,11 +481,32 @@ namespace TrackNowApi.Controllers
         [HttpPost("CreateFilingMasterWorkflow")]
         public IActionResult CreateFilingMasterWorkflow([FromBody] FilingMasterWorkflow FilingMasterWorkflow)
         {
-            FilingMasterWorkflow.CurrentApproverId = (from a in _db.Approvers
+            FilingMasterDraft FilingMasterDraft = _db.FilingMasterDraft
+                                        .Where(d => d.DraftId == FilingMasterWorkflow.DraftId).First();
+
+            string Juristiction = FilingMasterDraft.Juristiction == null ? "State" : "Federal";
+
+            if (Juristiction.Contains("State"))
+            { 
+                FilingMasterWorkflow.CurrentApproverId = (from a in _db.Approvers
                                                       join c in _db.ApproverConfiguration on a.ApproverGroupId equals c.ApproverGroupId
-                                                      join f in _db.FilingMaster on a.State equals f.StateInfo
+                                                      join f in _db.FilingMasterDraft on a.State equals f.StateInfo
                                                       where c.FilingType != null && c.FilingType.Equals("MasterFiling") && a.Isdefault == true
                                                       select a.ApproverId).FirstOrDefault();
+            }
+            else
+            {
+                FilingMasterWorkflow.CurrentApproverId = (from a in _db.Approvers
+                                                          join c in _db.ApproverConfiguration on a.ApproverGroupId equals c.ApproverGroupId
+                                                          where c.FilingType != null && c.FilingType.Equals("MasterFiling") && a.Isdefault == true
+                                                          select a.ApproverId).FirstOrDefault();
+            }
+
+            if(FilingMasterWorkflow.CurrentApproverId==0)
+            {
+                return NotFound("FilingMasterWorkflow.CurrentApproverId:"+FilingMasterWorkflow.CurrentApproverId);
+            }
+
             _db.Add(FilingMasterWorkflow);
             _db.SaveChanges();
 

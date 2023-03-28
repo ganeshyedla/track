@@ -130,13 +130,12 @@ namespace TrackNowApi.Controllers
         }
 
         [HttpPost("AppConfigurationCreate")]
-        public IActionResult AppConfigurationCreate([FromBody] AppConfiguration item)
+        public IActionResult AppConfigurationCreate([FromBody] AppConfiguration []item)
         {
-            if (item == null)
+            foreach (AppConfiguration Bc in item)
             {
-                return BadRequest();
+                _db.Add(Bc);
             }
-            _db.AppConfiguration.Add(item);
             _db.SaveChanges();
             return Ok(item);
         }
