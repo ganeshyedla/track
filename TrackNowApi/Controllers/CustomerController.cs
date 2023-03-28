@@ -1981,7 +1981,7 @@ namespace TrackNowApi.Controllers
 //=========================================================================================================================
 
        
-        [HttpGet("ViewCustomerApprovalStatus/{CommentsId:int}")]
+        [HttpGet("ViewCustomerComments/{CommentsId:int}")]
         public IActionResult ViewCustomerComments(int CommentsId)
         {
             try
