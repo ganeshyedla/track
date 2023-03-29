@@ -18,10 +18,10 @@ namespace TrackNowApi.Controllers
     {
         private readonly ApplicationDbContext _db;
 
-        //public ApplicationController(ApplicationDbContext db)
-        //{
-        //    _db = db;
-        //}
+        public ApplicationController(ApplicationDbContext db)
+        {
+            _db = db;
+        }
         [HttpGet("UserRole")]
         public IActionResult UserRole()
         {
@@ -132,7 +132,7 @@ namespace TrackNowApi.Controllers
         }
 
         [HttpPost("AppConfigurationCreate")]
-        public IActionResult AppConfigurationCreate([FromBody] AppConfiguration[] item)
+        public IActionResult AppConfigurationCreate([FromBody] AppConfiguration []item)
         {
             foreach (AppConfiguration Bc in item)
             {
@@ -298,7 +298,7 @@ namespace TrackNowApi.Controllers
         //=============================================================================================================
 
         [HttpPost("CreateApprovers")]
-        public IActionResult CreateApprovers(Approvers[] Approver)
+        public IActionResult CreateApprovers(Approvers []Approver)
         {
             try
             {
