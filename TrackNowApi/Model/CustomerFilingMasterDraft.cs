@@ -6,6 +6,7 @@ namespace TrackNowApi.Model
     public class CustomerFilingMasterDraft
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public decimal Id { get; set; }
         public decimal DraftId { get; set; }
         public decimal? CustomerId { get; set; }
         public decimal? FilingId { get; set; }
@@ -15,5 +16,6 @@ namespace TrackNowApi.Model
         public DateTime? UpdateDate { get; set; }
         public string? UpdateUser { get; set; }
         public string? Status { get; set; }
+        public string? BusinessOperation { get; set;}
     }
 }

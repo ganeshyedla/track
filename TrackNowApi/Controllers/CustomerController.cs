@@ -1,15 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Drawing;
-using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Text.RegularExpressions;
+using System.Text.Json;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
+using System.Data;
+
 
 namespace TrackNowApi.Controllers
 {
@@ -350,63 +345,36 @@ namespace TrackNowApi.Controllers
         [HttpPut("CustomerFilingReject{WorkflowId:Int}")]
         public IActionResult CustomerFilingReject(int WorkflowId, string Userid, [FromBody] CustomerFilingMasterDraft CustomerFilingMasterDraft)
         {
-            CustomerFilingMasterWorkflow CustomerFilingMasterWorkflow = (CustomerFilingMasterWorkflow)
-                                                                        (from w in _db.CustomerFilingMasterWorkflow
-                                                                         where w.WorkflowId == WorkflowId
-                                                                         select w);
-            if (CustomerFilingMasterWorkflow == null)
+
             {
-                return BadRequest(ModelState);
+                string StoredProc = "exec CustomerFilingMasterDraftApproveReject " +
+                        "@WorkflowId = " + WorkflowId.ToString() + "," +
+                        "@LoginUserdID = " + Userid.ToString() + "," +
+                        "@ApprovedOrRejected= 'Approved'";
+
+                //return await _context.output.ToListAsync();
+                _db.Database.ExecuteSqlRaw(StoredProc);
+
+
+                return Ok();
+
             }
-            CustomerFilingMasterWorkflow.WorkflowStatus = "Rejected";
-            CustomerFilingMasterWorkflow.UpdateDate = DateTime.Now;
-            CustomerFilingMasterWorkflow.UpdateUser = Userid;
-            _db.CustomerFilingMasterWorkflow.Attach(CustomerFilingMasterWorkflow);
-            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
-            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
-            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
-
-            //CustomerFilingMaster CustomerFilingMaster = (CustomerFilingMaster)
-            //                                                         (from w in _db.CustomerFilingMaster
-            //                                                          where w.FilingId == CustomerFilingMasterDraft.FilingId
-
-
-            //CustomerFilingMaster. = "Rejected";
-            //CustomerFilingMasterWorkflow.UpdateDate = DateTime.Now;
-            //CustomerFilingMasterWorkflow.UpdateUser = Userid;
-            //_db.CustomerFilingMasterWorkflow.Attach(CustomerFilingMasterWorkflow);
-            //_db.Entry(CustomerFilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
-            //_db.Entry(CustomerFilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
-            //select w);
-
-
-            _db.SaveChanges();
-
-            return Ok(CustomerFilingMasterWorkflow);
         }
         [HttpPut("CustomerFilingApprove{WorkflowId:Int}")]
-        public IActionResult CustomerFilingApprove(int WorkflowId, string Userid, [FromBody] CustomerFilingMasterDraft CustomerFilingMasterDraft)
+        public IActionResult CustomerFilingApprove(ulong WorkflowId, ulong Userid)
         {
-            CustomerFilingMasterWorkflow CustomerFilingMasterWorkflow = (CustomerFilingMasterWorkflow)
-                                                                        (from w in _db.CustomerFilingMasterWorkflow
-                                                                         where w.WorkflowId == WorkflowId
-                                                                         select w);
-            if (CustomerFilingMasterWorkflow == null)
-            {
-                return BadRequest(ModelState);
-            }
-            CustomerFilingMasterWorkflow.WorkflowStatus = "Rejected";
-            CustomerFilingMasterWorkflow.UpdateDate = DateTime.Now;
-            CustomerFilingMasterWorkflow.UpdateUser = Userid;
-            _db.CustomerFilingMasterWorkflow.Attach(CustomerFilingMasterWorkflow);
-            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
-            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
-            _db.Entry(CustomerFilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
+
+            string StoredProc = "exec CustomerFilingMasterDraftApproveReject " +
+                    "@WorkflowId = " + WorkflowId.ToString() + "," +
+                    "@LoginUserdID = " + Userid.ToString() + "," +
+                    "@ApprovedOrRejected= 'Rejected'";
+
+            //return await _context.output.ToListAsync();
+            _db.Database.ExecuteSqlRaw(StoredProc);
 
 
-            _db.SaveChanges();
+            return Ok();
 
-            return Ok(CustomerFilingMasterWorkflow);
         }
 
         [HttpGet("CustomerFilingMasterWorkflowList")]
@@ -2510,21 +2478,18 @@ namespace TrackNowApi.Controllers
                 return NotFound(ex.Message);
             }
         }
-//===============================================================================================================
+        //===============================================================================================================
 
         [HttpPost("CustomerFilingMasterDraft")]
-        public IActionResult CreateCustomerFilingMasterDraft(CustomerFilingMasterDraft Customer)
+        public IActionResult CreateCustomerFilingMasterDraft(CustomerFilingMasterDraft[] Customer, string @LoggedInUser)
         {
-            try
-            {
-                _db.CustomerFilingMasterDraft.Add(Customer);
-                _db.SaveChanges();
-                return Ok(Customer);
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
-            }
+
+            var opt = new JsonSerializerOptions() { WriteIndented = true };
+            string Customerrecords = JsonSerializer.Serialize<CustomerFilingMasterDraft[]>(Customer, opt);
+
+            var userType = _db.Database.ExecuteSqlRaw("dbo.CustomerFilingMasterDraftUpdate {0},{1}", Customerrecords, @LoggedInUser);
+
+            return Ok();
 
         }
 
