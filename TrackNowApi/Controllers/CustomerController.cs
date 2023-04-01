@@ -156,7 +156,7 @@ namespace TrackNowApi.Controllers
                        join i in _db.BusinessCategoryMaster on cb.BusinessCategoryId equals i.BusinessCategoryId
                        select new
                        {
-                           CustomerId=c.CustomerId, CustomerName=c.CustomerName,
+                           Id = cb.Id, CustomerId=c.CustomerId, CustomerName=c.CustomerName,
                            BusinessCategoryId = i.BusinessCategoryId,
                            BusinessCategoryName = i.BusinessCategoryName,
                            BusinessCategoryDescription = i.BusinessCategoryDescription,
@@ -164,6 +164,17 @@ namespace TrackNowApi.Controllers
                        })); ;
 
         }
+        
+        [HttpDelete("CustomerBusinessCategory{CustomerId:Int}")]
+        public IActionResult CustomerBusinessCategory(int Id)
+        {
+            CustomerBusinessCategory CustomerBusinessCategory;
+
+            CustomerBusinessCategory = _db.CustomerBusinessCategory.Where(d => d.Id == Id).First();
+            _db.CustomerBusinessCategory.Remove(CustomerBusinessCategory);
+            _db.SaveChanges();
+        }
+
         [HttpGet("CustomerBusinessCategoryList{CustomerId:Int}")]
         public IActionResult CustomerBusinessCategoryList(int CustomerId)
         {
@@ -172,7 +183,7 @@ namespace TrackNowApi.Controllers
                        join i in _db.BusinessCategoryMaster on cb.BusinessCategoryId equals i.BusinessCategoryId
                        where c.CustomerId== CustomerId
                        select new
-                       {
+                       {   Id=cb.Id,
                            CustomerId = c.CustomerId,
                            CustomerName = c.CustomerName,
                            BusinessCategoryId = i.BusinessCategoryId,
@@ -343,7 +354,7 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpPut("CustomerFilingReject{WorkflowId:Int}")]
-        public IActionResult CustomerFilingReject(int WorkflowId, string Userid, [FromBody] CustomerFilingMasterDraft CustomerFilingMasterDraft)
+        public IActionResult CustomerFilingReject(int WorkflowId, string Userid)
         {
 
             {
