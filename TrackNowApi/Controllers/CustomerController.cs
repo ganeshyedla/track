@@ -61,7 +61,9 @@ namespace TrackNowApi.Controllers
                            Notes= o.Notes,
                            City= o.City,
                            State= o.State,
-                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerId).Select(u => u.CustomerName).SingleOrDefault(),
+                           ParentCustomer =   (from i in _db.Customer
+                                                where i.CustomerId == o.ParentCustomerId
+                                                select new { i.CustomerId, i.CustomerName }).FirstOrDefault(),
                            JSI_POC = o.JSI_POC,
                            Customer_POC = o.Customer_POC
                         }
@@ -92,7 +94,9 @@ namespace TrackNowApi.Controllers
                            Notes = o.Notes,
                            City = o.City,
                            State = o.State,
-                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerId).Select(u => u.CustomerName).SingleOrDefault(),
+                           ParentCustomer = (from i in _db.Customer
+                                             where i.CustomerId == o.ParentCustomerId
+                                             select new { i.CustomerId, i.CustomerName }).FirstOrDefault(),
                            JSI_POC = o.JSI_POC,
                            Customer_POC = o.Customer_POC
                        }
@@ -130,7 +134,9 @@ namespace TrackNowApi.Controllers
                            Notes = o.Notes,
                            City = o.City,
                            State = o.State,
-                           ParentCustomer = _db.Customer.Where(u => u.CustomerId == o.ParentCustomerId).Select(u => u.CustomerName).SingleOrDefault(),
+                           ParentCustomer = (from i in _db.Customer
+                                             where i.CustomerId == o.ParentCustomerId
+                                             select new { i.CustomerId, i.CustomerName }).FirstOrDefault(),
                            JSI_POC = o.JSI_POC,
                            Customer_POC = o.Customer_POC
                        })); ;
