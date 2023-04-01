@@ -165,7 +165,7 @@ namespace TrackNowApi.Controllers
 
         }
         
-        [HttpDelete("CustomerBusinessCategory{CustomerId:Int}")]
+        [HttpDelete("CustomerBusinessCategory/{Id:Int}")]
         public IActionResult CustomerBusinessCategory(int Id)
         {
             CustomerBusinessCategory CustomerBusinessCategory;
@@ -173,6 +173,7 @@ namespace TrackNowApi.Controllers
             CustomerBusinessCategory = _db.CustomerBusinessCategory.Where(d => d.Id == Id).First();
             _db.CustomerBusinessCategory.Remove(CustomerBusinessCategory);
             _db.SaveChanges();
+            return Ok();
         }
 
         [HttpGet("CustomerBusinessCategoryList{CustomerId:Int}")]
