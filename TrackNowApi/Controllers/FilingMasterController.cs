@@ -531,8 +531,8 @@ namespace TrackNowApi.Controllers
                            RuleInf = o.RuleInfo,
                            Required = o.Required,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
-                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
-                                               where j.FilingId == o.FilingId
+                                               join j in _db.FilingDraftBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.DraftId == o.DraftId
                                                select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Jsidept = o.Jsidept,
                            JsicontactName = o.JsicontactName,
