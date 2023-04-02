@@ -403,8 +403,9 @@ namespace TrackNowApi.Controllers
                        join c in _db.Customer on o.CustomerId equals c.CustomerId
                        join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
                        join f in _db.FilingMaster on o.FilingId equals f.FilingId
-                       join s in _db.Approvers on w.CurrentApproverId equals s.ApproverId
-                       select new
+                       join s in _db.Approvers on w.CurrentApproverId equals s.ApproverId into Appr
+                        from m in Appr.DefaultIfEmpty()
+                      select new
                        {
                            WorkflowId = w.WorkflowId,
                            DraftId = w.DraftId,
@@ -431,7 +432,7 @@ namespace TrackNowApi.Controllers
                            UpdateDate = f.UpdateDate,
                            UpdateUser = f.UpdateUser,
                            ChangesInprogress = f.ChangesInprogress,
-                           ApproverName = s.ApproverName
+                           ApproverName = m.ApproverName,
                        }
                       );
 
@@ -2105,12 +2106,12 @@ namespace TrackNowApi.Controllers
             return new NoContentResult();
         }
 
-        [HttpGet("CustomerFilingMasterWorkflowLists")]
-        public IActionResult CustomerFilingMasterWorkflowLists()
-        {
-            var res = _db.CustomerFilingMasterWorkflow.ToList();
-            return Ok(res);
-        }
+        //[HttpGet("CustomerFilingMasterWorkflowLists")]
+        //public IActionResult CustomerFilingMasterWorkflowLists()
+        //{
+        //    var res = _db.CustomerFilingMasterWorkflow.ToList();
+        //    return Ok(res);
+        //}
 
         [HttpPost("CustomerFilingMasterWorkflowCreate")]
         public IActionResult CustomerFilingMasterWorkflow([FromBody] CustomerFilingMasterWorkflow item)
