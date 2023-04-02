@@ -334,13 +334,14 @@ namespace TrackNowApi.Controllers
         [HttpGet("BusinessBasedFilingMasterList")]
         public IActionResult BusinessBasedFilingMasterList(int CustomerId)
         {
-            return Ok(from
+            return Ok((from
                       c in _db.Customer
                       join cb in _db.CustomerBusinessCategory on c.CustomerId equals cb.CustomerId
                       join b in _db.BusinessCategoryMaster on cb.BusinessCategoryId equals b.BusinessCategoryId
                       join fm in _db.FilingBusinessCategory on b.BusinessCategoryId equals fm.BusinessCategoryId
                       join f in _db.FilingMaster on fm.FilingId equals f.FilingId
-                      where (cb.CustomerId == CustomerId && f.StateInfo==cb.State ) || (cb.CustomerId == CustomerId && cb.State == null)
+                      where cb.CustomerId == CustomerId && 
+                            ((fm.State==cb.State && f.StateInfo==cb.State)|| (cb.State == null && fm.State==null))
 
                       select new
                       {
@@ -357,7 +358,7 @@ namespace TrackNowApi.Controllers
                           JsicontactName = f.JsicontactName,
                           JsiContactEmail = f.JsicontactEmail
 
-                      });
+                      }).Distinct());
 
         }
         [HttpPut("CustomerFilingReject{WorkflowId:Int}")]
