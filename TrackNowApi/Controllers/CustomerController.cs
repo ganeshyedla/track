@@ -313,7 +313,6 @@ namespace TrackNowApi.Controllers
                       join i in _db.CustomerFilingMaster on c.CustomerId equals i.CustomerId
                       join b in _db.FilingMaster on i.FilingId equals b.FilingId
                       where i.CustomerId == (CustomerId == 0 ? i.CustomerId : CustomerId )
-
                       select new
                       {
                           CustomerId = i.CustomerId,
@@ -327,8 +326,12 @@ namespace TrackNowApi.Controllers
                           Required = b.Required,
                           Jsidept = b.Jsidept,
                           JsicontactName = b.JsicontactName,
-                          JsiContactEmail = b.JsicontactEmail
-                      });
+                          JsiContactEmail = b.JsicontactEmail,
+                          BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                             join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                             where j.FilingId == b.FilingId
+                                             select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                                              });
 
         }
         [HttpGet("BusinessBasedFilingMasterList")]
@@ -404,7 +407,8 @@ namespace TrackNowApi.Controllers
                        join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
                        join f in _db.FilingMaster on o.FilingId equals f.FilingId
                        join s in _db.Approvers on w.CurrentApproverId equals s.ApproverId into Appr
-                        from m in Appr.DefaultIfEmpty()
+                            from m in Appr.DefaultIfEmpty()
+                      where w.WorkflowStatus !="Approved" && w.WorkflowStatus != "Rejected"
                       select new
                        {
                            WorkflowId = w.WorkflowId,
@@ -431,7 +435,7 @@ namespace TrackNowApi.Controllers
                            CreateUser = f.CreateUser,
                            UpdateDate = f.UpdateDate,
                            UpdateUser = f.UpdateUser,
-                           ChangesInprogress = f.ChangesInprogress,
+                           WorkflowStatus = w.WorkflowStatus,
                            ApproverName = m.ApproverName,
                        }
                       );

@@ -3,9 +3,11 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
+using System.Linq;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
 using static Azure.Core.HttpHeader;
+using static jwt_auth.Startup;
 
 namespace TrackNowApi.Controllers
 {
@@ -471,14 +473,33 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpDelete("FilingMasterDelete{FilingId:Int}")]
-        public void FilingMasterDelete(int FilingId)
+        public IActionResult FilingMasterDelete(ulong FilingId)
         {
-            FilingMaster FilingMaster;
+            
 
-            FilingMaster = _db.FilingMaster.Where(d => d.FilingId == FilingId).First();
-            _db.FilingMaster.Remove(FilingMaster);
-            _db.SaveChanges();
+            var CustomerFilingDraft = _db.CustomerFilingMasterDraft.Where(d => d.FilingId == FilingId);
+            var CustomerFilingMaster = _db.CustomerFilingMaster.Where(d => d.FilingId == FilingId);
 
+            if (CustomerFilingDraft.ToList().Count==0 && CustomerFilingMaster.ToList().Count == 0)
+            {
+                FilingMaster FilingMaster = _db.FilingMaster.Where(d => d.FilingId == FilingId).FirstOrDefault();
+
+                if (FilingMaster !=null)
+                {
+                    _db.FilingMaster.Remove(FilingMaster);
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    return NotFound("FilingID Not Found");
+                }
+
+            }
+            else
+            {   
+                return NotFound("FilingID Used in CustomerFilingDraft or CustomerFilingMaster");
+            }
+            return Ok();
         }
        
         [HttpPost("CreateDraftFilingMaster")]
@@ -571,7 +592,7 @@ namespace TrackNowApi.Controllers
             return Ok((from o in _db.FilingMasterDraft
                        join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
                        join s in _db.Approvers on c.CurrentApproverId equals s.ApproverId
-                       
+                       where c.WorkflowStatus != "Approved" && c.WorkflowStatus != "Rejected"
                        select new
                        {
                            WorkflowId = c.WorkflowId,
@@ -608,7 +629,7 @@ namespace TrackNowApi.Controllers
             return Ok((from o in _db.FilingMasterDraft
                        join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
                        join s in _db.Approvers on c.CurrentApproverId equals s.ApproverId
-                       where s.ApproverId== UserId && o.ChangesInprogress==true
+                       where s.ApproverId== UserId && c.WorkflowStatus!="Approved" && c.WorkflowStatus != "Rejected"
                        select new
                        {
                            WorkflowId = c.WorkflowId,
