@@ -364,15 +364,15 @@ namespace TrackNowApi.Controllers
                       }).Distinct());
 
         }
-        [HttpPut("CustomerFilingReject{WorkflowId:Int}")]
-        public IActionResult CustomerFilingReject(int WorkflowId, string Userid)
+        [HttpPut("CustomerFilingMasterReject{WorkflowId:Int}")]
+        public IActionResult CustomerFilingMasterReject(int WorkflowId, string Userid)
         {
 
             {
                 string StoredProc = "exec CustomerFilingMasterDraftApproveReject " +
                         "@WorkflowId = " + WorkflowId.ToString() + "," +
                         "@LoginUserdID = " + Userid.ToString() + "," +
-                        "@ApprovedOrRejected= 'Approved'";
+                        "@ApprovedOrRejected= 'Rejected'";
 
                 //return await _context.output.ToListAsync();
                 _db.Database.ExecuteSqlRaw(StoredProc);
@@ -382,14 +382,14 @@ namespace TrackNowApi.Controllers
 
             }
         }
-        [HttpPut("CustomerFilingApprove{WorkflowId:Int}")]
-        public IActionResult CustomerFilingApprove(ulong WorkflowId, ulong Userid)
+        [HttpPut("CustomerFilingMasterApprove{WorkflowId:Int}")]
+        public IActionResult CustomerFilingMasterApprove(ulong WorkflowId, string Userid)
         {
 
             string StoredProc = "exec CustomerFilingMasterDraftApproveReject " +
                     "@WorkflowId = " + WorkflowId.ToString() + "," +
                     "@LoginUserdID = " + Userid.ToString() + "," +
-                    "@ApprovedOrRejected= 'Rejected'";
+                    "@ApprovedOrRejected= 'Approved'";
 
             //return await _context.output.ToListAsync();
             _db.Database.ExecuteSqlRaw(StoredProc);
@@ -473,10 +473,10 @@ namespace TrackNowApi.Controllers
                            JsicontactEmail = f.JsicontactEmail,
                            Juristiction = f.Juristiction,
                            Notes = f.Notes,
-                           CreateDate = f.CreateDate,
-                           CreateUser = f.CreateUser,
-                           UpdateDate = f.UpdateDate,
-                           UpdateUser = f.UpdateUser,
+                           CreateDate = w.CreateDate,
+                           CreateUser = w.CreateUser,
+                           UpdateDate = w.UpdateDate,
+                           UpdateUser =w.UpdateUser,
                            ChangesInprogress = f.ChangesInprogress,
                            ApproverName = s.ApproverName
                        }
@@ -2272,6 +2272,22 @@ namespace TrackNowApi.Controllers
             }
         }
 
+        [HttpGet("CustomerFileTrackingbyCustomerId")]
+        public IActionResult CustomerFileTrackingbyCustomerId(ulong CustomerId)
+        {
+            try
+            {
+
+                var CustomerFileTracking = _db.CustomerFileTracking.Where(F => F.CustomerId == CustomerId).ToList();
+                return Ok(CustomerFileTracking);
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
 
         [HttpGet("CustomerFileTracking")]
         public IActionResult ListCustomerFileTracking()
