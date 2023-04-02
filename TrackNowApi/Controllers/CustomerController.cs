@@ -431,12 +431,13 @@ namespace TrackNowApi.Controllers
                            JsicontactEmail = f.JsicontactEmail,
                            Juristiction = f.Juristiction,
                            Notes = f.Notes,
-                           CreateDate = f.CreateDate,
-                           CreateUser = f.CreateUser,
-                           UpdateDate = f.UpdateDate,
-                           UpdateUser = f.UpdateUser,
+                           CreateDate = w.CreateDate,
+                           CreateUser = w.CreateUser,
+                           UpdateDate = w.UpdateDate,
+                           UpdateUser = w.UpdateUser,
                            WorkflowStatus = w.WorkflowStatus,
-                           ApproverName = m.ApproverName,
+                           ChangesInprogress = f.ChangesInprogress,
+                           ApproverName = m.ApproverName
                        }
                       );
 
