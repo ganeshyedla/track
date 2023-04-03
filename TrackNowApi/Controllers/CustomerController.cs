@@ -238,14 +238,26 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpDelete("CustomerDelete{CustomerId:Int}")]
-        public void CustomerDelete(int CustomerId)
+        public IActionResult CustomerDelete(int CustomerId)
         {
-            Customer Customer;
-
-            Customer = _db.Customer.Where(d => d.CustomerId == CustomerId).First();
-            _db.Customer.Remove(Customer);
-            _db.SaveChanges();
-
+            Customer  TmpCustomer = _db.Customer.Where(d => d.CustomerId == CustomerId).FirstOrDefault();
+            if( TmpCustomer != null) { 
+                Customer ParentCustomer = _db.Customer.Where(d => d.ParentCustomerId == TmpCustomer.CustomerId).FirstOrDefault();
+                if (ParentCustomer == null)
+                {
+                    _db.Customer.Remove(TmpCustomer);
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    return NotFound(" This Parent Customer has Child, Could not delete it");  
+                }
+            }
+            else
+            {
+                return NotFound(" No Customer Found");
+            }
+            return Ok();
         }
 
         [HttpPut("CustomerUpdate{CustomerId:Int}")]

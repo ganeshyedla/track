@@ -347,7 +347,7 @@ namespace TrackNowApi.Controllers
         {
             try
             {
-                var Approvers = _db.Approvers.ToList();
+                var Approvers = _db.Approvers;
                 return Ok(Approvers);
 
             }
