@@ -70,6 +70,7 @@ namespace TrackNowApi.Model
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long UserId { get; set; }
         public string? UserName { get; set; }
+        public string? LoginId { get; set; }
         public DateTime? CreateDate { get; set; }
         public string? CreateUser { get; set; }
         public DateTime? UpdateDate { get; set; }

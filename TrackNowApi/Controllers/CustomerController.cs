@@ -359,10 +359,12 @@ namespace TrackNowApi.Controllers
                           Required = f.Required,
                           Jsidept = f.Jsidept,
                           JsicontactName = f.JsicontactName,
-                          JsiContactEmail = f.JsicontactEmail
-
-                      }).Distinct());
-
+                          JsiContactEmail = f.JsicontactEmail,
+                          BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                              join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                              where j.FilingId == f.FilingId
+                                              select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                        }).Where(x => !_db.CustomerFilingMaster.Any(c => c.FilingId == x.FilingId && c.CustomerId == x.CustomerId)));
         }
         [HttpPut("CustomerFilingMasterReject{WorkflowId:Int}")]
         public IActionResult CustomerFilingMasterReject(int WorkflowId, string Userid)

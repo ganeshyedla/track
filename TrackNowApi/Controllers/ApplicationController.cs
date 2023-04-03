@@ -22,6 +22,7 @@ namespace TrackNowApi.Controllers
         {
             _db = db;
         }
+
         [HttpGet("UserRole")]
         public IActionResult UserRole()
         {
@@ -32,6 +33,7 @@ namespace TrackNowApi.Controllers
                        {
                            UserId = u.UserId,
                            UserName = u.UserName,
+                           LoginId = u.LoginId,
                            RoleId = r.RoleId,
                            RoleName = r.RoleName
                        }
@@ -49,6 +51,7 @@ namespace TrackNowApi.Controllers
                        {
                            UserId = u.UserId,
                            UserName = u.UserName,
+                           LoginId = u.LoginId,
                            RoleId = r.RoleId,
                            RoleName = r.RoleName
                        }
