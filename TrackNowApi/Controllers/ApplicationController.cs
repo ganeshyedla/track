@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.StaticFiles;
+﻿using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
-using System.Net;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
 
@@ -347,7 +343,7 @@ namespace TrackNowApi.Controllers
         {
             try
             {
-                var Approvers = _db.Approvers;
+                var Approvers = _db.Approvers.ToList();
                 return Ok(Approvers);
 
             }

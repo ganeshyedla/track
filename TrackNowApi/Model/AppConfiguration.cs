@@ -19,9 +19,10 @@ namespace TrackNowApi.Model
     }
     public partial class Approvers
     {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long ApproverId { get; set; }
-        public string ApproverName { get; set; }
-        public decimal CustomerId { get; set; }
+        public string? ApproverName { get; set; }
+        public decimal? CustomerId { get; set; }
         public string? Juristiction { get; set; }
         public string? State { get; set; }
         public bool? Isdefault { get; set; }
