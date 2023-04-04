@@ -140,7 +140,7 @@ namespace TrackNowApi.Data
                 .HasKey(t => new { t.ApproverConfigId });
 
             modelBuilder.Entity<Approvers>()
-                .HasKey(t => new { t.ApproverId});
+                .HasKey(t => new { t.Id});
 
             modelBuilder.Entity<CustomerFilingMaster>()
                 .HasKey(t => new { t.CustomerId, t.FilingId });

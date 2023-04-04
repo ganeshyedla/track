@@ -100,11 +100,38 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpDelete("BusinessCategoryMaster{BusinessCategoryId:Int}")]
-        public void DeleteBusinessCategoryMaster(int BusinessCategoryId)
+        public IActionResult DeleteBusinessCategoryMaster(int BusinessCategoryId)
         {
-            BusinessCategoryMaster BusinessCategoryMaster = _db.BusinessCategoryMaster.Where(d => d.BusinessCategoryId == BusinessCategoryId).First();
-            _db.BusinessCategoryMaster.Remove(BusinessCategoryMaster);
-            _db.SaveChanges();
+            BusinessCategoryMaster BusinessCategoryMaster = _db.BusinessCategoryMaster.Where(d => d.BusinessCategoryId == BusinessCategoryId).FirstOrDefault();
+
+            if (BusinessCategoryMaster != null)
+            {
+                var CustomerBusinessCategory = _db.CustomerBusinessCategory.Where(d => d.BusinessCategoryId == BusinessCategoryId).FirstOrDefault();
+                var FilingBusinessCategory = _db.FilingBusinessCategory.Where(d => d.BusinessCategoryId == BusinessCategoryId).FirstOrDefault();
+                var FilingDraftBusinessCategory = (
+                    from d in _db.FilingMasterDraft
+                    join c in _db.FilingDraftBusinessCategory on d.DraftId equals c.DraftId
+                    join f in _db.FilingMaster on d.FilingId equals f.FilingId
+                    where f.ChangesInprogress == true &&  c.BusinessCategoryId == BusinessCategoryId
+                    select d).FirstOrDefault(); 
+                ;
+                var CustomerDraftBusinessCategory = (
+                    from d in _db.CustomerFilingMasterDraft
+                    join c in _db.CustomerDraftBusinessCategory on d.DraftId equals c.DraftId
+                    where d.Status == "Pending" && c.BusinessCategoryId == BusinessCategoryId
+                    select d).FirstOrDefault();
+
+                if (CustomerBusinessCategory==null && FilingBusinessCategory==null && FilingDraftBusinessCategory==null && CustomerDraftBusinessCategory==null)
+                { 
+                    _db.BusinessCategoryMaster.Remove(BusinessCategoryMaster);
+                    _db.SaveChanges();
+                }
+                else
+                {
+                    return NotFound("Business Category Master in used in some table");
+                }
+            }
+            return Ok();
         }
         [HttpPut("BusinessCategoryMasterUpdate{BusinessCategoryId:Int}")]
         public IActionResult BusinessCategoryMasterUpdate(int BusinessCategoryId, [FromBody] BusinessCategoryMaster BusinessCategoryMaster)
