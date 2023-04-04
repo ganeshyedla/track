@@ -430,7 +430,8 @@ namespace TrackNowApi.Controllers
                            CreateUser = o.CreateUser,
                            UpdateDate = o.UpdateDate,
                            UpdateUser = o.UpdateUser,
-                           ChangesInprogress = o.ChangesInprogress
+                           ChangesInprogress = o.ChangesInprogress,
+                           DueDayofFrequency = o.DueDayofFrequency
                        }
                        ));
 

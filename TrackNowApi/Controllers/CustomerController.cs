@@ -328,7 +328,7 @@ namespace TrackNowApi.Controllers
                       select new
                       {
                           CustomerId = i.CustomerId,
-                          customeName=c.CustomerName,
+                          CustomerName = c.CustomerName,
                           FilingId = i.FilingId,
                           FilingDescription = b.FilingDescription,
                           FilingFrequency = b.FilingFrequency,
@@ -357,11 +357,10 @@ namespace TrackNowApi.Controllers
                       join f in _db.FilingMaster on fm.FilingId equals f.FilingId
                       where cb.CustomerId == CustomerId && 
                             ((fm.State==cb.State && f.StateInfo==cb.State)|| (cb.State == null && fm.State==null))
-
                       select new
                       {
                           CustomerId = c.CustomerId,
-                          customeName = c.CustomerName,
+                          CustomerName = c.CustomerName,
                           FilingId = f.FilingId,
                           FilingDescription = f.FilingDescription,
                           FilingFrequency = f.FilingFrequency,
@@ -376,7 +375,10 @@ namespace TrackNowApi.Controllers
                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
                                               where j.FilingId == f.FilingId
                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
-                        }).Where(x => !_db.CustomerFilingMaster.Any(c => c.FilingId == x.FilingId && c.CustomerId == x.CustomerId)));
+                        }).Where(x => !_db.CustomerFilingMaster.Any(c => c.FilingId == x.FilingId && c.CustomerId == x.CustomerId) &&
+                                      !_db.CustomerFilingMasterDraft.Any(c => c.FilingId == x.FilingId && c.CustomerId == x.CustomerId && c.Status == "Pending")   
+                                )
+                        );
         }
         [HttpPut("CustomerFilingMasterReject{WorkflowId:Int}")]
         public IActionResult CustomerFilingMasterReject(int WorkflowId, string Userid)
