@@ -430,7 +430,7 @@ namespace TrackNowApi.Controllers
                            WorkflowId = w.WorkflowId,
                            DraftId = w.DraftId,
                            CustomerId = c.CustomerId,
-                           Customername = c.CustomerName,
+                           CustomerName = c.CustomerName,
                            FilingId = f.FilingId,
                            FilingName = f.FilingName,
                            FilingDescription = f.FilingDescription,
