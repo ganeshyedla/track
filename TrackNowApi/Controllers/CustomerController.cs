@@ -422,7 +422,7 @@ namespace TrackNowApi.Controllers
                        join f in _db.FilingMaster on o.FilingId equals f.FilingId
                        join s in _db.Approvers on w.CurrentApproverId equals s.ApproverId into Appr
                             from m in Appr.DefaultIfEmpty()
-                      where w.WorkflowStatus !="Approved" && w.WorkflowStatus != "Rejected"
+                      where w.WorkflowStatus !="Approved" && w.WorkflowStatus != "Rejected" && w.WorkflowStatus != null
                       select new
                        {
                            WorkflowId = w.WorkflowId,
@@ -464,7 +464,7 @@ namespace TrackNowApi.Controllers
                        join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
                        join f in _db.FilingMaster on o.FilingId equals f.FilingId
                        join s in _db.Approvers on w.CurrentApproverId equals s.ApproverId
-                       where s.ApproverId == UserId
+                       where s.ApproverId == UserId && w.WorkflowStatus != "Approved" && w.WorkflowStatus != "Rejected" && w.WorkflowStatus != null
                        select new
                        {
                            WorkflowId= w.WorkflowId,

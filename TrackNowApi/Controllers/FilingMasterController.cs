@@ -143,7 +143,7 @@ namespace TrackNowApi.Controllers
 
        
         [HttpGet("FilingDraftBusinessCategoryGetById1/{DraftId:int}")]
-        public ActionResult<FilingMasterHistory> FilingDraftBusinessCategoryGetById(int DraftId)
+        public ActionResult  FilingDraftBusinessCategoryGetById(int DraftId)
         {
             var res = _db.FilingDraftBusinessCategory.FirstOrDefault(p => p.DraftId== DraftId);
 
@@ -153,7 +153,7 @@ namespace TrackNowApi.Controllers
         }
 
         [HttpGet("FilingDraftBusinessCategoryGetById/{id:int}")]
-        public ActionResult<FilingMasterHistory> FilingDraftBusinessCategoryGetById1(int id)
+        public ActionResult  FilingDraftBusinessCategoryGetById1(int id)
         {
             var res = _db.FilingDraftBusinessCategory.FirstOrDefault(p => p.Id == id);
 
@@ -275,10 +275,7 @@ namespace TrackNowApi.Controllers
             FilingMasterDraft FilingMasterDraft = (from f in _db.FilingMasterDraft
                                                    where f.DraftId == DraftId
                                                    select f).FirstOrDefault();
-
-            var BusinessCategoryInfo =  (from f in _db.FilingDraftBusinessCategory
-                                                                       where f.DraftId == DraftId
-                                                                        select f).ToList();
+            
             FilingMasterWorkflow.WorkflowStatus = "Approved";
             FilingMasterWorkflow.UpdateDate = DateTime.Now;
             FilingMasterWorkflow.UpdateUser = Userid.ToString();
@@ -286,73 +283,92 @@ namespace TrackNowApi.Controllers
             _db.Entry(FilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
             _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
             _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
+
             decimal FilingId=0;
+
             if (FilingMasterDraft != null)
             {
-
-                var rowsToUpdate = _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
-                if (rowsToUpdate != null)
-                {
-                    rowsToUpdate.FilingName = FilingMasterDraft.FilingName;
-                    rowsToUpdate.FilingDescription = FilingMasterDraft.FilingDescription;
-                    rowsToUpdate.FilingFrequency = FilingMasterDraft.FilingFrequency;
-                    rowsToUpdate.StateInfo = FilingMasterDraft.StateInfo;
-                    rowsToUpdate.Required = FilingMasterDraft.Required;
-                    rowsToUpdate.Jsidept = FilingMasterDraft.Jsidept;
-                    rowsToUpdate.JsicontactName = FilingMasterDraft.JsicontactName;
-                    rowsToUpdate.JsicontactEmail = FilingMasterDraft.JsicontactEmail;
-                    rowsToUpdate.UpdateDate = FilingMasterDraft.UpdateDate;
-                    rowsToUpdate.UpdateUser = FilingMasterDraft.UpdateUser;
-                    rowsToUpdate.Juristiction = FilingMasterDraft.Juristiction;
-                    rowsToUpdate.Notes = FilingMasterDraft.Notes;
-                    rowsToUpdate.ChangesInprogress = false;
-                }
-                else
-                {
-                FilingMaster FilingMasterData = new FilingMaster
-                {
-                    FilingName = FilingMasterDraft.FilingName,
-                    FilingDescription = FilingMasterDraft.FilingDescription,
-                    FilingFrequency = FilingMasterDraft.FilingFrequency,
-                    StateInfo = FilingMasterDraft.StateInfo,
-                    Required = FilingMasterDraft.Required,
-                    Jsidept = FilingMasterDraft.Jsidept,
-                    JsicontactName = FilingMasterDraft.JsicontactName,
-                    JsicontactEmail = FilingMasterDraft.JsicontactEmail,
-                    UpdateDate = FilingMasterDraft.UpdateDate,
-                    UpdateUser = FilingMasterDraft.UpdateUser,
-                    Juristiction = FilingMasterDraft.Juristiction,
-                    Notes = FilingMasterDraft.Notes,
-                    ChangesInprogress = false
-                };
-                 //_db.InsertOnSubmit(FilingMasterData);
-                    //_db.SubmitChanges();
-                _db.FilingMaster.Add(FilingMasterData);
-                    //FilingId = FilingMasterData.FilingId;
-                _db.SaveChanges();
-
-                }
-                FilingMasterDraft.ChangesInprogress = false;
-                FilingMasterDraft.UpdateDate = DateTime.Now; ;
-                FilingMasterDraft.UpdateUser = Userid.ToString();
-                _db.Entry(FilingMasterDraft).Property(x => x.ChangesInprogress).IsModified = true;
-                _db.Entry(FilingMasterDraft).Property(x => x.UpdateDate).IsModified = true;
-                _db.Entry(FilingMasterDraft).Property(x => x.UpdateUser).IsModified = true;
-            }
-            
-            if (BusinessCategoryInfo != null)   
-            {
                 
-                foreach (FilingDraftBusinessCategory Bc in BusinessCategoryInfo)
+                var DraftBusinessCategoryInfo = (from f in _db.FilingDraftBusinessCategory
+                                                 where f.DraftId == DraftId
+                                                 select f).ToList();
+
+                var FilingBusinessCategoryInfo = (from f in _db.FilingMasterDraft
+                                                  join o in _db.FilingBusinessCategory on f.FilingId equals o.FilingId
+                                                  where f.DraftId == DraftId
+                                                  select o);
+
+                if (FilingMasterDraft.BusinessOperation.Contains("Edit"))
                 {
-                    _db.FilingBusinessCategory.Add(new FilingBusinessCategory { 
-                                FilingId= _db.FilingMaster.Max(u => (decimal?)u.FilingId), 
-                                BusinessCategoryId= Bc.BusinessCategoryId,
-                                State= Bc.State
-                    } );
+                    var rowsToUpdate = _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
+                    if (rowsToUpdate != null)
+                    {
+                        rowsToUpdate.FilingName = FilingMasterDraft.FilingName;
+                        rowsToUpdate.FilingDescription = FilingMasterDraft.FilingDescription;
+                        rowsToUpdate.FilingFrequency = FilingMasterDraft.FilingFrequency;
+                        rowsToUpdate.StateInfo = FilingMasterDraft.StateInfo;
+                        rowsToUpdate.RuleInfo = FilingMasterDraft.RuleInfo;
+                        rowsToUpdate.Required = FilingMasterDraft.Required;
+                        rowsToUpdate.Jsidept = FilingMasterDraft.Jsidept;
+                        rowsToUpdate.JsicontactName = FilingMasterDraft.JsicontactName;
+                        rowsToUpdate.JsicontactEmail = FilingMasterDraft.JsicontactEmail;
+                        rowsToUpdate.UpdateDate = FilingMasterDraft.UpdateDate;
+                        rowsToUpdate.UpdateUser = FilingMasterDraft.UpdateUser;
+                        rowsToUpdate.Juristiction = FilingMasterDraft.Juristiction;
+                        rowsToUpdate.Notes = FilingMasterDraft.Notes;
+                        rowsToUpdate.ChangesInprogress = false;
+                        rowsToUpdate.DueDayofFrequency = FilingMasterDraft.DueDayofFrequency;
+                        _db.FilingMaster.Update(rowsToUpdate);
+                    }
                 }
-             }
-        
+                else if (FilingMasterDraft.BusinessOperation.Contains("Add"))
+                {
+                    FilingMaster FilingMasterData = new FilingMaster
+                    {
+                        FilingName = FilingMasterDraft.FilingName,
+                        FilingDescription = FilingMasterDraft.FilingDescription,
+                        FilingFrequency = FilingMasterDraft.FilingFrequency,
+                        StateInfo = FilingMasterDraft.StateInfo,
+                        Required = FilingMasterDraft.Required,
+                        Jsidept = FilingMasterDraft.Jsidept,
+                        JsicontactName = FilingMasterDraft.JsicontactName,
+                        JsicontactEmail = FilingMasterDraft.JsicontactEmail,
+                        UpdateDate = FilingMasterDraft.UpdateDate,
+                        UpdateUser = FilingMasterDraft.UpdateUser,
+                        Juristiction = FilingMasterDraft.Juristiction,
+                        Notes = FilingMasterDraft.Notes,
+                        ChangesInprogress = false
+                    };
+                    _db.FilingMaster.Add(FilingMasterData);
+                }
+                else if (FilingMasterDraft.BusinessOperation.Contains("Delete"))
+                {
+                    var rowsToDelete = _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
+                    if (rowsToDelete != null)
+                    {
+                        _db.FilingMaster.Remove(rowsToDelete);
+                    }
+                    foreach (FilingBusinessCategory Bc in FilingBusinessCategoryInfo)
+                    {
+                        _db.FilingBusinessCategory.Remove((FilingBusinessCategory)Bc);
+                    }
+                }
+
+                foreach (FilingBusinessCategory Bc in FilingBusinessCategoryInfo)
+                {
+                    _db.FilingBusinessCategory.Remove((FilingBusinessCategory)Bc);
+                }
+
+                if (FilingMasterDraft.BusinessOperation.Contains("Add") || FilingMasterDraft.BusinessOperation.Contains("Edit"))
+                {
+                    foreach (FilingBusinessCategory Bc in FilingBusinessCategoryInfo)
+                    {
+                        _db.FilingBusinessCategory.Remove((FilingBusinessCategory)Bc);
+                    }
+                }
+
+            }
+
             _db.SaveChanges();
             return Ok();
         }
@@ -384,8 +400,6 @@ namespace TrackNowApi.Controllers
             var rowsToUpdate = _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
             if (rowsToUpdate != null)
                 rowsToUpdate.ChangesInprogress = false;
-            if(FilingMasterDraft !=null)
-                FilingMasterDraft.ChangesInprogress = false;
             
             _db.SaveChanges();
             return Ok();
@@ -587,7 +601,7 @@ namespace TrackNowApi.Controllers
             return Ok((from o in _db.FilingMasterDraft
                        join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
                        join s in _db.Approvers on c.CurrentApproverId equals s.ApproverId
-                       where c.WorkflowStatus != "Approved" && c.WorkflowStatus != "Rejected"
+                       where c.WorkflowStatus != "Approved" && c.WorkflowStatus != "Rejected" && c.WorkflowStatus !=null
                        select new
                        {
                            WorkflowId = c.WorkflowId,
@@ -624,7 +638,7 @@ namespace TrackNowApi.Controllers
             return Ok((from o in _db.FilingMasterDraft
                        join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
                        join s in _db.Approvers on c.CurrentApproverId equals s.ApproverId
-                       where s.ApproverId== UserId && c.WorkflowStatus!="Approved" && c.WorkflowStatus != "Rejected"
+                       where s.ApproverId== UserId && c.WorkflowStatus!="Approved" && c.WorkflowStatus != "Rejected" && c.WorkflowStatus != null
                        select new
                        {
                            WorkflowId = c.WorkflowId,

@@ -26,5 +26,7 @@ namespace TrackNowApi.Model
         public string? Juristiction { get; set; }
         public string? Notes { get; set; }
         public bool? ChangesInprogress { get; set; }
+		public decimal? DueDayofFrequency { get; set; }
+		public string? BusinessOperation { get; set; }
     }
 }

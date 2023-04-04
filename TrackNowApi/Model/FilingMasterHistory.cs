@@ -28,5 +28,6 @@ namespace TrackNowApi.Model
         public bool? ChangesInprogress { get; set; }
         public string? Dboperation { get; set; }
         public string? Source { get; set; }
+        public decimal? DueDayofFrequency { get; set; }
     }
 }
