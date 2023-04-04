@@ -576,6 +576,7 @@ namespace TrackNowApi.Controllers
                                                       join c in _db.ApproverConfiguration on a.ApproverGroupId equals c.ApproverGroupId
                                                       join f in _db.FilingMasterDraft on a.State equals f.StateInfo
                                                       where c.FilingType != null && c.FilingType.Equals("MasterFiling") && a.Isdefault == true
+                                                            && a.Juristiction=="State"
                                                       select a.ApproverId).FirstOrDefault();
             }
             else
@@ -583,6 +584,7 @@ namespace TrackNowApi.Controllers
                 FilingMasterWorkflow.CurrentApproverId = (from a in _db.Approvers
                                                           join c in _db.ApproverConfiguration on a.ApproverGroupId equals c.ApproverGroupId
                                                           where c.FilingType != null && c.FilingType.Equals("MasterFiling") && a.Isdefault == true
+                                                                && a.Juristiction == "Federal"
                                                           select a.ApproverId).FirstOrDefault();
             }
 
