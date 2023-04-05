@@ -333,12 +333,14 @@ namespace TrackNowApi.Controllers
                     _db.Add(Bc);
                 }
                 _db.SaveChanges();
-                return Ok(Approver);
+                
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                if (ex.Message.Contains("UK_Approvers"))
+                    return NotFound("Duplicate approvers found");
             }
+            return Ok(Approver);
         }
 
         [HttpGet("ViewApprovers/{ApproverId:int}")]

@@ -568,6 +568,8 @@ namespace TrackNowApi.Controllers
             FilingMasterDraft FilingMasterDraft = _db.FilingMasterDraft
                                         .Where(d => d.DraftId == FilingMasterWorkflow.DraftId).First();
 
+            FilingMasterWorkflow.WorkflowStatus = "Pending";
+
             string Juristiction = FilingMasterDraft.Juristiction == null ? "State" : "Federal";
 
             if (Juristiction.Contains("State"))

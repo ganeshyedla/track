@@ -356,7 +356,7 @@ namespace TrackNowApi.Controllers
                       join fm in _db.FilingBusinessCategory on b.BusinessCategoryId equals fm.BusinessCategoryId
                       join f in _db.FilingMaster on fm.FilingId equals f.FilingId
                       where cb.CustomerId == CustomerId && 
-                            ((fm.State==cb.State && f.StateInfo==cb.State)|| (cb.State == null && fm.State==null))
+                            ((f.StateInfo==cb.State)|| (cb.State == null && f.Juristiction== "Federal"))
                       select new
                       {
                           CustomerId = c.CustomerId,
