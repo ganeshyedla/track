@@ -632,7 +632,8 @@ namespace TrackNowApi.Controllers
                            UpdateDate = o.UpdateDate,
                            UpdateUser = o.UpdateUser,
                            ChangesInprogress = o.ChangesInprogress,
-                           ApproverName = s.UserName
+                           ApproverName = s.UserName,
+                           BusinessOperation = o.BusinessOperation
                        }
                       ));
 
@@ -669,7 +670,8 @@ namespace TrackNowApi.Controllers
                            UpdateDate = o.UpdateDate,
                            UpdateUser = o.UpdateUser,
                            ChangesInprogress = o.ChangesInprogress,
-                           ApproverName = s.ApproverName
+                           ApproverName = s.ApproverName,
+                           BusinessOperation = o.BusinessOperation
                        }
                        ));
 

@@ -453,7 +453,8 @@ namespace TrackNowApi.Controllers
                            UpdateUser = w.UpdateUser,
                            WorkflowStatus = w.WorkflowStatus,
                            ChangesInprogress = f.ChangesInprogress,
-                           ApproverName = m.UserName
+                           ApproverName = m.UserName,
+                           BusinessOperation = o.BusinessOperation
                       }
                       );
 
@@ -494,7 +495,8 @@ namespace TrackNowApi.Controllers
                            UpdateDate = w.UpdateDate,
                            UpdateUser =w.UpdateUser,
                            ChangesInprogress = f.ChangesInprogress,
-                           ApproverName = s.UserName
+                           ApproverName = s.UserName,                           ,
+                           BusinessOperation = o.BusinessOperation
                        }
                       ));
         }
