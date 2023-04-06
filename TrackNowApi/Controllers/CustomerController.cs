@@ -453,7 +453,7 @@ namespace TrackNowApi.Controllers
                            UpdateUser = w.UpdateUser,
                            WorkflowStatus = w.WorkflowStatus,
                            ChangesInprogress = f.ChangesInprogress,
-                           ApproverName = s.UserName
+                           ApproverName = m.UserName
                       }
                       );
 
