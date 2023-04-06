@@ -200,7 +200,44 @@ namespace TrackNowApi.Controllers
                        })); ;
 
         }
+        [HttpGet("CustomerFederalBusinessCategoryList{CustomerId:Int}")]
+        public IActionResult CustomerFederalBusinessCategoryList(int CustomerId)
+        {
+            return Ok((from c in _db.Customer
+                       join cb in _db.CustomerBusinessCategory on c.CustomerId equals cb.CustomerId
+                       join i in _db.BusinessCategoryMaster on cb.BusinessCategoryId equals i.BusinessCategoryId
+                       where c.CustomerId == CustomerId && cb.State == null
+                       select new
+                       {
+                           Id = cb.Id,
+                           CustomerId = c.CustomerId,
+                           CustomerName = c.CustomerName,
+                           BusinessCategoryId = i.BusinessCategoryId,
+                           BusinessCategoryName = i.BusinessCategoryName,
+                           BusinessCategoryDescription = i.BusinessCategoryDescription,
+                           State = cb.State
+                       })); ;
 
+        }
+        [HttpGet("CustomerStateBusinessCategoryList{CustomerId:Int}")]
+        public IActionResult CustomerStateBusinessCategoryList(int CustomerId)
+        {
+            return Ok((from c in _db.Customer
+                       join cb in _db.CustomerBusinessCategory on c.CustomerId equals cb.CustomerId
+                       join i in _db.BusinessCategoryMaster on cb.BusinessCategoryId equals i.BusinessCategoryId
+                       where c.CustomerId == CustomerId && cb.State != null
+                       select new
+                       {
+                           Id = cb.Id,
+                           CustomerId = c.CustomerId,
+                           CustomerName = c.CustomerName,
+                           BusinessCategoryId = i.BusinessCategoryId,
+                           BusinessCategoryName = i.BusinessCategoryName,
+                           BusinessCategoryDescription = i.BusinessCategoryDescription,
+                           State = cb.State
+                       })); ;
+
+        }
         [HttpGet("CustomerfulltextSearch")]
         public IActionResult CustomerfulltextSearch(string? Textsearch)
         {
