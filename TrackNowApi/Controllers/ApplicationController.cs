@@ -337,7 +337,7 @@ namespace TrackNowApi.Controllers
             }
             catch (Exception ex)
             {
-                if (ex.Message.Contains("UK_Approvers"))
+                if (ex.InnerException.Message.Contains("UK_Approvers"))
                     return NotFound("Duplicate approvers found");
             }
             return Ok(Approver);

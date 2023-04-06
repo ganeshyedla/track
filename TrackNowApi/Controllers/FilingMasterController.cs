@@ -298,7 +298,7 @@ namespace TrackNowApi.Controllers
                                                   where f.DraftId == DraftId
                                                   select o);
 
-                if (FilingMasterDraft.BusinessOperation.Contains("Edit"))
+                if (FilingMasterDraft.BusinessOperation.Contains("edit"))
                 {
                     var rowsToUpdate = _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
                     if (rowsToUpdate != null)
@@ -321,7 +321,7 @@ namespace TrackNowApi.Controllers
                         _db.FilingMaster.Update(rowsToUpdate);
                     }
                 }
-                else if (FilingMasterDraft.BusinessOperation.Contains("Add"))
+                else if (FilingMasterDraft.BusinessOperation.Contains("add"))
                 {
                     FilingMaster FilingMasterData = new FilingMaster
                     {
@@ -341,7 +341,7 @@ namespace TrackNowApi.Controllers
                     };
                     _db.FilingMaster.Add(FilingMasterData);
                 }
-                else if (FilingMasterDraft.BusinessOperation.Contains("Delete"))
+                else if (FilingMasterDraft.BusinessOperation.Contains("delete"))
                 {
                     var rowsToDelete = _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
                     if (rowsToDelete != null)
@@ -359,7 +359,7 @@ namespace TrackNowApi.Controllers
                     _db.FilingBusinessCategory.Remove((FilingBusinessCategory)Bc);
                 }
 
-                if (FilingMasterDraft.BusinessOperation.Contains("Add") || FilingMasterDraft.BusinessOperation.Contains("Edit"))
+                if (FilingMasterDraft.BusinessOperation.Contains("add") || FilingMasterDraft.BusinessOperation.Contains("edit"))
                 {
                     foreach (FilingBusinessCategory Bc in FilingBusinessCategoryInfo)
                     {
@@ -605,7 +605,7 @@ namespace TrackNowApi.Controllers
         {
             return Ok((from o in _db.FilingMasterDraft
                        join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
-                       join s in _db.Approvers on c.CurrentApproverId equals s.ApproverId
+                       join s in _db.Users on c.CurrentApproverId equals s.UserId
                        where c.WorkflowStatus != "Approved" && c.WorkflowStatus != "Rejected" && c.WorkflowStatus !=null
                        select new
                        {
@@ -632,7 +632,7 @@ namespace TrackNowApi.Controllers
                            UpdateDate = o.UpdateDate,
                            UpdateUser = o.UpdateUser,
                            ChangesInprogress = o.ChangesInprogress,
-                           ApproverName = s.ApproverName
+                           ApproverName = s.UserName
                        }
                       ));
 

@@ -422,7 +422,7 @@ namespace TrackNowApi.Controllers
                        join c in _db.Customer on o.CustomerId equals c.CustomerId
                        join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
                        join f in _db.FilingMaster on o.FilingId equals f.FilingId
-                       join s in _db.Approvers on w.CurrentApproverId equals s.ApproverId into Appr
+                       join s in _db.Users on w.CurrentApproverId equals s.UserId into Appr
                             from m in Appr.DefaultIfEmpty()
                       where w.WorkflowStatus !="Approved" && w.WorkflowStatus != "Rejected" && w.WorkflowStatus != null
                       select new
@@ -453,8 +453,8 @@ namespace TrackNowApi.Controllers
                            UpdateUser = w.UpdateUser,
                            WorkflowStatus = w.WorkflowStatus,
                            ChangesInprogress = f.ChangesInprogress,
-                           ApproverName = m.ApproverName
-                       }
+                           ApproverName = s.UserName
+                      }
                       );
 
         }
@@ -465,8 +465,8 @@ namespace TrackNowApi.Controllers
                        join c in _db.Customer on o.CustomerId equals c.CustomerId
                        join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
                        join f in _db.FilingMaster on o.FilingId equals f.FilingId
-                       join s in _db.Approvers on w.CurrentApproverId equals s.ApproverId
-                       where s.ApproverId == UserId && w.WorkflowStatus != "Approved" && w.WorkflowStatus != "Rejected" && w.WorkflowStatus != null
+                       join s in _db.Users on w.CurrentApproverId equals s.UserId
+                       where s.UserId == UserId && w.WorkflowStatus != "Approved" && w.WorkflowStatus != "Rejected" && w.WorkflowStatus != null
                        select new
                        {
                            WorkflowId= w.WorkflowId,
@@ -494,7 +494,7 @@ namespace TrackNowApi.Controllers
                            UpdateDate = w.UpdateDate,
                            UpdateUser =w.UpdateUser,
                            ChangesInprogress = f.ChangesInprogress,
-                           ApproverName = s.ApproverName
+                           ApproverName = s.UserName
                        }
                       ));
         }
