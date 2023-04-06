@@ -372,14 +372,33 @@ namespace TrackNowApi.Controllers
         {
             try
             {
-                var Approvers = _db.Approvers.ToList();
-                return Ok(Approvers);
+            //    var Approvers = _db.Approvers.ToList();
+            //    return Ok(Approvers);
+                
+                return Ok( from a in _db.Approvers 
+                        join c in _db.Customer on a.CustomerId equals c.CustomerId
+                        select new
+                        {
+                            ApproverId = a.ApproverId,
+                            CustomerId = a.CustomerId,
+                            State       = a.State,
+                            ApproverGroupId = a.ApproverGroupId,
+                            Isdefault   = a.Isdefault,
+                            ApproverName   = a.ApproverName,
+                            Juristiction   = a.Juristiction,
+                            CreateDate  = a.CreateDate,
+                            CreateUser = a.CreateUser,
+                            UpdateDate = a.UpdateDate,
+                            UpdateUser = a.UpdateUser,
+                            CustomerName = c.CustomerName
+                        } );
 
             }
             catch (Exception ex)
             {
                 return NotFound(ex.Message);
             }
+
         }
         [HttpDelete("DeleteApprovers/{ApproverId:int}")]
         public IActionResult DeleteApprovers(int ApproverId)
