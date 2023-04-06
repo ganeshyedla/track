@@ -361,9 +361,15 @@ namespace TrackNowApi.Controllers
 
                 if (FilingMasterDraft.BusinessOperation.Contains("add") || FilingMasterDraft.BusinessOperation.Contains("edit"))
                 {
-                    foreach (FilingBusinessCategory Bc in FilingBusinessCategoryInfo)
+                    foreach (FilingDraftBusinessCategory Bc in DraftBusinessCategoryInfo)
                     {
-                        _db.FilingBusinessCategory.Remove((FilingBusinessCategory)Bc);
+
+                        _db.FilingBusinessCategory.Add(new FilingBusinessCategory
+                        {
+                            FilingId = _db.FilingMaster.Max(u => (decimal?)u.FilingId),
+                            BusinessCategoryId = Bc.BusinessCategoryId,
+                            State = Bc.State
+                        });
                     }
                 }
 
@@ -431,7 +437,15 @@ namespace TrackNowApi.Controllers
                            UpdateDate = o.UpdateDate,
                            UpdateUser = o.UpdateUser,
                            ChangesInprogress = o.ChangesInprogress,
-                           DueDayofFrequency = o.DueDayofFrequency
+                           DueDayofFrequency = o.DueDayofFrequency,
+                           WhoMustFileInState = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.FilingId == o.FilingId && j.State !=null
+                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                           WhoMustFileInFederal = (from i in _db.BusinessCategoryMaster
+                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                               where j.FilingId == o.FilingId && j.State == null
+                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                        }
                        ));
 
@@ -463,7 +477,15 @@ namespace TrackNowApi.Controllers
                            CreateUser = o.CreateUser,
                            UpdateDate = o.UpdateDate,
                            UpdateUser = o.UpdateUser,
-                           ChangesInprogress = o.ChangesInprogress
+                           ChangesInprogress = o.ChangesInprogress,
+                           WhoMustFileInState = (from i in _db.BusinessCategoryMaster
+                                                 join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                                 where j.FilingId == o.FilingId && j.State != null
+                                                 select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                           WhoMustFileInFederal = (from i in _db.BusinessCategoryMaster
+                                                   join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                                   where j.FilingId == o.FilingId && j.State == null
+                                                   select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                        }
                        ));
 
