@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Net;
 
 namespace TrackNowApi.Model
 {
@@ -28,6 +27,7 @@ namespace TrackNowApi.Model
         public string? State { get; set; }
         public bool? Isdefault { get; set; }
         public long ApproverGroupId { get; set; }
+        public string? FilingType { get; set; }
         public DateTime? CreateDate { get; set; }
         public string? CreateUser { get; set; }
         public DateTime? UpdateDate { get; set; }
@@ -77,5 +77,15 @@ namespace TrackNowApi.Model
         public string? CreateUser { get; set; }
         public DateTime? UpdateDate { get; set; }
         public string? UpdateUser { get; set; }
+    }
+    public partial class AppStatusInfo
+    {
+        public HttpStatusCode HttpStatus { get; set; }
+        public long HttpStatusCode { get; set; }
+        public string HttpErrorMessage { get; set; }
+        public string AppStatus { get; set; }
+        public long AppStatusCode { get; set; }
+        public string AppStatusMessage { get; set; }
+
     }
 }
