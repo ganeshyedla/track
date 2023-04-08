@@ -393,7 +393,7 @@ namespace TrackNowApi.Controllers
                       join fm in _db.FilingBusinessCategory on b.BusinessCategoryId equals fm.BusinessCategoryId
                       join f in _db.FilingMaster on fm.FilingId equals f.FilingId
                       where cb.CustomerId == CustomerId && 
-                            ((f.StateInfo==cb.State)|| (cb.State == null && f.Juristiction== "Federal"))
+                            ((f.StateInfo==cb.State && f.Juristiction == "State") || (cb.State == null && f.Juristiction== "Federal"))
                       select new
                       {
                           CustomerId = c.CustomerId,
@@ -461,7 +461,7 @@ namespace TrackNowApi.Controllers
                        join f in _db.FilingMaster on o.FilingId equals f.FilingId
                        join s in _db.Users on w.CurrentApproverId equals s.UserId into Appr
                             from m in Appr.DefaultIfEmpty()
-                      where w.WorkflowStatus !="Approved" && w.WorkflowStatus != "Rejected" && w.WorkflowStatus != null
+                      where w.WorkflowStatus =="Pending"
                       select new
                        {
                            WorkflowId = w.WorkflowId,
@@ -504,7 +504,7 @@ namespace TrackNowApi.Controllers
                        join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
                        join f in _db.FilingMaster on o.FilingId equals f.FilingId
                        join s in _db.Users on w.CurrentApproverId equals s.UserId
-                       where s.UserId == UserId && w.WorkflowStatus != "Approved" && w.WorkflowStatus != "Rejected" && w.WorkflowStatus != null
+                       where s.UserId == UserId && w.WorkflowStatus != "Pending"
                        select new
                        {
                            WorkflowId= w.WorkflowId,
@@ -531,6 +531,7 @@ namespace TrackNowApi.Controllers
                            CreateUser = w.CreateUser,
                            UpdateDate = w.UpdateDate,
                            UpdateUser =w.UpdateUser,
+                           WorkflowStatus = w.WorkflowStatus,
                            ChangesInprogress = f.ChangesInprogress,
                            ApproverName = s.UserName,
                            BusinessOperation = o.BusinessOperation
@@ -2583,7 +2584,7 @@ namespace TrackNowApi.Controllers
             var opt = new JsonSerializerOptions() { WriteIndented = true };
             string Customerrecords = JsonSerializer.Serialize<CustomerFilingMasterDraft[]>(Customer, opt);
 
-            var userType = _db.Database.ExecuteSqlRaw("dbo.CustomerFilingMasterDraftUpdate {0},{1}", Customerrecords, @LoggedInUser);
+            var userType = _db.Database.ExecuteSqlRaw("dbo.CustomerFilingMasterDraftUpdate {0}", Customerrecords);
 
             return Ok();
 

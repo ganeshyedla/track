@@ -267,15 +267,16 @@ namespace TrackNowApi.Controllers
             FilingMasterWorkflow FilingMasterWorkflow =  (from w in _db.FilingMasterWorkflow
                                                           where w.WorkflowId == WorkflowId
                                                           select w).FirstOrDefault();
-            if (FilingMasterWorkflow == null)
-            {
-                return BadRequest(ModelState);
-            }
 
             FilingMasterDraft FilingMasterDraft = (from f in _db.FilingMasterDraft
                                                    where f.DraftId == DraftId
                                                    select f).FirstOrDefault();
-            
+
+            if (FilingMasterWorkflow == null || FilingMasterDraft == null)
+            {
+                return BadRequest(ModelState);
+            }
+
             FilingMasterWorkflow.WorkflowStatus = "Approved";
             FilingMasterWorkflow.UpdateDate = DateTime.Now;
             FilingMasterWorkflow.UpdateUser = Userid.ToString();
@@ -284,8 +285,16 @@ namespace TrackNowApi.Controllers
             _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
             _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
 
-            decimal FilingId=0;
+            FilingMasterDraft.ChangesInprogress = false;
+            FilingMasterDraft.UpdateDate = DateTime.Now;
+            FilingMasterDraft.UpdateUser = Userid.ToString();
+            _db.FilingMasterDraft.Attach(FilingMasterDraft);
+            _db.Entry(FilingMasterDraft).Property(x => x.ChangesInprogress).IsModified = true;
+            _db.Entry(FilingMasterDraft).Property(x => x.UpdateDate).IsModified = true;
+            _db.Entry(FilingMasterDraft).Property(x => x.UpdateUser).IsModified = true;
 
+
+            decimal FilingId = 0;
             if (FilingMasterDraft != null)
             {
                 
@@ -297,6 +306,12 @@ namespace TrackNowApi.Controllers
                                                   join o in _db.FilingBusinessCategory on f.FilingId equals o.FilingId
                                                   where f.DraftId == DraftId
                                                   select o);
+
+                foreach (FilingBusinessCategory Bc in FilingBusinessCategoryInfo)
+                {
+                    _db.FilingBusinessCategory.Remove((FilingBusinessCategory)Bc);
+                }
+
 
                 if (FilingMasterDraft.BusinessOperation.Contains("edit"))
                 {
@@ -319,7 +334,10 @@ namespace TrackNowApi.Controllers
                         rowsToUpdate.ChangesInprogress = false;
                         rowsToUpdate.DueDayofFrequency = FilingMasterDraft.DueDayofFrequency;
                         _db.FilingMaster.Update(rowsToUpdate);
+                        FilingId = (decimal) FilingMasterDraft.FilingId;
                     }
+                    
+                    
                 }
                 else if (FilingMasterDraft.BusinessOperation.Contains("add"))
                 {
@@ -340,6 +358,9 @@ namespace TrackNowApi.Controllers
                         ChangesInprogress = false
                     };
                     _db.FilingMaster.Add(FilingMasterData);
+                    _db.SaveChanges();
+                    FilingId = _db.FilingMaster.Max(u => (decimal)u.FilingId);
+
                 }
                 else if (FilingMasterDraft.BusinessOperation.Contains("delete"))
                 {
@@ -348,28 +369,20 @@ namespace TrackNowApi.Controllers
                     {
                         _db.FilingMaster.Remove(rowsToDelete);
                     }
-                    foreach (FilingBusinessCategory Bc in FilingBusinessCategoryInfo)
-                    {
-                        _db.FilingBusinessCategory.Remove((FilingBusinessCategory)Bc);
-                    }
                 }
-
-                foreach (FilingBusinessCategory Bc in FilingBusinessCategoryInfo)
-                {
-                    _db.FilingBusinessCategory.Remove((FilingBusinessCategory)Bc);
-                }
+                
 
                 if (FilingMasterDraft.BusinessOperation.Contains("add") || FilingMasterDraft.BusinessOperation.Contains("edit"))
                 {
                     foreach (FilingDraftBusinessCategory Bc in DraftBusinessCategoryInfo)
                     {
-
                         _db.FilingBusinessCategory.Add(new FilingBusinessCategory
                         {
-                            FilingId = _db.FilingMaster.Max(u => (decimal?)u.FilingId),
+                            FilingId = FilingId,
                             BusinessCategoryId = Bc.BusinessCategoryId,
                             State = Bc.State
                         });
+                        
                     }
                 }
 
@@ -402,6 +415,15 @@ namespace TrackNowApi.Controllers
             _db.Entry(FilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
             _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
             _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
+
+
+            FilingMasterDraft.ChangesInprogress = false;
+            FilingMasterDraft.UpdateDate = DateTime.Now;
+            FilingMasterDraft.UpdateUser = Userid.ToString();
+            _db.FilingMasterDraft.Attach(FilingMasterDraft);
+            _db.Entry(FilingMasterDraft).Property(x => x.ChangesInprogress).IsModified = true;
+            _db.Entry(FilingMasterDraft).Property(x => x.UpdateDate).IsModified = true;
+            _db.Entry(FilingMasterDraft).Property(x => x.UpdateUser).IsModified = true;
 
             var rowsToUpdate = _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
             if (rowsToUpdate != null)
@@ -437,15 +459,7 @@ namespace TrackNowApi.Controllers
                            UpdateDate = o.UpdateDate,
                            UpdateUser = o.UpdateUser,
                            ChangesInprogress = o.ChangesInprogress,
-                           DueDayofFrequency = o.DueDayofFrequency,
-                           WhoMustFileInState = (from i in _db.BusinessCategoryMaster
-                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
-                                               where j.FilingId == o.FilingId && j.State !=null
-                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
-                           WhoMustFileInFederal = (from i in _db.BusinessCategoryMaster
-                                               join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
-                                               where j.FilingId == o.FilingId && j.State == null
-                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                           DueDayofFrequency = o.DueDayofFrequency
                        }
                        ));
 
@@ -478,14 +492,7 @@ namespace TrackNowApi.Controllers
                            UpdateDate = o.UpdateDate,
                            UpdateUser = o.UpdateUser,
                            ChangesInprogress = o.ChangesInprogress,
-                           WhoMustFileInState = (from i in _db.BusinessCategoryMaster
-                                                 join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
-                                                 where j.FilingId == o.FilingId && j.State != null
-                                                 select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
-                           WhoMustFileInFederal = (from i in _db.BusinessCategoryMaster
-                                                   join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
-                                                   where j.FilingId == o.FilingId && j.State == null
-                                                   select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                           DueDayofFrequency = o.DueDayofFrequency
                        }
                        ));
 
@@ -599,16 +606,14 @@ namespace TrackNowApi.Controllers
                 FilingMasterWorkflow.CurrentApproverId = (from a in _db.Approvers
                                                       join c in _db.ApproverConfiguration on a.ApproverGroupId equals c.ApproverGroupId
                                                       join f in _db.FilingMasterDraft on a.State equals f.StateInfo
-                                                      where c.FilingType != null && c.FilingType.Equals("MasterFiling") && a.Isdefault == true
-                                                            && a.Juristiction=="State"
+                                                      where a.FilingType.Equals("MasterFiling") && a.Isdefault == true && a.Juristiction=="State"
                                                       select a.ApproverId).FirstOrDefault();
             }
-            else
+            else if (Juristiction.Contains("Federal"))
             {
                 FilingMasterWorkflow.CurrentApproverId = (from a in _db.Approvers
                                                           join c in _db.ApproverConfiguration on a.ApproverGroupId equals c.ApproverGroupId
-                                                          where c.FilingType != null && c.FilingType.Equals("MasterFiling") && a.Isdefault == true
-                                                                && a.Juristiction == "Federal"
+                                                          where a.FilingType.Equals("MasterFiling") && a.Isdefault == true && a.Juristiction == "Federal"
                                                           select a.ApproverId).FirstOrDefault();
             }
 
@@ -628,7 +633,7 @@ namespace TrackNowApi.Controllers
             return Ok((from o in _db.FilingMasterDraft
                        join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
                        join s in _db.Users on c.CurrentApproverId equals s.UserId
-                       where c.WorkflowStatus != "Approved" && c.WorkflowStatus != "Rejected" && c.WorkflowStatus !=null
+                       where c.WorkflowStatus == "Pending"
                        select new
                        {
                            WorkflowId = c.WorkflowId,
@@ -653,6 +658,7 @@ namespace TrackNowApi.Controllers
                            CreateUser = o.CreateUser,
                            UpdateDate = o.UpdateDate,
                            UpdateUser = o.UpdateUser,
+                           WorkflowStatus = c.WorkflowStatus,
                            ChangesInprogress = o.ChangesInprogress,
                            ApproverName = s.UserName,
                            BusinessOperation = o.BusinessOperation
@@ -666,7 +672,7 @@ namespace TrackNowApi.Controllers
             return Ok((from o in _db.FilingMasterDraft
                        join c in _db.FilingMasterWorkflow on o.DraftId equals c.DraftId
                        join s in _db.Approvers on c.CurrentApproverId equals s.ApproverId
-                       where s.ApproverId== UserId && c.WorkflowStatus!="Approved" && c.WorkflowStatus != "Rejected" && c.WorkflowStatus != null
+                       where s.ApproverId== UserId && c.WorkflowStatus!= "Pending"
                        select new
                        {
                            WorkflowId = c.WorkflowId,
@@ -691,6 +697,7 @@ namespace TrackNowApi.Controllers
                            CreateUser = o.CreateUser,
                            UpdateDate = o.UpdateDate,
                            UpdateUser = o.UpdateUser,
+                           WorkflowStatus = c.WorkflowStatus,
                            ChangesInprogress = o.ChangesInprogress,
                            ApproverName = s.ApproverName,
                            BusinessOperation = o.BusinessOperation

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
+using System.Net;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
 
@@ -100,38 +101,54 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpDelete("BusinessCategoryMaster{BusinessCategoryId:Int}")]
-        public IActionResult DeleteBusinessCategoryMaster(int BusinessCategoryId)
+        public AppStatusInfo DeleteBusinessCategoryMaster(int BusinessCategoryId)
         {
-            BusinessCategoryMaster BusinessCategoryMaster = _db.BusinessCategoryMaster.Where(d => d.BusinessCategoryId == BusinessCategoryId).FirstOrDefault();
+            AppStatusInfo AppErr = new AppStatusInfo();
 
-            if (BusinessCategoryMaster != null)
-            {
-                var CustomerBusinessCategory = _db.CustomerBusinessCategory.Where(d => d.BusinessCategoryId == BusinessCategoryId).FirstOrDefault();
-                var FilingBusinessCategory = _db.FilingBusinessCategory.Where(d => d.BusinessCategoryId == BusinessCategoryId).FirstOrDefault();
-                var FilingDraftBusinessCategory = (
-                    from d in _db.FilingMasterDraft
-                    join c in _db.FilingDraftBusinessCategory on d.DraftId equals c.DraftId
-                    join f in _db.FilingMaster on d.FilingId equals f.FilingId
-                    where f.ChangesInprogress == true &&  c.BusinessCategoryId == BusinessCategoryId
-                    select d).FirstOrDefault(); 
-                ;
-                var CustomerDraftBusinessCategory = (
-                    from d in _db.CustomerFilingMasterDraft
-                    join c in _db.CustomerDraftBusinessCategory on d.DraftId equals c.DraftId
-                    where d.Status == "Pending" && c.BusinessCategoryId == BusinessCategoryId
-                    select d).FirstOrDefault();
+            try { 
+                BusinessCategoryMaster BusinessCategoryMaster = _db.BusinessCategoryMaster.Where(d => d.BusinessCategoryId == BusinessCategoryId).FirstOrDefault();
 
-                if (CustomerBusinessCategory==null && FilingBusinessCategory==null && FilingDraftBusinessCategory==null && CustomerDraftBusinessCategory==null)
-                { 
-                    _db.BusinessCategoryMaster.Remove(BusinessCategoryMaster);
-                    _db.SaveChanges();
+                if (BusinessCategoryMaster != null)
+                {
+                    var CustomerBusinessCategory = _db.CustomerBusinessCategory.Where(d => d.BusinessCategoryId == BusinessCategoryId).FirstOrDefault();
+                    var FilingBusinessCategory = _db.FilingBusinessCategory.Where(d => d.BusinessCategoryId == BusinessCategoryId).FirstOrDefault();
+                    var FilingDraftBusinessCategory = (
+                        from d in _db.FilingMasterDraft
+                        join c in _db.FilingDraftBusinessCategory on d.DraftId equals c.DraftId
+                        join f in _db.FilingMaster on d.FilingId equals f.FilingId
+                        where f.ChangesInprogress == true &&  c.BusinessCategoryId == BusinessCategoryId
+                        select d).FirstOrDefault(); 
+                    ;
+                    var CustomerDraftBusinessCategory = (
+                        from d in _db.CustomerFilingMasterDraft
+                        join c in _db.CustomerDraftBusinessCategory on d.DraftId equals c.DraftId
+                        where d.Status == "Pending" && c.BusinessCategoryId == BusinessCategoryId
+                        select d).FirstOrDefault();
+
+                    if (CustomerBusinessCategory==null && FilingBusinessCategory==null && FilingDraftBusinessCategory==null && CustomerDraftBusinessCategory==null)
+                    { 
+                        _db.BusinessCategoryMaster.Remove(BusinessCategoryMaster);
+                        _db.SaveChanges();
+                        AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Success", AppStatusCode = 0, AppStatusMessage = "Success" };
+
+                    }
+                    else
+                    {
+                         AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK,AppStatus = "Failure", AppStatusCode = 1, AppStatusMessage = "Business Category Master in used in some table" };
+                    }
                 }
                 else
                 {
-                    return NotFound("Business Category Master in used in some table");
+                    AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Failure", AppStatusCode = 1, AppStatusMessage = "Business Category Master Not found" };
                 }
             }
-            return Ok();
+            catch(Exception ex)
+            {
+                 AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Failure", AppStatusCode = 1, AppStatusMessage = ex.InnerException.Message };
+
+            }
+            return (AppErr);
+
         }
         [HttpPut("BusinessCategoryMasterUpdate{BusinessCategoryId:Int}")]
         public IActionResult BusinessCategoryMasterUpdate(int BusinessCategoryId, [FromBody] BusinessCategoryMaster BusinessCategoryMaster)
@@ -324,8 +341,10 @@ namespace TrackNowApi.Controllers
         //=============================================================================================================
 
         [HttpPost("CreateApprovers")]
-        public IActionResult CreateApprovers(Approvers []Approver)
+        public AppStatusInfo CreateApprovers(Approvers []Approver)
         {
+            AppStatusInfo AppErr = new AppStatusInfo();
+
             try
             {
                 foreach (Approvers Bc in Approver)
@@ -333,14 +352,16 @@ namespace TrackNowApi.Controllers
                     _db.Add(Bc);
                 }
                 _db.SaveChanges();
-                
+                AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Success", AppStatusCode = 0, AppStatusMessage = "Success" };
             }
             catch (Exception ex)
             {
                 if (ex.InnerException.Message.Contains("UK_Approvers"))
-                    return NotFound("Duplicate approvers found");
+                    AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Failure", AppStatusCode = 1, AppStatusMessage = "Business Category Master in used in some table" };
+                else 
+                    AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Failure", AppStatusCode = 1, AppStatusMessage = ex.InnerException.Message };
             }
-            return Ok(Approver);
+            return (AppErr);
         }
 
         [HttpGet("ViewApprovers/{ApproverId:int}")]
@@ -376,8 +397,9 @@ namespace TrackNowApi.Controllers
             //    return Ok(Approvers);
                 
                 return Ok( from a in _db.Approvers 
-                        join c in _db.Customer on a.CustomerId equals c.CustomerId
-                        select new
+                        join c in _db.Customer on a.CustomerId equals c.CustomerId into Cus
+                           from m in Cus.DefaultIfEmpty()
+                           select new
                         {
                             ApproverId = a.ApproverId,
                             CustomerId = a.CustomerId,
@@ -390,7 +412,8 @@ namespace TrackNowApi.Controllers
                             CreateUser = a.CreateUser,
                             UpdateDate = a.UpdateDate,
                             UpdateUser = a.UpdateUser,
-                            CustomerName = c.CustomerName
+                            CustomerName = m.CustomerName,
+                            FilingType = a.FilingType
                         } );
 
             }
