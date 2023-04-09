@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Data;
 using System.Text.Json;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
-using System.Data;
 
 
 namespace TrackNowApi.Controllers
@@ -2333,10 +2333,33 @@ namespace TrackNowApi.Controllers
         {
             try
             {
-
-                var CustomerFileTracking = _db.CustomerFileTracking.Where(F => F.CustomerId == CustomerId).ToList();
-                return Ok(CustomerFileTracking);
-
+                return Ok(
+                from c in _db.CustomerFileTracking
+                join f in _db.FilingMaster on c.FilingId equals f.FilingId
+                join o in _db.Customer on c.CustomerId equals o.CustomerId
+                where o.CustomerId == CustomerId
+                select new
+                {
+                    CustomerId = c.CustomerId,
+                    FilingId = c.FilingId,
+                    DueDate = c.DueDate,
+                    Status = c.Status,
+                    CreateDate = c.CreateDate,
+                    CreateUser = c.CreateUser,
+                    UpdateDate = c.UpdateDate,
+                    UpdateUser = c.UpdateUser,
+                    CustomerName = o.CustomerName,
+                    FilingName = f.FilingName,
+                    FilingDescription = f.FilingDescription,
+                    FilingFrequency = f.FilingFrequency,
+                    FilingJuristiction = f.Juristiction,
+                    FilingStateInfo = f.StateInfo,
+                    FilingRuleInfo = f.RuleInfo,
+                    Jsidept = f.Jsidept,
+                    JsicontactName = f.JsicontactName,
+                    JsicontactEmail = f.JsicontactEmail
+                }
+                );
 
             }
             catch (Exception ex)
@@ -2350,10 +2373,31 @@ namespace TrackNowApi.Controllers
         {
             try
             {
-
-                var CustomerFileTracking = _db.CustomerFileTracking.ToList();
-                return Ok(CustomerFileTracking);
-
+                return Ok(
+                from c in _db.CustomerFileTracking
+                join f in _db.FilingMaster on c.FilingId equals f.FilingId
+                join o in _db.Customer on c.CustomerId equals o.CustomerId
+                select new {
+                    CustomerId = c.CustomerId,
+                    FilingId = c.FilingId,
+                    DueDate = c.DueDate,
+                    Status = c.Status,
+                    CreateDate = c.CreateDate,
+                    CreateUser = c.CreateUser,
+                    UpdateDate = c.UpdateDate,
+                    UpdateUser = c.UpdateUser,
+                    CustomerName = o.CustomerName,
+                    FilingName = f.FilingName,
+                    FilingDescription =f.FilingDescription,
+                    FilingFrequency = f.FilingFrequency,
+                    FilingJuristiction = f.Juristiction,
+                    FilingStateInfo =  f.StateInfo,
+                    FilingRuleInfo = f.RuleInfo,
+                    Jsidept = f.Jsidept,
+                    JsicontactName = f.JsicontactName,
+                    JsicontactEmail = f.JsicontactEmail
+                }
+                );
 
             }
             catch (Exception ex)
