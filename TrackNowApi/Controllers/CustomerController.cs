@@ -1,10 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.AzureAD.UI.Internal;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using System.Data;
 using System.Text.Json;
+using System.Web.Helpers;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
-
 
 namespace TrackNowApi.Controllers
 {
@@ -558,11 +560,21 @@ namespace TrackNowApi.Controllers
             return Ok(CustomerFilingComments);
         }
         [HttpGet("CustomerFilingWorkflowNotificationsList")]
-        public IActionResult CustomerFilingWorkflowNotificationsList()
+        public APIStatus CustomerFilingWorkflowNotificationsList()
         {
-            var CustomerFilingWorkflowNotifications = _db.CustomerFilingWorkflowNotifications.ToList();
-            return Ok(CustomerFilingWorkflowNotifications);
-            //    return await _db.CustomerFilingWorkflowNotifications.ToListAsync();
+            try { 
+                var CustomerFilingWorkflowNotifications = _db.CustomerFilingWorkflowNotifications.ToList();
+                return new APIStatus
+                {
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(CustomerFilingWorkflowNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
+            }
+            catch(Exception ex)
+            {
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
         }
         [HttpPost("CreateCustomerFilingDraftComments")]
         public IActionResult CreateCustomerFilingDraftComments([FromBody] CustomerFilingDraftComments CustomerFilingDraftComments)
@@ -592,17 +604,24 @@ namespace TrackNowApi.Controllers
             return Ok(CustomerFilingWorkflowComments);
         }
 [       HttpPost("CustomerFilingWorkflowNotifications/Create")]
-        public IActionResult Create([FromBody] CustomerFilingWorkflowNotifications item)
+        public APIStatus Create([FromBody] CustomerFilingWorkflowNotifications item)
         {
-            if (item == null)
-            {
-                return BadRequest();
+            try { 
+                _db.CustomerFilingWorkflowNotifications.Add(item);
+                _db.SaveChanges();
+                return new APIStatus
+                {
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(
+                        _db.CustomerFilingWorkflowNotifications.Where(u=>u.NotificationId== _db.CustomerFilingWorkflowNotifications.Max(x=>x.NotificationId)), 
+                        new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
             }
-
-            _db.CustomerFilingWorkflowNotifications.Add(item);
-            _db.SaveChanges();
-            return Ok(item);
-
+            catch ( Exception ex)
+            {
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
         }
 
         [HttpDelete("CustomerCommentsDelete{CommentsId:Int}")]
@@ -635,42 +654,6 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
 
         }
-        //[HttpGet("getbyid/{WorkflowId:int}")]
-        //public ActionResult<CustomerFilingWorkflowNotifications> GetById(int WorkflowId)
-        //{
-        //    var res = _db.CustomerFilingWorkflowNotifications.FirstOrDefault(p => p.WorkflowId == WorkflowId);
-
-
-        //    if (res != null)
-        //    {
-        //        return Ok(res);
-        //    }
-        //    else
-        //    {
-        //        return NotFound();
-        //    }
-
-           
-        //}
-
-
-        //[HttpPut("{WorkflowId}")]
-        //public IActionResult Update(int WorkflowId, CustomerFilingWorkflowNotifications updatedCustomer)
-        //{
-        //    var customer = _db.CustomerFilingWorkflowNotifications.FirstOrDefault(p => p.WorkflowId == WorkflowId);
-
-        //    if (customer == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    customer.EmailFrom = updatedCustomer.EmailFrom;
-           
-
-        //    _db.SaveChanges();
-
-        //    return Ok();
-        //}
 
         [HttpDelete("CustomerFilingTrackingCommentsDelete{CommentId:Int}")]
         public void CustomerFilingTrackingCommentsDelete(int CommentsId)
@@ -692,19 +675,6 @@ namespace TrackNowApi.Controllers
             _db.SaveChanges();
 
         }
-		//[HttpDelete("(delete/{WorkflowId:int}")]
-  //      public IActionResult Delete(int WorkflowId)
-  //      {
-  //          var res = _db.CustomerFilingWorkflowNotifications.FirstOrDefault(t => t.WorkflowId == WorkflowId);
-  //          if (res == null)
-  //          {
-  //              return NotFound();
-  //          }
-
-  //          _db.CustomerFilingWorkflowNotifications.Remove(res);
-  //          _db.SaveChanges();
-  //          return new NoContentResult();
-  //      }
         
         [HttpGet("CustomerCommentsbyId{CommentsId:Int}")]
         public IActionResult CustomerCommentsbyId(int CommentsId)
@@ -1754,11 +1724,10 @@ namespace TrackNowApi.Controllers
         }
 //=====================================================================================================================
         [HttpDelete("DeleteCustomerFilingTrackingNotification/{NotificationId:decimal}")]
-        public IActionResult DeleteCustomerFilingTrackingNotification(decimal NotificationId)
+        public APIStatus DeleteCustomerFilingTrackingNotification(decimal NotificationId)
         {
             try
             {
-                //using (var Customer = new Model.TrackNowContext())
                 {
                     var CustomerFilingTrackingNotification = _db.CustomerFilingTrackingNotifications
                                                 .FirstOrDefault(n => n.NotificationId == NotificationId);
@@ -1767,146 +1736,139 @@ namespace TrackNowApi.Controllers
                     {
                         _db.CustomerFilingTrackingNotifications.Remove(CustomerFilingTrackingNotification);
                         _db.SaveChanges();
-                        return Ok();
+                        return new APIStatus {Status = "Success"};
                     }
                     else
                     {
-                        return NotFound();
+                        return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found"};
                     }
                 }
             }
             catch (Exception ex)
             {
-
-                // return StatusCode(StatusCodes.Status500InternalServerError);
-
-                return NotFound(ex.Message);
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
 
         [HttpPost("CreateCustomerFilingTrackingNotifications")]
-        public IActionResult CreateCustomerFilingTrackingNotifications(CustomerFilingTrackingNotifications notification)
+        public APIStatus CreateCustomerFilingTrackingNotifications(CustomerFilingTrackingNotifications notification)
         {
             try
             {
-                // using (var Customer = new Models.TrackNowContext())
+                _db.CustomerFilingTrackingNotifications.Add(notification);
+                _db.SaveChanges();
+                return new APIStatus
                 {
-                    _db.CustomerFilingTrackingNotifications.Add(notification);
-                    int i = _db.SaveChanges();
-                    //return CreatedAtRoute("GetNotification", new { WorkflowId = notification.WorkflowId }, notification);
-                    return Ok("number of row effected is " + i);
-                }
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(
+                    _db.CustomerFilingTrackingNotifications.Where(u => u.NotificationId == _db.CustomerFilingTrackingNotifications.Max(x => x.NotificationId)),
+                    new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
             }
             catch (Exception ex)
             {
-
-                // return StatusCode(StatusCodes.Status500InternalServerError);
-                //Console.WriteLine(ex.Message);
-                //return null;
-                return NotFound(ex.Message);
-
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                
             }
         }
 
 
         [HttpGet("ViewCustomerFilingTrackingNotification/{NotificationId:decimal}")]
-        public IActionResult ViewCustomerFilingTrackingNotification(decimal NotificationId)
+        public APIStatus ViewCustomerFilingTrackingNotification(decimal NotificationId)
         {
             try
             {
-                //using (var Customer = new Models.TrackNowContext())
+                var CustomerFilingTrackingNotification = _db.CustomerFilingTrackingNotifications
+                                                        .FirstOrDefault(n => n.NotificationId == NotificationId);
+
+                if (CustomerFilingTrackingNotification != null)
                 {
-                    var CustomerFilingTrackingNotification = _db.CustomerFilingTrackingNotifications
-                                                            .FirstOrDefault(n => n.NotificationId == NotificationId);
-
-                    //var CustomerFilingTrackingNotification = from t in Customer.CustomerFilingTrackingNotifications
-                    //                                         where t.NotificationId == NotificationId
-                    //                                         select t;
-
-                    if (CustomerFilingTrackingNotification != null)
+                    return new APIStatus
                     {
-                        return Ok(CustomerFilingTrackingNotification);
-                    }
-                    else
-                    {
-                        return NotFound();
-                    }
+                        Status = "Success",
+                        Data = JsonSerializer.Serialize(CustomerFilingTrackingNotification, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    };
+                }
+                else
+                {
+                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
                 }
             }
             catch (Exception ex)
             {
-                // Handle any exceptions that occurred during the view operation
-                // return StatusCode(StatusCodes.Status500InternalServerError);
-                return NotFound(ex.Message);
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
 
 
         [HttpGet("ListCustomerFilingTrackingNotifications")]
-        public IActionResult ListCustomerFilingTrackingNotifications()
+        public APIStatus ListCustomerFilingTrackingNotifications()
         {
             try
             {
-                //using (var Customer = new Models.TrackNowContext())
+                var CustomerFilingTrackingNotifications = _db.CustomerFilingTrackingNotifications.ToList();
+                return new APIStatus
                 {
-                    var CustomerFilingTrackingNotifications = _db.CustomerFilingTrackingNotifications.ToList();
-                    return Ok(CustomerFilingTrackingNotifications);
-                }
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(CustomerFilingTrackingNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
+
             }
             catch (Exception ex)
             {
-                // Handle any exceptions that occurred during the list operation
-                //return StatusCode(StatusCodes.Status500InternalServerError);
-                return NotFound(ex.Message);
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpPut("UpdateCustomerFilingTrackingNotification/{NotificationId:decimal}")]
-        public IActionResult UpdateCustomerFilingTrackingNotification(decimal NotificationId, [FromBody] CustomerFilingTrackingNotifications customerFilingTrackingNotification)
+        public APIStatus UpdateCustomerFilingTrackingNotification(decimal NotificationId, [FromBody] CustomerFilingTrackingNotifications customerFilingTrackingNotification)
         {
             try
             {
-                //  using (var Customer = new Models.TrackNowContext())
+                var existingNotification = _db.CustomerFilingTrackingNotifications.
+                                        FirstOrDefault(n => n.NotificationId == NotificationId);
+
+                if (existingNotification != null)
+
                 {
-                    var existingNotification = _db.CustomerFilingTrackingNotifications.
-                                          FirstOrDefault(n => n.NotificationId == NotificationId);
+                    existingNotification.FileTrackingId = customerFilingTrackingNotification.FileTrackingId;
+                    existingNotification.NotificationFrom = customerFilingTrackingNotification.NotificationFrom;
+                    existingNotification.NotificationTo = customerFilingTrackingNotification.NotificationTo;
+                    existingNotification.NotificationCC = customerFilingTrackingNotification.NotificationCC;
+                    existingNotification.NotificationSubject = customerFilingTrackingNotification.NotificationSubject;
+                    existingNotification.NotificationType = customerFilingTrackingNotification.NotificationType;
+                    existingNotification.NotificationText = customerFilingTrackingNotification.NotificationText;
+                    existingNotification.InformationRead = customerFilingTrackingNotification.InformationRead;
+                    existingNotification.InformationDeleted = customerFilingTrackingNotification.InformationDeleted;
+                    existingNotification.CreateDate = customerFilingTrackingNotification.CreateDate;
+                    existingNotification.CreateUser = customerFilingTrackingNotification.CreateUser;
 
-                    if (existingNotification != null)
-
+                    _db.SaveChanges();
+                    return new APIStatus
                     {
-                        existingNotification.WorkflowId = customerFilingTrackingNotification.WorkflowId;
-                        existingNotification.EmailFrom = customerFilingTrackingNotification.EmailFrom;
-                        existingNotification.EmailTo = customerFilingTrackingNotification.EmailTo;
-                        existingNotification.EmailCc = customerFilingTrackingNotification.EmailCc;
-                        existingNotification.EmailSubject = customerFilingTrackingNotification.EmailSubject;
-                        existingNotification.NotificationType = customerFilingTrackingNotification.NotificationType;
-                        existingNotification.NotificationText = customerFilingTrackingNotification.NotificationText;
-                        existingNotification.InformationRead = customerFilingTrackingNotification.InformationRead;
-                        existingNotification.InformationDeleted = customerFilingTrackingNotification.InformationDeleted;
-                        existingNotification.CreateDate = customerFilingTrackingNotification.CreateDate;
-                        existingNotification.CreateUser = customerFilingTrackingNotification.CreateUser;
+                        Status = "Success",
+                        Data = JsonSerializer.Serialize(
+                   _db.CustomerFilingTrackingNotifications.Where(u => u.NotificationId == existingNotification.NotificationId),
+                   new JsonSerializerOptions
+                   { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    };
 
+                }
+                else
+                {
+                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
 
-
-                        _db.SaveChanges();
-                        return Ok(existingNotification);
-                    }
-                    else
-                    {
-                        return NotFound();
-                    }
                 }
             }
             catch (Exception ex)
             {
-                // Handle any exceptions that occurred during the update operation
-                // return StatusCode(StatusCodes.Status500InternalServerError);
-                return NotFound(ex.Message);
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
-
-
         }
  //=====================================================================================================
 

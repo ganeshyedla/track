@@ -219,7 +219,7 @@ namespace TrackNowApi.Data
               .HasKey(t => new { t.FileTrackingId });
 
             modelBuilder.Entity<CustomerFilingTrackingNotifications>()
-              .HasKey(t => new { t.WorkflowId });
+              .HasKey(t => new { t.FileTrackingId });
 
             modelBuilder.Entity<CustomerFileTracking>()
              .HasKey(t => new { t.FileTrackingId });

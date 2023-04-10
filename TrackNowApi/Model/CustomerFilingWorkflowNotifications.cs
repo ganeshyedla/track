@@ -2,22 +2,26 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace TrackNowApi.Model
 {
     public partial class CustomerFilingWorkflowNotifications
     {
         public decimal? WorkflowId { get; set; }
-        public string? EmailFrom { get; set; }
-        public string? EmailTo { get; set; }
-        public string? EmailCc { get; set; }
-        public string? EmailSubject { get; set; }
+        public string NotificationFrom { get; set; }
+        public string NotificationTo { get; set; }
+        public string NotificationCC { get; set; }
+        public string NotificationSubject { get; set; }
         public string? NotificationType { get; set; }
         public string? NotificationText { get; set; }
         public bool? InformationRead { get; set; }
         public bool? InformationDeleted { get; set; }
         public DateTime? CreateDate { get; set; }
         public string? CreateUser { get; set; }
+        [ConcurrencyCheck]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public decimal NotificationId { get; set; }
     }
 }

@@ -86,6 +86,21 @@ namespace TrackNowApi.Model
         public string AppStatus { get; set; }
         public long AppStatusCode { get; set; }
         public string AppStatusMessage { get; set; }
-
+        public string AppData { get; set; }
     }
+    public partial class APIStatus
+    {
+        public string   Status { get; set; }
+        public long     ErrorCode { get; set; }
+        public string   ErrorMessage { get; set; }
+        public string   Data { get; set; }
+    }
+    public class MailRequest
+    {
+        public string ToEmail { get; set; }
+        public string Subject { get; set; }
+        public string Body { get; set; }
+        public List<IFormFile> Attachments { get; set; }
+    }
+   
 }

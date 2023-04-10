@@ -10,10 +10,10 @@ namespace TrackNowApi.Model
     {
        
         public decimal WorkflowId { get; set; }
-        public string EmailFrom { get; set; }
-        public string EmailTo { get; set; }
-        public string EmailCc { get; set; }
-        public string EmailSubject { get; set; }
+        public string NotificationFrom { get; set; }
+        public string NotificationTo { get; set; }
+        public string NotificationCC { get; set; }
+        public string NotificationSubject { get; set; }
         public string NotificationType { get; set; }
         public string NotificationText { get; set; }
         public bool? InformationRead { get; set; }
