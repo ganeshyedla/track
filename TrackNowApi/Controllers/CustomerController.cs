@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Authentication.AzureAD.UI.Internal;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 using System.Data;
 using System.Text.Json;
-using System.Web.Helpers;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
 
