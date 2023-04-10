@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
-using System.Net;
+using System.Text.Json;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
 
@@ -101,10 +101,8 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpDelete("BusinessCategoryMaster{BusinessCategoryId:Int}")]
-        public AppStatusInfo DeleteBusinessCategoryMaster(int BusinessCategoryId)
+        public APIStatus DeleteBusinessCategoryMaster(int BusinessCategoryId)
         {
-            AppStatusInfo AppErr = new AppStatusInfo();
-
             try { 
                 BusinessCategoryMaster BusinessCategoryMaster = _db.BusinessCategoryMaster.Where(d => d.BusinessCategoryId == BusinessCategoryId).FirstOrDefault();
 
@@ -129,26 +127,22 @@ namespace TrackNowApi.Controllers
                     { 
                         _db.BusinessCategoryMaster.Remove(BusinessCategoryMaster);
                         _db.SaveChanges();
-                        AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Success", AppStatusCode = 0, AppStatusMessage = "Success" };
-
+                        return new APIStatus { Status = "Success" };
                     }
                     else
                     {
-                         AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK,AppStatus = "Failure", AppStatusCode = 1, AppStatusMessage = "Business Category Master in used in some table" };
+                        return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Business Category Master in used in some table" };
                     }
                 }
                 else
                 {
-                    AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Failure", AppStatusCode = 1, AppStatusMessage = "Business Category Master Not found" };
+                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Business Category Master Not found" };
                 }
             }
             catch(Exception ex)
             {
-                 AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Failure", AppStatusCode = 1, AppStatusMessage = ex.InnerException.Message };
-
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
-            return (AppErr);
-
         }
         [HttpPut("BusinessCategoryMasterUpdate{BusinessCategoryId:Int}")]
         public IActionResult BusinessCategoryMasterUpdate(int BusinessCategoryId, [FromBody] BusinessCategoryMaster BusinessCategoryMaster)
@@ -341,27 +335,33 @@ namespace TrackNowApi.Controllers
         //=============================================================================================================
 
         [HttpPost("CreateApprovers")]
-        public AppStatusInfo CreateApprovers(Approvers []Approver)
+        public APIStatus CreateApprovers(Approvers []Approver)
         {
-            AppStatusInfo AppErr = new AppStatusInfo();
-
+            
             try
             {
+                long MaxId = _db.Approvers.Max(u => u.Id);
                 foreach (Approvers Bc in Approver)
                 {
                     _db.Add(Bc);
                 }
                 _db.SaveChanges();
-                AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Success", AppStatusCode = 0, AppStatusMessage = "Success" };
+                return new APIStatus
+                {
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(
+                   _db.Approvers.Where(u => u.Id > MaxId),
+                   new JsonSerializerOptions
+                   { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
             }
             catch (Exception ex)
             {
                 if (ex.InnerException.Message.Contains("UK_Approvers"))
-                    AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Failure", AppStatusCode = 1, AppStatusMessage = "Business Category Master in used in some table" };
-                else 
-                    AppErr = new AppStatusInfo { HttpStatus = HttpStatusCode.OK, AppStatus = "Failure", AppStatusCode = 1, AppStatusMessage = ex.InnerException.Message };
+                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Appovers already available" };
+                else
+                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
-            return (AppErr);
         }
 
         [HttpGet("ViewApprovers/{ApproverId:int}")]

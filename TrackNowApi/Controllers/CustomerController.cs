@@ -713,6 +713,7 @@ namespace TrackNowApi.Controllers
                        }));
 
         }
+
         [HttpGet("CustomerFilingDraftCommentsbyId{CommentsId:Int}")]
         public IActionResult CustomerFilingDraftCommentsbyId(int CommentsId)
         {
@@ -954,6 +955,37 @@ namespace TrackNowApi.Controllers
                            UpdateUser = o.UpdateUser
                        }));
 
+        }
+        [HttpGet("CustomerFilingCommentsByCustomerIdFilingId{FilingId:Int}")]
+        public APIStatus CustomerFilingCommentsByCustomerIdFilingId(int CustomerId, int FilingId)
+        {
+            try {
+                var CustomerFilingComments =  from o in _db.CustomerFilingComments
+                           where o.FilingId == FilingId && o.CustomerId == CustomerId
+                           select new
+                           {
+                               CommentsId = o.CommentsId,
+                               CustomerId = o.CustomerId,
+                               FilingId = o.FilingId,
+                               CommentsText = o.CommentsText,
+                               InformationRead = o.InformationRead,
+                               InformationDeleted = o.InformationDeleted,
+                               CreateDate = o.CreateDate,
+                               UpdateDate = o.UpdateDate,
+                               CreateUser = o.CreateUser,
+                               UpdateUser = o.UpdateUser
+                           };
+                return new APIStatus
+                {
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(CustomerFilingComments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
+
+            }
+            catch (Exception ex) {
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
         }
         [HttpGet("CustomerFilingTrackingComments{FileTrackingId:Int}")]
         public IActionResult CustomerFilingTrackingComments(int FileTrackingId)
