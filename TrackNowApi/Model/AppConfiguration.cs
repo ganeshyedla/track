@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.Net;
+using System.Text.Json;
 
 namespace TrackNowApi.Model
 {
@@ -85,6 +86,13 @@ namespace TrackNowApi.Model
         public long     ErrorCode { get; set; }
         public string   ErrorMessage { get; set; }
         public string   Data { get; set; }
+    }
+    public partial class APIStatusJSON
+    {
+        public string Status { get; set; }
+        public long ErrorCode { get; set; }
+        public string ErrorMessage { get; set; }
+        public JsonDocument Data { get; set; }
     }
     public class MailRequest
     {

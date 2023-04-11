@@ -543,19 +543,19 @@ namespace TrackNowApi.Controllers
         }
        
         [HttpPost("CreateDraftFilingMaster")]
-        public APIStatus CreateDraftFilingMaster([FromBody] FilingMasterDraft FilingMasterDraft)
+        public APIStatusJSON CreateDraftFilingMaster([FromBody] FilingMasterDraft FilingMasterDraft)
         {
             try {
             _db.Add(FilingMasterDraft);
             _db.SaveChanges();
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(FilingMasterDraft, new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterDraft, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
             }
-            catch(Exception ex ) { return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message }; }
+            catch(Exception ex ) { return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message }; }
         }
         [HttpGet("DraftFilingMasterList")]
         public IActionResult DraftFilingMasterList()
@@ -599,7 +599,7 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpPost("CreateFilingMasterWorkflow")]
-        public APIStatus CreateFilingMasterWorkflow([FromBody] FilingMasterWorkflow FilingMasterWorkflow)
+        public APIStatusJSON CreateFilingMasterWorkflow([FromBody] FilingMasterWorkflow FilingMasterWorkflow)
         {
             try
             {
@@ -629,26 +629,27 @@ namespace TrackNowApi.Controllers
                 if (FilingMasterWorkflow.CurrentApproverId == 0)
                 {
                     FilingMasterWorkflow.CurrentApproverId = (from u in _db.Users
-                                                             join ur in _db.UsersRoles on u.UserId equals ur.UserId
-                                                             join r in _db.Roles on ur.RoleId equals r.RoleId
-                                                             where r.RoleName.Contains("Admin")
-                                                             select u.UserId).FirstOrDefault();
+                                                              join ur in _db.UsersRoles on u.UserId equals ur.UserId
+                                                              join r in _db.Roles on ur.RoleId equals r.RoleId
+                                                              where r.RoleName.Contains("Admin")
+                                                              select u.UserId).FirstOrDefault();
                     //return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Approver Not Configured" };
                 }
 
                 _db.Add(FilingMasterWorkflow);
                 _db.SaveChanges();
 
-                return new APIStatus
+                
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(FilingMasterWorkflow, new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterWorkflow, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
-
             }
-            catch (Exception ex) {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
         [HttpGet("FilingMasterWorkflowList")]
@@ -1605,49 +1606,48 @@ namespace TrackNowApi.Controllers
 
 
         [HttpPost("createFilingMasterWorkflowNotifications")]
-        public APIStatus createFilingMasterWorkflowNotifications(FilingMasterWorkflowNotifications workflow)
+        public APIStatusJSON createFilingMasterWorkflowNotifications(FilingMasterWorkflowNotifications workflow)
         {
             try
             {
                 _db.FilingMasterWorkflowNotifications.Add(workflow);
                 _db.SaveChanges();
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(
-                    _db.FilingMasterWorkflowNotifications.Where(u => u.NotificationId == _db.FilingMasterWorkflowNotifications.Max(x => x.NotificationId)),
-                    new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(workflow, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
 
         }
 
         [HttpGet("ListFilingMasterWorkflowNotifications")]
-        public APIStatus ListFilingMasterWorkflowNotifications()
+        public APIStatusJSON ListFilingMasterWorkflowNotifications()
         {
             try
             {
                 var FilingMasterWorkflowNotifications = _db.FilingMasterWorkflowNotifications.ToList();
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(FilingMasterWorkflowNotifications, new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterWorkflowNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
+            
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpGet("ViewFilingMasterWorkflowNotifications/{NotificationId:Int}")]
-        public APIStatus ViewFilingMasterWorkflowNotifications(int NotificationId)
+        public APIStatusJSON ViewFilingMasterWorkflowNotifications(int NotificationId)
         {
             try
             {
@@ -1655,28 +1655,30 @@ namespace TrackNowApi.Controllers
                                        .FirstOrDefault(F => F.NotificationId == NotificationId);
                 if (FilingMasterWorkflowNotifications != null)
                 {
-                    return new APIStatus
+
+                    return new APIStatusJSON
                     {
                         Status = "Success",
-                        Data = JsonSerializer.Serialize(FilingMasterWorkflowNotifications, new JsonSerializerOptions
-                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterWorkflowNotifications, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                     };
+
                 }
                 else
                 {
-                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
 
                 }
 
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpDelete("DeleteFilingMasterWorkflowNotifications/{NotificationId:Int}")]
-        public APIStatus DeleteFilingMasterWorkflowNotifications(int NotificationId)
+        public APIStatusJSON DeleteFilingMasterWorkflowNotifications(int NotificationId)
         {
             try
             {
@@ -1688,22 +1690,22 @@ namespace TrackNowApi.Controllers
                 {
                     _db.FilingMasterWorkflowNotifications.Remove(FilingMasterWorkflowNotifications);
                     _db.SaveChanges();
-                    return new APIStatus { Status = "Success" };
+                    return new APIStatusJSON { Status = "Success" };
                 }
                 else
                 {
-                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
                 }
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
 
         }
 
         [HttpPut("UpdateFilingMasterWorkflowNotifications/{NotificationId:int}")]
-        public APIStatus UpdateFilingMasterWorkflowNotifications(int NotificationId, [FromBody] FilingMasterWorkflowNotifications FilingMasterWorkflowNotifications)
+        public APIStatusJSON UpdateFilingMasterWorkflowNotifications(int NotificationId, [FromBody] FilingMasterWorkflowNotifications FilingMasterWorkflowNotifications)
         {
             try
             {
@@ -1728,24 +1730,22 @@ namespace TrackNowApi.Controllers
                    
 
                     _db.SaveChanges();
-                    return new APIStatus
+                    return new APIStatusJSON
                     {
                         Status = "Success",
-                        Data = JsonSerializer.Serialize(
-                   _db.FilingMasterWorkflowNotifications.Where(u => u.NotificationId == existingNotification.NotificationId),
-                   new JsonSerializerOptions
-                   { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterWorkflowNotifications, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                     };
                 }
                 else
                 {
-                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
                 }
 
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
