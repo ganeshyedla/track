@@ -4,3 +4,13 @@
 /TrackNowApi/obj/Debug/net6.0
 /TrackNowApi/Properties/PublishProfiles
 /TrackNowApi/obj/Release/net6.0
+/TrackNowApi/Model/FilingMasterHistory.cs.bak
+/TrackNowApi/Model/FilingMasterDraft.cs.bak
+/TrackNowApi/Model/FilingMaster.cs.bak
+/TrackNowApi/Model/FilingDraftBusinessCategory.cs.bak
+/TrackNowApi/Model/FilingBusinessCategory.cs.bak
+/TrackNowApi/Model/AppConfiguration.cs.bak
+/TrackNowApi/Controllers/FilingMasterController.cs.bak
+/TrackNowApi/Controllers/CustomerController.cs.bak
+/TrackNowApi/Controllers/ApplicationController.cs.bak
+/TrackNowApi/Data/ApplicationDbContext.cs.bak

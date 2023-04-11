@@ -104,7 +104,7 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpDelete("BusinessCategoryMaster{BusinessCategoryId:Int}")]
-        public APIStatus DeleteBusinessCategoryMaster(int BusinessCategoryId)
+        public APIStatusJSON DeleteBusinessCategoryMaster(int BusinessCategoryId)
         {
             try { 
                 BusinessCategoryMaster BusinessCategoryMaster = _db.BusinessCategoryMaster.Where(d => d.BusinessCategoryId == BusinessCategoryId).FirstOrDefault();
@@ -130,21 +130,21 @@ namespace TrackNowApi.Controllers
                     { 
                         _db.BusinessCategoryMaster.Remove(BusinessCategoryMaster);
                         _db.SaveChanges();
-                        return new APIStatus { Status = "Success" };
+                        return new APIStatusJSON { Status = "Success" };
                     }
                     else
                     {
-                        return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Business Category Master in used in some table" };
+                        return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Business Category Master in used in some table" };
                     }
                 }
                 else
                 {
-                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Business Category Master Not found" };
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Business Category Master Not found" };
                 }
             }
             catch(Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
         [HttpPut("BusinessCategoryMasterUpdate{BusinessCategoryId:Int}")]
@@ -338,7 +338,7 @@ namespace TrackNowApi.Controllers
         //=============================================================================================================
 
         [HttpPost("CreateApprovers")]
-        public APIStatus CreateApprovers(Approvers []Approver)
+        public APIStatusJSON CreateApprovers(Approvers []Approver)
         {
             
             try
@@ -349,21 +349,20 @@ namespace TrackNowApi.Controllers
                     _db.Add(Bc);
                 }
                 _db.SaveChanges();
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(
-                   _db.Approvers.Where(u => u.Id > MaxId),
-                   new JsonSerializerOptions
-                   { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(Approver, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
+;
             }
             catch (Exception ex)
             {
                 if (ex.InnerException.Message.Contains("UK_Approvers"))
-                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Appovers already available" };
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Appovers already available" };
                 else
-                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
@@ -494,7 +493,7 @@ namespace TrackNowApi.Controllers
         }
 
         [HttpPost("[action]")]
-        public APIStatus CustomerFilingUpload([FromForm] CustomerFilingUpload request)
+        public APIStatusJSON CustomerFilingUpload([FromForm] CustomerFilingUpload request)
         {
             try
             {
@@ -551,25 +550,25 @@ namespace TrackNowApi.Controllers
                         Response.Headers.Add("X-File-URL", blobUrlFormatted);
                     }
                 }
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(uploadedFiles, new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(uploadedFiles, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
             }
             catch (RequestFailedException ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Upload request failed" };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Upload request failed" };
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpPost("[action]")]
-        public APIStatus FilingmasterUpload([FromForm] FilingUploadFilesRequest request)
+        public APIStatusJSON FilingmasterUpload([FromForm] FilingUploadFilesRequest request)
         {
             try
             {
@@ -613,20 +612,20 @@ namespace TrackNowApi.Controllers
                         Response.Headers.Add("X-File-URL", blobUrlFormatted);
                     }
                 }
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(uploadedFiles, new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(uploadedFiles, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
             }
             catch (RequestFailedException ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Upload request failed" };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Upload request failed" };
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 

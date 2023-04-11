@@ -557,20 +557,22 @@ namespace TrackNowApi.Controllers
             return Ok(CustomerFilingComments);
         }
         [HttpGet("CustomerFilingWorkflowNotificationsList")]
-        public APIStatus CustomerFilingWorkflowNotificationsList()
+        public APIStatusJSON CustomerFilingWorkflowNotificationsList()
         {
             try { 
                 var CustomerFilingWorkflowNotifications = _db.CustomerFilingWorkflowNotifications.ToList();
-                return new APIStatus
+
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(CustomerFilingWorkflowNotifications, new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingWorkflowNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
+               
             }
             catch(Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
         [HttpPost("CreateCustomerFilingDraftComments")]
@@ -601,23 +603,21 @@ namespace TrackNowApi.Controllers
             return Ok(CustomerFilingWorkflowComments);
         }
 [       HttpPost("CustomerFilingWorkflowNotifications/Create")]
-        public APIStatus Create([FromBody] CustomerFilingWorkflowNotifications item)
+        public APIStatusJSON CustomerFilingWorkflowNotifications([FromBody] CustomerFilingWorkflowNotifications item)
         {
             try { 
                 _db.CustomerFilingWorkflowNotifications.Add(item);
                 _db.SaveChanges();
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(
-                        _db.CustomerFilingWorkflowNotifications.Where(u=>u.NotificationId== _db.CustomerFilingWorkflowNotifications.Max(x=>x.NotificationId)), 
-                        new JsonSerializerOptions
-                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(item, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
             }
             catch ( Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
@@ -954,7 +954,7 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpGet("CustomerFilingCommentsByCustomerIdFilingId{FilingId:Int}")]
-        public APIStatus CustomerFilingCommentsByCustomerIdFilingId(int CustomerId, int FilingId)
+        public APIStatusJSON CustomerFilingCommentsByCustomerIdFilingId(int CustomerId, int FilingId)
         {
             try {
                 var CustomerFilingComments =  from o in _db.CustomerFilingComments
@@ -972,16 +972,16 @@ namespace TrackNowApi.Controllers
                                CreateUser = o.CreateUser,
                                UpdateUser = o.UpdateUser
                            };
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(CustomerFilingComments, new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingComments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
 
             }
             catch (Exception ex) {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
         [HttpGet("CustomerFilingTrackingComments{FileTrackingId:Int}")]
@@ -1753,7 +1753,7 @@ namespace TrackNowApi.Controllers
         }
 //=====================================================================================================================
         [HttpDelete("DeleteCustomerFilingTrackingNotification/{NotificationId:decimal}")]
-        public APIStatus DeleteCustomerFilingTrackingNotification(decimal NotificationId)
+        public APIStatusJSON DeleteCustomerFilingTrackingNotification(decimal NotificationId)
         {
             try
             {
@@ -1765,47 +1765,45 @@ namespace TrackNowApi.Controllers
                     {
                         _db.CustomerFilingTrackingNotifications.Remove(CustomerFilingTrackingNotification);
                         _db.SaveChanges();
-                        return new APIStatus {Status = "Success"};
+                        return new APIStatusJSON { Status = "Success"};
                     }
                     else
                     {
-                        return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found"};
+                        return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found"};
                     }
                 }
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
 
         [HttpPost("CreateCustomerFilingTrackingNotifications")]
-        public APIStatus CreateCustomerFilingTrackingNotifications(CustomerFilingTrackingNotifications notification)
+        public APIStatusJSON CreateCustomerFilingTrackingNotifications(CustomerFilingTrackingNotifications notification)
         {
             try
             {
                 _db.CustomerFilingTrackingNotifications.Add(notification);
                 _db.SaveChanges();
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(
-                    _db.CustomerFilingTrackingNotifications.Where(u => u.NotificationId == _db.CustomerFilingTrackingNotifications.Max(x => x.NotificationId)),
-                    new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(notification, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
                 
             }
         }
 
 
         [HttpGet("ViewCustomerFilingTrackingNotification/{NotificationId:decimal}")]
-        public APIStatus ViewCustomerFilingTrackingNotification(decimal NotificationId)
+        public APIStatusJSON ViewCustomerFilingTrackingNotification(decimal NotificationId)
         {
             try
             {
@@ -1814,48 +1812,47 @@ namespace TrackNowApi.Controllers
 
                 if (CustomerFilingTrackingNotification != null)
                 {
-                    return new APIStatus
+                    return new APIStatusJSON
                     {
                         Status = "Success",
-                        Data = JsonSerializer.Serialize(CustomerFilingTrackingNotification, new JsonSerializerOptions
-                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingTrackingNotification, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                     };
                 }
                 else
                 {
-                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
                 }
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
 
 
         [HttpGet("ListCustomerFilingTrackingNotifications")]
-        public APIStatus ListCustomerFilingTrackingNotifications()
+        public APIStatusJSON ListCustomerFilingTrackingNotifications()
         {
             try
             {
                 var CustomerFilingTrackingNotifications = _db.CustomerFilingTrackingNotifications.ToList();
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(CustomerFilingTrackingNotifications, new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingTrackingNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
-
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpPut("UpdateCustomerFilingTrackingNotification/{NotificationId:decimal}")]
-        public APIStatus UpdateCustomerFilingTrackingNotification(decimal NotificationId, [FromBody] CustomerFilingTrackingNotifications customerFilingTrackingNotification)
+        public APIStatusJSON UpdateCustomerFilingTrackingNotification(decimal NotificationId, [FromBody] CustomerFilingTrackingNotifications customerFilingTrackingNotification)
         {
             try
             {
@@ -1878,25 +1875,23 @@ namespace TrackNowApi.Controllers
                     existingNotification.CreateUser = customerFilingTrackingNotification.CreateUser;
 
                     _db.SaveChanges();
-                    return new APIStatus
+                    return new APIStatusJSON
                     {
                         Status = "Success",
-                        Data = JsonSerializer.Serialize(
-                   _db.CustomerFilingTrackingNotifications.Where(u => u.NotificationId == existingNotification.NotificationId),
-                   new JsonSerializerOptions
-                   { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(existingNotification, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                     };
 
                 }
                 else
                 {
-                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
 
                 }
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
  //=====================================================================================================
@@ -2292,7 +2287,7 @@ namespace TrackNowApi.Controllers
         //=====================================================================================================================
 
         [HttpPost("CustomerFileTracking")]
-        public APIStatus CreateCustomerFileTracking(CustomerFileTracking customer)
+        public APIStatusJSON CreateCustomerFileTracking(CustomerFileTracking customer)
         {
             try
             {
@@ -2311,21 +2306,22 @@ namespace TrackNowApi.Controllers
                 });
 
                 _db.SaveChanges();
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(customer, new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(customer, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
+
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpGet("CustomerFileTrackingbyCustomerId")]
-        public APIStatus CustomerFileTrackingbyCustomerId(ulong CustomerId)
+        public APIStatusJSON CustomerFileTrackingbyCustomerId(ulong CustomerId)
         {
             try
             {
@@ -2357,23 +2353,21 @@ namespace TrackNowApi.Controllers
                     JsicontactEmail = f.JsicontactEmail
                 }
                 );
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(Filetrackinglist, new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(Filetrackinglist, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
-
-
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpGet("CustomerFileTracking")]
-        public APIStatus ListCustomerFileTracking()
+        public APIStatusJSON ListCustomerFileTracking()
         {
             try
             {
@@ -2404,23 +2398,21 @@ namespace TrackNowApi.Controllers
                     JsicontactEmail = f.JsicontactEmail
                 }
                 );
-                return new APIStatus
+                return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonSerializer.Serialize(Filetrackinglist, new JsonSerializerOptions
-                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(Filetrackinglist, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
-
-
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpGet("CustomerFileTracking/{FileTrackingId:Int}")]
-        public APIStatus ViewCustomerFileTracking(int FileTrackingId)
+        public APIStatusJSON ViewCustomerFileTracking(int FileTrackingId)
         {
             try
             {
@@ -2430,17 +2422,17 @@ namespace TrackNowApi.Controllers
                 if (CustomerFileTracking != null)
                 {
 
-                    return new APIStatus
+                    return new APIStatusJSON
                     {
                         Status = "Success",
-                        Data = JsonSerializer.Serialize(CustomerFileTracking, new JsonSerializerOptions
-                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFileTracking, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                     };
-                    
+
                 }
                 else
                 {
-                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "File Tracking Not Found" };
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "File Tracking Not Found" };
 
                 }
 
@@ -2448,12 +2440,12 @@ namespace TrackNowApi.Controllers
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpDelete("CustomerFileTracking/{FileTrackingId:Int}")]
-        public APIStatus DeleteCustomerFileTracking(int FileTrackingId)
+        public APIStatusJSON DeleteCustomerFileTracking(int FileTrackingId)
         {
             try
             {
@@ -2465,23 +2457,23 @@ namespace TrackNowApi.Controllers
                 {
                     _db.CustomerFileTracking.Remove(CustomerFileTracking);
                     _db.SaveChanges();
-                    return new APIStatus { Status = "Success" };
+                    return new APIStatusJSON { Status = "Success" };
 
                 }
                 else
                 {
-                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "File Tracking Not Found" };
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "File Tracking Not Found" };
                 }
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
 
         }
 
         [HttpPut("CustomerFileTracking/{FileTrackingId:int}")]
-        public APIStatus UpdateCustomerFileTracking(int FileTrackingId, [FromBody] CustomerFileTracking CustomerFileTracking)
+        public APIStatusJSON UpdateCustomerFileTracking(int FileTrackingId, [FromBody] CustomerFileTracking CustomerFileTracking)
         {
             try
             {
@@ -2501,23 +2493,22 @@ namespace TrackNowApi.Controllers
                     existingNotification.UpdateDate = CustomerFileTracking.UpdateDate;
                     existingNotification.UpdateUser = CustomerFileTracking.UpdateUser;
                     _db.SaveChanges();
-                    return new APIStatus
+                    return new APIStatusJSON
                     {
                         Status = "Success",
-                        Data = JsonSerializer.Serialize(existingNotification, new JsonSerializerOptions
-                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFileTracking, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                     };
-
                 }
                 else
                 {
-                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
                 }
 
             }
             catch (Exception ex)
             {
-                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 //===============================================================================================================
