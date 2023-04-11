@@ -543,13 +543,19 @@ namespace TrackNowApi.Controllers
         }
        
         [HttpPost("CreateDraftFilingMaster")]
-        public IActionResult CreateDraftFilingMaster([FromBody] FilingMasterDraft FilingMasterDraft)
+        public APIStatus CreateDraftFilingMaster([FromBody] FilingMasterDraft FilingMasterDraft)
         {
-
+            try {
             _db.Add(FilingMasterDraft);
             _db.SaveChanges();
-
-            return Ok(FilingMasterDraft);
+                return new APIStatus
+                {
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(FilingMasterDraft, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
+            }
+            catch(Exception ex ) { return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message }; }
         }
         [HttpGet("DraftFilingMasterList")]
         public IActionResult DraftFilingMasterList()
@@ -593,40 +599,53 @@ namespace TrackNowApi.Controllers
 
         }
         [HttpPost("CreateFilingMasterWorkflow")]
-        public IActionResult CreateFilingMasterWorkflow([FromBody] FilingMasterWorkflow FilingMasterWorkflow)
+        public APIStatus CreateFilingMasterWorkflow([FromBody] FilingMasterWorkflow FilingMasterWorkflow)
         {
-            FilingMasterDraft FilingMasterDraft = _db.FilingMasterDraft
-                                        .Where(d => d.DraftId == FilingMasterWorkflow.DraftId).First();
-
-            FilingMasterWorkflow.WorkflowStatus = "Pending";
-
-            string Juristiction = FilingMasterDraft.Juristiction == null ? "State" : "Federal";
-
-            if (Juristiction.Contains("State"))
-            { 
-                FilingMasterWorkflow.CurrentApproverId = (from a in _db.Approvers
-                                                      join c in _db.ApproverConfiguration on a.ApproverGroupId equals c.ApproverGroupId
-                                                      join f in _db.FilingMasterDraft on a.State equals f.StateInfo
-                                                      where a.FilingType.Equals("MasterFiling") && a.Isdefault == true && a.Juristiction=="State"
-                                                      select a.ApproverId).FirstOrDefault();
-            }
-            else if (Juristiction.Contains("Federal"))
+            try
             {
-                FilingMasterWorkflow.CurrentApproverId = (from a in _db.Approvers
-                                                          join c in _db.ApproverConfiguration on a.ApproverGroupId equals c.ApproverGroupId
-                                                          where a.FilingType.Equals("MasterFiling") && a.Isdefault == true && a.Juristiction == "Federal"
-                                                          select a.ApproverId).FirstOrDefault();
+                FilingMasterDraft FilingMasterDraft = _db.FilingMasterDraft
+                                            .Where(d => d.DraftId == FilingMasterWorkflow.DraftId).First();
+
+                FilingMasterWorkflow.WorkflowStatus = "Pending";
+
+                string Juristiction = FilingMasterDraft.Juristiction == null ? "State" : FilingMasterDraft.Juristiction;
+
+                if (Juristiction.Contains("State"))
+                {
+                    FilingMasterWorkflow.CurrentApproverId = (from a in _db.Approvers
+                                                              join c in _db.ApproverConfiguration on a.ApproverGroupId equals c.ApproverGroupId
+                                                              join f in _db.FilingMasterDraft on a.State equals f.StateInfo
+                                                              where a.FilingType.Equals("MasterFiling") && a.Isdefault == true && a.Juristiction == "State"
+                                                              select a.ApproverId).FirstOrDefault();
+                }
+                else if (Juristiction.Contains("Federal"))
+                {
+                    FilingMasterWorkflow.CurrentApproverId = (from a in _db.Approvers
+                                                              join c in _db.ApproverConfiguration on a.ApproverGroupId equals c.ApproverGroupId
+                                                              where a.FilingType.Equals("MasterFiling") && a.Isdefault == true && a.Juristiction == "Federal"
+                                                              select a.ApproverId).FirstOrDefault();
+                }
+
+                if (FilingMasterWorkflow.CurrentApproverId == 0)
+                {
+                    FilingMasterWorkflow.CurrentApproverId = 1;
+                    //return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Approver Not Configured" };
+                }
+
+                _db.Add(FilingMasterWorkflow);
+                _db.SaveChanges();
+
+                return new APIStatus
+                {
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(FilingMasterWorkflow, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
+
             }
-
-            if(FilingMasterWorkflow.CurrentApproverId==0)
-            {
-                return NotFound("FilingMasterWorkflow.CurrentApproverId:"+FilingMasterWorkflow.CurrentApproverId);
+            catch (Exception ex) {
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
-
-            _db.Add(FilingMasterWorkflow);
-            _db.SaveChanges();
-
-            return Ok(FilingMasterWorkflow);
         }
         [HttpGet("FilingMasterWorkflowList")]
         public IActionResult FilingMasterWorkflowList()
