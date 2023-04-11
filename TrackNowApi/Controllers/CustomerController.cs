@@ -2292,13 +2292,14 @@ namespace TrackNowApi.Controllers
         //=====================================================================================================================
 
         [HttpPost("CustomerFileTracking")]
-        public IActionResult CreateCustomerFileTracking(CustomerFileTracking customer)
+        public APIStatus CreateCustomerFileTracking(CustomerFileTracking customer)
         {
             try
             {
                 // Exclude the 'FileTrackingId' column when adding a new record to the database
                 _db.CustomerFileTracking.Add(new CustomerFileTracking
                 {
+                    
                     CustomerId = customer.CustomerId,
                     FilingId = customer.FilingId,
                     DueDate = customer.DueDate,
@@ -2310,28 +2311,32 @@ namespace TrackNowApi.Controllers
                 });
 
                 _db.SaveChanges();
-
-                return Ok(customer);
+                return new APIStatus
+                {
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(customer, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
-
         [HttpGet("CustomerFileTrackingbyCustomerId")]
-        public IActionResult CustomerFileTrackingbyCustomerId(ulong CustomerId)
+        public APIStatus CustomerFileTrackingbyCustomerId(ulong CustomerId)
         {
             try
             {
-                return Ok(
+                var Filetrackinglist = (
                 from c in _db.CustomerFileTracking
                 join f in _db.FilingMaster on c.FilingId equals f.FilingId
                 join o in _db.Customer on c.CustomerId equals o.CustomerId
                 where o.CustomerId == CustomerId
                 select new
                 {
+                    FileTrackingId = c.FileTrackingId,
                     CustomerId = c.CustomerId,
                     FilingId = c.FilingId,
                     DueDate = c.DueDate,
@@ -2352,24 +2357,33 @@ namespace TrackNowApi.Controllers
                     JsicontactEmail = f.JsicontactEmail
                 }
                 );
+                return new APIStatus
+                {
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(Filetrackinglist, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
+
 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpGet("CustomerFileTracking")]
-        public IActionResult ListCustomerFileTracking()
+        public APIStatus ListCustomerFileTracking()
         {
             try
             {
-                return Ok(
+                var Filetrackinglist = (
                 from c in _db.CustomerFileTracking
                 join f in _db.FilingMaster on c.FilingId equals f.FilingId
                 join o in _db.Customer on c.CustomerId equals o.CustomerId
-                select new {
+                select new
+                {
+                    FileTrackingId = c.FileTrackingId,
                     CustomerId = c.CustomerId,
                     FilingId = c.FilingId,
                     DueDate = c.DueDate,
@@ -2380,26 +2394,33 @@ namespace TrackNowApi.Controllers
                     UpdateUser = c.UpdateUser,
                     CustomerName = o.CustomerName,
                     FilingName = f.FilingName,
-                    FilingDescription =f.FilingDescription,
+                    FilingDescription = f.FilingDescription,
                     FilingFrequency = f.FilingFrequency,
                     FilingJuristiction = f.Juristiction,
-                    FilingStateInfo =  f.StateInfo,
+                    FilingStateInfo = f.StateInfo,
                     FilingRuleInfo = f.RuleInfo,
                     Jsidept = f.Jsidept,
                     JsicontactName = f.JsicontactName,
                     JsicontactEmail = f.JsicontactEmail
                 }
                 );
+                return new APIStatus
+                {
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(Filetrackinglist, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
+
 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpGet("CustomerFileTracking/{FileTrackingId:Int}")]
-        public IActionResult ViewCustomerFileTracking(int FileTrackingId)
+        public APIStatus ViewCustomerFileTracking(int FileTrackingId)
         {
             try
             {
@@ -2408,23 +2429,31 @@ namespace TrackNowApi.Controllers
                                        .FirstOrDefault(F => F.FileTrackingId == FileTrackingId);
                 if (CustomerFileTracking != null)
                 {
-                    return Ok(CustomerFileTracking);
+
+                    return new APIStatus
+                    {
+                        Status = "Success",
+                        Data = JsonSerializer.Serialize(CustomerFileTracking, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    };
+                    
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "File Tracking Not Found" };
+
                 }
 
 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpDelete("CustomerFileTracking/{FileTrackingId:Int}")]
-        public IActionResult DeleteCustomerFileTracking(int FileTrackingId)
+        public APIStatus DeleteCustomerFileTracking(int FileTrackingId)
         {
             try
             {
@@ -2436,23 +2465,23 @@ namespace TrackNowApi.Controllers
                 {
                     _db.CustomerFileTracking.Remove(CustomerFileTracking);
                     _db.SaveChanges();
-                    return Ok();
+                    return new APIStatus { Status = "Success" };
+
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "File Tracking Not Found" };
                 }
             }
             catch (Exception ex)
             {
-
-                return NotFound(ex.Message);
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
 
         }
 
         [HttpPut("CustomerFileTracking/{FileTrackingId:int}")]
-        public IActionResult UpdateCustomerFileTracking(int FileTrackingId, [FromBody] CustomerFileTracking CustomerFileTracking)
+        public APIStatus UpdateCustomerFileTracking(int FileTrackingId, [FromBody] CustomerFileTracking CustomerFileTracking)
         {
             try
             {
@@ -2471,20 +2500,24 @@ namespace TrackNowApi.Controllers
                     existingNotification.CreateUser = CustomerFileTracking.CreateUser;
                     existingNotification.UpdateDate = CustomerFileTracking.UpdateDate;
                     existingNotification.UpdateUser = CustomerFileTracking.UpdateUser;
-
-
                     _db.SaveChanges();
-                    return Ok(existingNotification);
+                    return new APIStatus
+                    {
+                        Status = "Success",
+                        Data = JsonSerializer.Serialize(existingNotification, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                    };
+
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Notification Not Found" };
                 }
 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 //===============================================================================================================
