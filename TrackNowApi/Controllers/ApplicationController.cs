@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure;
+using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Text.Json;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
+using Azure.Storage.Blobs;
 
 namespace TrackNowApi.Controllers
 {
@@ -14,6 +16,7 @@ namespace TrackNowApi.Controllers
     public class ApplicationController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
+        private string Blob_connectionString = "DefaultEndpointsProtocol=https;AccountName=jsiblob;AccountKey=Cj3LbE2K++GT8xcKBFGPLHA5ybb1zEgZ8GbwTRMTW5Z/0eSURQVuRQVXulIadLUAheQg0dsX1e5MGNxjjEflRA==;EndpointSuffix=core.windows.net";
 
         public ApplicationController(ApplicationDbContext db)
         {
@@ -490,81 +493,174 @@ namespace TrackNowApi.Controllers
 
         }
 
-
-        //public static IWebHostEnvironment _webHostEnvironment;
-
-        //public ApplicationController(IWebHostEnvironment webHostEnvironment)
-        //{
-        //    _webHostEnvironment = webHostEnvironment;
-        //}
-
-      
-
-
-        [HttpPost("upload")]
-        public ActionResult<string> Upload(IFormFile file, string folderPath)
+        [HttpPost("[action]")]
+        public APIStatus CustomerFilingUpload([FromForm] CustomerFilingUpload request)
         {
             try
             {
-                if (file != null && file.Length > 0)
+                BlobContainerClient blobContainerClient = new BlobContainerClient(Blob_connectionString, "jsitracknow");
+
+                List<azzureupload> uploadedFiles = new List<azzureupload>();
+
+                foreach (IFormFile file in request.Files)
                 {
-                    var fileName = Path.GetFileName(file.FileName);
-                    var targetPath = Path.Combine(folderPath, fileName);
-                    using (var fileStream = new FileStream(targetPath, FileMode.Create))
+                    using (var stream = new MemoryStream())
                     {
-                        file.CopyTo(fileStream);
+                        file.CopyTo(stream);
+                        stream.Position = 0;
+
+                        var blobName = file.FileName;
+                        var folderPath = $"Customer/{request.CustomerId}/";
+
+                        if (!string.IsNullOrEmpty(request.CommentId))
+                        {
+                            folderPath += $"Comments/CommentID:{request.CommentId}/";
+                        }
+                        else if (!string.IsNullOrEmpty(request.FilingId))
+                        {
+                            folderPath += $"Filing/{request.FilingId}/";
+                        }
+                        else if (!string.IsNullOrEmpty(request.WorkflowId))
+                        {
+                            folderPath += $"WorkFlow/{request.WorkflowId}/";
+                        }
+                        else if (!string.IsNullOrEmpty(request.WorkflowId))
+                        {
+                            folderPath += $"WorkFlow/{request.WorkflowId}/";
+                        }
+                        else if (!string.IsNullOrEmpty(request.FileTrackingId))
+                        {
+                            folderPath += $"FileTracking/{request.FileTrackingId}/";
+                        }
+                        else if (!string.IsNullOrEmpty(request.DraftId))
+                        {
+                            folderPath += $"Draft/{request.DraftId}/";
+                        }
+                        
+                        if (!string.IsNullOrEmpty(request.AttachmentId))
+                        {
+                            folderPath += $"AttachmentID:{request.AttachmentId}/";
+                        }
+                        var blobClient = blobContainerClient.GetBlobClient($"{folderPath}{blobName}");
+                        blobClient.Upload(stream);
+
+                        var blobUrl = blobClient.Uri.AbsoluteUri;
+                        var blobUrlFormatted = $"{blobUrl.Substring(0, blobUrl.LastIndexOf("/"))}/{blobName}";
+
+                        uploadedFiles.Add(new azzureupload { FileName = blobName, Message = $"File '{blobName}' uploaded successfully." });
+                        Response.Headers.Add("X-File-URL", blobUrlFormatted);
                     }
-                    return Ok(targetPath);
+                }
+                return new APIStatus
+                {
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(uploadedFiles, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
+            }
+            catch (RequestFailedException ex)
+            {
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Upload request failed" };
+            }
+            catch (Exception ex)
+            {
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
+        [HttpPost("[action]")]
+        public APIStatus FilingmasterUpload([FromForm] FilingUploadFilesRequest request)
+        {
+            try
+            {
+                BlobContainerClient blobContainerClient = new BlobContainerClient(Blob_connectionString, "jsitracknow");
+
+                List<azzureupload> uploadedFiles = new List<azzureupload>();
+
+                foreach (IFormFile file in request.Files)
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        file.CopyTo(stream);
+                        stream.Position = 0;
+
+                        var blobName = file.FileName;
+                        var folderPath = $"FilingMaster/{request.FilingId}/";
+
+                        if (!string.IsNullOrEmpty(request.CommentId))
+                        {
+                            folderPath += $"Comments/CommentID:{request.CommentId}/";
+                        }
+                        else if (!string.IsNullOrEmpty(request.WorkflowId))
+                        {
+                            folderPath += $"WorkFlow/{request.WorkflowId}/";
+                        }
+                        else if (!string.IsNullOrEmpty(request.DraftId))
+                        {
+                            folderPath += $"Draft/{request.DraftId}/";
+                        }
+                        if (!string.IsNullOrEmpty(request.AttachmentId))
+                        {
+                            folderPath += $"AttachmentID:{request.AttachmentId}/";
+                        }
+                        var blobClient = blobContainerClient.GetBlobClient($"{folderPath}{blobName}");
+                        blobClient.Upload(stream);
+
+                        var blobUrl = blobClient.Uri.AbsoluteUri;
+                        var blobUrlFormatted = $"{blobUrl.Substring(0, blobUrl.LastIndexOf("/"))}/{blobName}";
+
+                        uploadedFiles.Add(new azzureupload { FileName = blobName, Message = $"File '{blobName}' uploaded successfully." });
+                        Response.Headers.Add("X-File-URL", blobUrlFormatted);
+                    }
+                }
+                return new APIStatus
+                {
+                    Status = "Success",
+                    Data = JsonSerializer.Serialize(uploadedFiles, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase })
+                };
+            }
+            catch (RequestFailedException ex)
+            {
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Upload request failed" };
+            }
+            catch (Exception ex)
+            {
+                return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
+        [HttpGet("[action]")]
+        public async Task<IActionResult> DownloadFile([FromQuery] DownloadFileRequest request)
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(request.FileUrl))
+                {
+                    // Download the file using the URL
+                    using (var client = new HttpClient())
+                    {
+                        var response = await client.GetAsync(request.FileUrl);
+                        var content = await response.Content.ReadAsStreamAsync();
+
+                        return new FileStreamResult(content, "application/octet-stream");
+                    }
                 }
                 else
                 {
-                    return BadRequest("File is null or empty.");
+                    return BadRequest("File URL cannot be null or empty.");
                 }
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+                return StatusCode(500, ex.Message);
             }
         }
 
 
-       
-
-        [HttpGet("{fileName}")]
-        public IActionResult Download(string fileName, string folderPath)
-        {
-            // string uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads");
-            string filePath = string.Empty;
-
-
-
-            string[] filePaths = Directory.GetFiles(folderPath, fileName);
-            if (filePaths != null)
-            {
-                //var targetPath = Path.Combine(folderPath, fileName);
-                filePath = Path.Combine(folderPath, fileName);
-            }
-
-            if (!System.IO.File.Exists(filePath))
-            {
-                return NotFound();
-            }
-
-
-
-            var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
-            return File(fileStream, "application/octet-stream", fileName);
-        }
-
-
-
-
-
-
-
 
     }
-    }
+}
 
 
 

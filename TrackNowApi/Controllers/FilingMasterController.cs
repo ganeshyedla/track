@@ -628,7 +628,11 @@ namespace TrackNowApi.Controllers
 
                 if (FilingMasterWorkflow.CurrentApproverId == 0)
                 {
-                    FilingMasterWorkflow.CurrentApproverId = 1;
+                    FilingMasterWorkflow.CurrentApproverId = (from u in _db.Users
+                                                             join ur in _db.UsersRoles on u.UserId equals ur.UserId
+                                                             join r in _db.Roles on ur.RoleId equals r.RoleId
+                                                             where r.RoleName.Contains("Admin")
+                                                             select u.UserId).FirstOrDefault();
                     //return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Approver Not Configured" };
                 }
 

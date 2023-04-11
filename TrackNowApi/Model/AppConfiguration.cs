@@ -78,16 +78,7 @@ namespace TrackNowApi.Model
         public DateTime? UpdateDate { get; set; }
         public string? UpdateUser { get; set; }
     }
-    public partial class AppStatusInfo
-    {
-        public HttpStatusCode HttpStatus { get; set; }
-        public long HttpStatusCode { get; set; }
-        public string HttpErrorMessage { get; set; }
-        public string AppStatus { get; set; }
-        public long AppStatusCode { get; set; }
-        public string AppStatusMessage { get; set; }
-        public string AppData { get; set; }
-    }
+    
     public partial class APIStatus
     {
         public string   Status { get; set; }
@@ -102,5 +93,35 @@ namespace TrackNowApi.Model
         public string Body { get; set; }
         public List<IFormFile> Attachments { get; set; }
     }
-   
+    public class DownloadFileRequest
+    {
+        public string FileUrl { get; set; }
+    }
+    public class FilingUploadFilesRequest
+    {
+        public string? FilingId { get; set; }
+        public string? CommentId { get; set; }
+        public string? AttachmentId { get; set; }
+        public string? DraftId { get; set; }
+        public string? WorkflowId { get; set; }
+        public List<IFormFile> Files { get; set; }
+    }
+    public class CustomerFilingUpload
+    {
+        public string? CustomerId { get; set; }
+        public string? FilingId { get; set; }
+        public string? CommentId { get; set; }
+        public string? AttachmentId { get; set; }
+        public string? WorkflowId { get; set; }
+        public string? DraftId { get; set; }
+        public string? FileTrackingId { get; set; }
+        public List<IFormFile> Files { get; set; }
+    }
+    public class azzureupload
+    {
+        public string Message { get; set; }
+        public string FileName { get; set; }
+        public string Url { get; set; }
+
+    }
 }
