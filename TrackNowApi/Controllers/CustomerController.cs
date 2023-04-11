@@ -50,7 +50,7 @@ namespace TrackNowApi.Controllers
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
                                                where j.CustomerId== o.CustomerId
-                                               select new { i.BusinessCategoryId,i.BusinessCategoryName }).ToList(),
+                                               select new {j.Id, j.State, i.BusinessCategoryId,i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
                            Phone = o.Phone,
@@ -83,7 +83,7 @@ namespace TrackNowApi.Controllers
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
                                                where j.CustomerId == o.CustomerId
-                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                                               select new { j.Id, j.State, i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
                            Phone = o.Phone,
@@ -123,7 +123,7 @@ namespace TrackNowApi.Controllers
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.CustomerBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
                                                where j.CustomerId == o.CustomerId
-                                               select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
+                                               select new { j.Id, j.State,  i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                            Address = o.Address,
                            TaxNumber = o.TaxNumber,
                            Phone = o.Phone,
@@ -2289,7 +2289,7 @@ namespace TrackNowApi.Controllers
                 return NotFound(ex.Message);
             }
         }
-//=====================================================================================================================
+        //=====================================================================================================================
 
         [HttpPost("CustomerFileTracking")]
         public IActionResult CreateCustomerFileTracking(CustomerFileTracking customer)
@@ -2318,6 +2318,7 @@ namespace TrackNowApi.Controllers
                 return NotFound(ex.Message);
             }
         }
+
 
         [HttpGet("CustomerFileTrackingbyCustomerId")]
         public IActionResult CustomerFileTrackingbyCustomerId(ulong CustomerId)
