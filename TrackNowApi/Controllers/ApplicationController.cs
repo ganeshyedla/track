@@ -366,43 +366,44 @@ namespace TrackNowApi.Controllers
             }
         }
 
-        [HttpGet("ViewApprovers/{ApproverId:int}")]
-        public IActionResult ViewApproverId(int ApproverId)
+        [HttpGet("ViewApprovers/{Id:int}")]
+        public APIStatusJSON ViewApproverId(int Id)
         {
             try
             {
-                var Approvers = _db.Approvers
-                                               .FirstOrDefault(n => n.ApproverId == ApproverId);
+                var Approvers = _db.Approvers.FirstOrDefault(n => n.Id == Id);
 
                 if (Approvers != null)
                 {
-                    return Ok(Approvers);
+                    return new APIStatusJSON
+                    {
+                        Status = "Success",
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(Approvers, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                    };
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Approvers Not found" };
                 }
 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpGet("ListApprovers")]
-        public IActionResult ListApprovers()
-        {
-            try
+        public APIStatusJSON ListApprovers()
+        {   try
             {
-            //    var Approvers = _db.Approvers.ToList();
-            //    return Ok(Approvers);
-                
-                return Ok( from a in _db.Approvers 
+                var Approvers = ( from a in _db.Approvers 
                         join c in _db.Customer on a.CustomerId equals c.CustomerId into Cus
                            from m in Cus.DefaultIfEmpty()
                            select new
                         {
+                            Id = a.Id,
                             ApproverId = a.ApproverId,
                             CustomerId = a.CustomerId,
                             State       = a.State,
@@ -418,46 +419,50 @@ namespace TrackNowApi.Controllers
                             FilingType = a.FilingType
                         } );
 
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(Approvers, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
-
         }
-        [HttpDelete("DeleteApprovers/{ApproverId:int}")]
-        public IActionResult DeleteApprovers(int ApproverId)
+        [HttpDelete("DeleteApprovers/{Id:int}")]
+        public APIStatusJSON DeleteApprovers(int Id)
         {
             try
             {
-
-                var Approvers = _db.Approvers
-                                            .FirstOrDefault(n => n.ApproverId == ApproverId);
+                var Approvers = _db.Approvers.FirstOrDefault(n => n.Id == Id);
 
                 if (Approvers != null)
                 {
                     _db.Approvers.Remove(Approvers);
                     _db.SaveChanges();
-                    return Ok();
+                    return new APIStatusJSON
+                    { Status = "Success" };
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Approver not found" };
                 }
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
-        [HttpPut("UpdateApproverConfiguration/{ApproverId:int}")]
-        public IActionResult UpdateApprovers(int ApproverId, [FromBody] Approvers Approvers)
+        [HttpPut("UpdateApprovers")]
+        public APIStatusJSON UpdateApprovers([FromBody] Approvers Approvers)
         {
             try
             {
 
                 var existingNotification = _db.Approvers.
-                                      FirstOrDefault(n => n.ApproverId == ApproverId);
+                                      FirstOrDefault(n => n.Id == Approvers.Id);
 
                 if (existingNotification != null)
 
@@ -474,20 +479,23 @@ namespace TrackNowApi.Controllers
                     existingNotification.UpdateDate = Approvers.UpdateDate;
                     existingNotification.UpdateUser = Approvers.UpdateUser;
 
-
-
                     _db.SaveChanges();
-                    return Ok(existingNotification);
+                    return new APIStatusJSON
+                    {
+                        Status = "Success",
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(Approvers, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                    };
+
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Approver not found" };
                 }
-
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
 
         }
