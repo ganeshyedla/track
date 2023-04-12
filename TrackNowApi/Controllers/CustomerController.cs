@@ -2348,6 +2348,10 @@ namespace TrackNowApi.Controllers
                     FilingJuristiction = f.Juristiction,
                     FilingStateInfo = f.StateInfo,
                     FilingRuleInfo = f.RuleInfo,
+                    BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                        join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                        where j.FilingId == f.FilingId
+                                        select new { j.Id, j.State, i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                     Jsidept = f.Jsidept,
                     JsicontactName = f.JsicontactName,
                     JsicontactEmail = f.JsicontactEmail
@@ -2638,15 +2642,29 @@ namespace TrackNowApi.Controllers
         //===============================================================================================================
 
         [HttpPost("CustomerFilingMasterDraft")]
-        public IActionResult CreateCustomerFilingMasterDraft(CustomerFilingMasterDraft[] Customer, string @LoggedInUser)
+        public APIStatusJSON CreateCustomerFilingMasterDraft(CustomerFilingMasterDraft[] Customer, string @LoggedInUser)
         {
+            try { 
+                var opt = new JsonSerializerOptions() { WriteIndented = true };
+                string Customerrecords = JsonSerializer.Serialize<CustomerFilingMasterDraft[]>(Customer, opt);
 
-            var opt = new JsonSerializerOptions() { WriteIndented = true };
-            string Customerrecords = JsonSerializer.Serialize<CustomerFilingMasterDraft[]>(Customer, opt);
+                var CustomerUpdate = _db.CustomerFilingMasterDraft.FromSqlRaw("dbo.CustomerFilingMasterDraftUpdate {0}", Customerrecords).ToList();
+                
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerUpdate, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
 
-            var userType = _db.Database.ExecuteSqlRaw("dbo.CustomerFilingMasterDraftUpdate {0}", Customerrecords);
+            }
+            catch (Exception ex)
+             {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
 
-            return Ok();
+            }
+
+ 
 
         }
 

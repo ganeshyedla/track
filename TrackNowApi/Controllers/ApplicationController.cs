@@ -400,6 +400,7 @@ namespace TrackNowApi.Controllers
         {   try
             {
                 var Approvers = ( from a in _db.Approvers 
+                                  join u in _db.Users on a.ApproverId equals u.UserId
                         join c in _db.Customer on a.CustomerId equals c.CustomerId into Cus
                            from m in Cus.DefaultIfEmpty()
                            select new
@@ -410,7 +411,7 @@ namespace TrackNowApi.Controllers
                             State       = a.State,
                             ApproverGroupId = a.ApproverGroupId,
                             Isdefault   = a.Isdefault,
-                            ApproverName   = a.ApproverName,
+                            ApproverName   = u.UserName,
                             Juristiction   = a.Juristiction,
                             CreateDate  = a.CreateDate,
                             CreateUser = a.CreateUser,
@@ -473,7 +474,6 @@ namespace TrackNowApi.Controllers
                     existingNotification.State = Approvers.State;
                     existingNotification.ApproverGroupId = Approvers.ApproverGroupId;
                     existingNotification.Isdefault = Approvers.Isdefault;
-                    existingNotification.ApproverName = Approvers.ApproverName;
                     existingNotification.Juristiction = Approvers.Juristiction;
                     existingNotification.CreateDate = Approvers.CreateDate;
                     existingNotification.CreateUser = Approvers.CreateUser;
