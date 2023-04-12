@@ -16,11 +16,12 @@ namespace TrackNowApi.Controllers
     public class ApplicationController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
-        private string Blob_connectionString = "DefaultEndpointsProtocol=https;AccountName=jsiblob;AccountKey=Cj3LbE2K++GT8xcKBFGPLHA5ybb1zEgZ8GbwTRMTW5Z/0eSURQVuRQVXulIadLUAheQg0dsX1e5MGNxjjEflRA==;EndpointSuffix=core.windows.net";
+        private readonly string Blob_connectionString;
 
-        public ApplicationController(ApplicationDbContext db)
+        public ApplicationController(ApplicationDbContext db, IConfiguration configuration)
         {
             _db = db;
+            Blob_connectionString = configuration.GetConnectionString("Blob_connectionString");
         }
 
         [HttpGet("UserRole")]
