@@ -204,7 +204,7 @@ namespace TrackNowApi.Data
               .HasKey(t => new { t.CustomerId});
 
             modelBuilder.Entity<CustomerFilingAttachments>()
-              .HasKey(t => new { t.FollowupId });
+              .HasKey(t => new { t.AttachmentId });
 
             modelBuilder.Entity<CustomerFilingCommentsAttachments>()
               .HasKey(t => new { t.AttachmentId });

@@ -1803,14 +1803,14 @@ namespace TrackNowApi.Controllers
         }
 
 
-        [HttpGet("FilingMasterAttachmentsGetById/{FilingId:int}")]
-        public APIStatusJSON FilingMasterAttachmentsGetById(int FilingId)
+        [HttpGet("FilingMasterAttachmentsGetById/{AttachmentId:int}")]
+        public APIStatusJSON FilingMasterAttachmentsGetById(int AttachmentId)
         {
             try
             {
                 var FilingMasterAttachments = (from fm in _db.FilingMaster
                                                join fa in _db.FilingMasterAttachments on fm.FilingId equals fa.FilingId
-                                               where fm.FilingId == FilingId
+                                               where fa.AttachmentId == AttachmentId
                                                select new
                                                {
                                                    FilingId = fm.FilingId,
@@ -1854,6 +1854,7 @@ namespace TrackNowApi.Controllers
                 {
                     existingFiling.AttachmentPath = FilingMasterAttachments.AttachmentPath;
                     existingFiling.AttachmentId = FilingMasterAttachments.AttachmentId;
+                    existingFiling.FilingId = FilingMasterAttachments.FilingId;
                     existingFiling.UpdatedDate = FilingMasterAttachments.UpdatedDate;
                     existingFiling.UpdatedUser = FilingMasterAttachments.UpdatedUser;
                     existingFiling.CreateDate = FilingMasterAttachments.CreateDate;

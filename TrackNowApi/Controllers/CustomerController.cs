@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
+using System.Net.Mail;
 using System.Text.Json;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
@@ -1193,11 +1194,9 @@ namespace TrackNowApi.Controllers
         {
             try
             {
-
                 var CustomerFilingAttachments = _db.CustomerFilingAttachments.ToList();
                 return Ok(CustomerFilingAttachments);
 
-
             }
             catch (Exception ex)
             {
@@ -1205,86 +1204,104 @@ namespace TrackNowApi.Controllers
             }
         }
 
-        [HttpGet("ViewCustomerFilingAttachments/{FollowupId:Int}")]
-        public IActionResult ViewCustomerFilingAttachments(int FollowupId)
+        [HttpGet("ViewCustomerFilingAttachments/{AttachmentId:Int}")]
+        public APIStatusJSON ViewCustomerFilingAttachments(int AttachmentId)
         {
             try
             {
 
                 var CustomerFilingAttachments = _db.CustomerFilingAttachments
-                                       .FirstOrDefault(F => F.FollowupId == FollowupId);
+                                       .FirstOrDefault(F => F.AttachmentId == AttachmentId);
                 if (CustomerFilingAttachments != null)
                 {
-                    return Ok(CustomerFilingAttachments);
+                    return new APIStatusJSON
+                    {
+                        Status = "Success",
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingAttachments, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                    };
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage= "Attachment Not found" };
                 }
 
 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
-        [HttpDelete("DeleteCustomerFilingAttachments/{FollowupId:Int}")]
-        public IActionResult DeleteCustomerFilingAttachments(int FollowupId)
+        [HttpDelete("DeleteCustomerFilingAttachments/{AttachmentId:Int}")]
+        public APIStatusJSON DeleteCustomerFilingAttachments(int AttachmentId)
         {
             try
             {
 
                 var CustomerFilingAttachments = _db.CustomerFilingAttachments
-                                                 .FirstOrDefault(a => a.FollowupId == FollowupId);
+                                                 .FirstOrDefault(a => a.AttachmentId == AttachmentId);
 
                 if (CustomerFilingAttachments != null)
                 {
                     _db.CustomerFilingAttachments.Remove(CustomerFilingAttachments);
                     _db.SaveChanges();
-                    return Ok();
+                    return new APIStatusJSON
+                    {
+                        Status = "Success"
+                    };
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Attachment Not found" };
                 }
             }
             catch (Exception ex)
             {
 
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
 
         }
 
-        [HttpPut("UpdateCustomerFilingAttachments/{FollowupId:int}")]
-        public IActionResult UpdateCustomerFilingAttachments(int FollowupId, [FromBody] CustomerFilingAttachments CustomerFilingAttachments)
+        [HttpPut("UpdateCustomerFilingAttachments")]
+        public APIStatusJSON UpdateCustomerFilingAttachments( [FromBody] CustomerFilingAttachments CustomerFilingAttachments)
         {
             try
             {
 
                 var existingNotification = _db.CustomerFilingAttachments.
-                                      FirstOrDefault(n => n.FollowupId == FollowupId);
+                                      FirstOrDefault(n => n.AttachmentId == CustomerFilingAttachments.AttachmentId);
 
                 if (existingNotification != null)
 
                 {
-                    existingNotification.AttachmentId = CustomerFilingAttachments.AttachmentId;
-                    
+                    existingNotification.AttachmentPath = CustomerFilingAttachments.AttachmentPath;
+                    existingNotification.FilingId = CustomerFilingAttachments.FilingId;
+                    existingNotification.CustomerId = CustomerFilingAttachments.CustomerId;
+                    existingNotification.CreateDate = CustomerFilingAttachments.CreateDate;
+                    existingNotification.CreateUser = CustomerFilingAttachments.CreateUser;
+                    existingNotification.UpdatedDate = CustomerFilingAttachments.UpdatedDate;
+                    existingNotification.UpdatedUser = CustomerFilingAttachments.UpdatedUser;
 
                     _db.SaveChanges();
-                    return Ok(existingNotification);
+                    return new APIStatusJSON
+                    {
+                        Status = "Success",
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingAttachments, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                    };
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Attachment Not found" };
                 }
 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 //===================================================================================================================

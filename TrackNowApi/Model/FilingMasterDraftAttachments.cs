@@ -11,7 +11,7 @@ namespace TrackNowApi.Model
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long AttachmentId { get; set; }
         public string AttachmentPath { get; set; }
-        public decimal CommentsId { get; set; }
+        public decimal DraftId { get; set; }
         public DateTime? CreateDate { get; set; }
         public string CreateUser { get; set; }
         public DateTime? UpdatedDate { get; set; }
