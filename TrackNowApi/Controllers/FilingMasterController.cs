@@ -390,7 +390,7 @@ namespace TrackNowApi.Controllers
                     {
                         _db.FilingMasterAttachments.Add(new FilingMasterAttachments
                         {
-                            FilingId = FilingMasterDraft.FilingId,
+                            FilingId = FilingId,
                             AttachmentPath = da.AttachmentPath,
                             CreateDate = DateTime.Now
                         }) ;
