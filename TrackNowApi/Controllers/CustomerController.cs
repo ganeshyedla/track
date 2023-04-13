@@ -2346,6 +2346,7 @@ namespace TrackNowApi.Controllers
                     FilingDescription = f.FilingDescription,
                     FilingFrequency = f.FilingFrequency,
                     FilingJuristiction = f.Juristiction,
+                    FilingRequired = f.Required,
                     FilingStateInfo = f.StateInfo,
                     FilingRuleInfo = f.RuleInfo,
                     BusinessCategory = (from i in _db.BusinessCategoryMaster
@@ -2395,8 +2396,13 @@ namespace TrackNowApi.Controllers
                     FilingDescription = f.FilingDescription,
                     FilingFrequency = f.FilingFrequency,
                     FilingJuristiction = f.Juristiction,
+                    FilingRequired = f.Required,
                     FilingStateInfo = f.StateInfo,
                     FilingRuleInfo = f.RuleInfo,
+                    BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                        join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                        where j.FilingId == f.FilingId
+                                        select new { j.Id, j.State, i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
                     Jsidept = f.Jsidept,
                     JsicontactName = f.JsicontactName,
                     JsicontactEmail = f.JsicontactEmail
