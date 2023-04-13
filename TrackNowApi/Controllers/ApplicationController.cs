@@ -344,7 +344,7 @@ namespace TrackNowApi.Controllers
             
             try
             {
-                long MaxId = _db.Approvers.Max(u => u.Id);
+               // long MaxId = _db.Approvers.Max(u => u.Id);
                 foreach (Approvers Bc in Approver)
                 {
                     _db.Add(Bc);
@@ -360,10 +360,11 @@ namespace TrackNowApi.Controllers
             }
             catch (Exception ex)
             {
+                if (ex.InnerException != null)
                 if (ex.InnerException.Message.Contains("UK_Approvers"))
                     return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Appovers already available" };
-                else
-                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+               
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
