@@ -171,14 +171,40 @@ namespace TrackNowApi.Controllers
         }
         
         [HttpDelete("CustomerBusinessCategory/{Id:Int}")]
-        public IActionResult CustomerBusinessCategory(int Id)
+        public APIStatusJSON CustomerBusinessCategory(int Id)
         {
-            CustomerBusinessCategory CustomerBusinessCategory;
+            try { 
+                    CustomerBusinessCategory CustomerBusinessCategory;
 
-            CustomerBusinessCategory = _db.CustomerBusinessCategory.Where(d => d.Id == Id).First();
-            _db.CustomerBusinessCategory.Remove(CustomerBusinessCategory);
-            _db.SaveChanges();
-            return Ok();
+                    CustomerBusinessCategory = _db.CustomerBusinessCategory.Where(d => d.Id == Id).FirstOrDefault();
+
+                    if (CustomerBusinessCategory == null)
+                    {
+                        return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Businesscategory not found" };
+                    }
+                    else {
+
+                        var AnyExistFilings = (from c in _db.CustomerBusinessCategory
+                                               join cf in _db.CustomerFilingMaster on c.CustomerId equals cf.CustomerId
+                                               join fb in _db.FilingBusinessCategory on cf.FilingId equals fb.FilingId
+                                               where c.BusinessCategoryId == fb.BusinessCategoryId && c.Id == Id
+                                               select c).FirstOrDefault();
+
+                        if (AnyExistFilings != null )
+                        {
+                            return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Businesscategory used in some filings" };
+                        }
+
+                        _db.CustomerBusinessCategory.Remove(CustomerBusinessCategory);
+                        _db.SaveChanges();
+                        return new APIStatusJSON
+                        {   Status = "Success"};
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+                }
         }
 
         [HttpGet("CustomerBusinessCategoryList{CustomerId:Int}")]
@@ -1632,123 +1658,168 @@ namespace TrackNowApi.Controllers
  //================================================================================================================
 
         [HttpPost("CreateCustomerFilingTrackingAttachments")]
-        public IActionResult CreateCustomerFilingTrackingAttachments(CustomerFilingTrackingAttachments Customer)
+        public APIStatusJSON CreateCustomerFilingTrackingAttachments(CustomerFilingTrackingAttachments Customer)
         {
             try
             {
                 _db.CustomerFilingTrackingAttachments.Add(Customer);
                 _db.SaveChanges();
-                return Ok(Customer);
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(Customer, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
 
         }
 
         [HttpGet("ListCustomerFilingTrackingAttachments")]
-        public IActionResult ListCustomerFilingTrackingAttachments()
+        public APIStatusJSON ListCustomerFilingTrackingAttachments()
         {
             try
             {
 
-                var CustomerFilingTrackingAttachments = _db.CustomerFilingTrackingAttachments.ToList();
-                return Ok(CustomerFilingTrackingAttachments);
-
+                 var CustomerFilingTrackingAttachments = (
+                 from o in _db.CustomerFilingTrackingAttachments
+                 join ct in _db.CustomerFileTracking on o.FileTrackingId equals ct.FileTrackingId
+                 select new
+                 {
+                     FileTrackingId = ct.FileTrackingId,
+                     FileTrackingStatus = ct.Status,
+                     FileTrackingDueDate = ct.DueDate,
+                     AttachmentId = o.AttachmentId,
+                     AttachmentPath = o.AttachmentPath,
+                     CreateDate = o.CreateDate,
+                     CreateUser = o.CreateUser,
+                     UpdatedDate = o.UpdatedDate,
+                     UpdatedUser = o.UpdatedUser,
+                     FileTrackingCreateDate = ct.CreateDate,
+                     FileTrackingCreateUser = ct.CreateUser,
+                     FileTrackingUpdateDate = ct.UpdateDate,
+                     FileTrackingUpdateUser = ct.UpdateUser
+                 });
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingTrackingAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpGet("ViewCustomerFilingTrackingAttachments/{FileTrackingId:Int}")]
-        public IActionResult ViewCustomerFilingTrackingAttachments(int FileTrackingId)
+        public APIStatusJSON ViewCustomerFilingTrackingAttachments(int FileTrackingId)
         {
             try
             {
-
-                var CustomerFilingTrackingAttachments = _db.CustomerFilingTrackingAttachments
-                                       .FirstOrDefault(F => F.FileTrackingId == FileTrackingId);
-                if (CustomerFilingTrackingAttachments != null)
+                var CustomerFilingTrackingAttachments = (
+                 from o in _db.CustomerFilingTrackingAttachments
+                 join ct in _db.CustomerFileTracking on o.FileTrackingId equals ct.FileTrackingId
+                 where ct.FileTrackingId == FileTrackingId
+                 select new
+                 {
+                     FileTrackingId = ct.FileTrackingId,
+                     FileTrackingStatus = ct.Status,
+                     FileTrackingDueDate = ct.DueDate,
+                     AttachmentId = o.AttachmentId,
+                     AttachmentPath = o.AttachmentPath,
+                     CreateDate = o.CreateDate,
+                     CreateUser = o.CreateUser,
+                     UpdatedDate = o.UpdatedDate,
+                     UpdatedUser = o.UpdatedUser,
+                     FileTrackingCreateDate = ct.CreateDate,
+                     FileTrackingCreateUser = ct.CreateUser,
+                     FileTrackingUpdateDate = ct.UpdateDate,
+                     FileTrackingUpdateUser = ct.UpdateUser
+                 });
+                return new APIStatusJSON
                 {
-                    return Ok(CustomerFilingTrackingAttachments);
-                }
-                else
-                {
-                    return NotFound();
-                }
-
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingTrackingAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
-        }
+          }
 
-        [HttpDelete("DeleteCustomerFilingTrackingAttachments/{FileTrackingId:Int}")]
-        public IActionResult DeleteCustomerFilingTrackingAttachments(int FileTrackingId)
+        [HttpDelete("DeleteCustomerFilingTrackingAttachments/{AttachmentId:Int}")]
+        public APIStatusJSON DeleteCustomerFilingTrackingAttachments(int AttachmentId)
         {
             try
             {
 
                 var CustomerFilingTrackingAttachments = _db.CustomerFilingTrackingAttachments
-                                                 .FirstOrDefault(a => a.FileTrackingId == FileTrackingId);
+                                                 .FirstOrDefault(a => a.AttachmentId == AttachmentId);
 
                 if (CustomerFilingTrackingAttachments != null)
                 {
                     _db.CustomerFilingTrackingAttachments.Remove(CustomerFilingTrackingAttachments);
                     _db.SaveChanges();
-                    return Ok();
+                    return new APIStatusJSON
+                    {   Status = "Success"};
+
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Attachment Not Found" };
                 }
             }
             catch (Exception ex)
             {
 
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
 
         }
 
-        [HttpPut("UpdateCustomerFilingTrackingAttachments/{FileTrackingId:int}")]
-        public IActionResult UpdateCustomerFilingTrackingAttachments(int FileTrackingId, [FromBody] CustomerFilingTrackingAttachments CustomerFilingTrackingAttachments)
+        [HttpPut("UpdateCustomerFilingTrackingAttachments/{AttachmentId:int}")]
+        public APIStatusJSON UpdateCustomerFilingTrackingAttachments( [FromBody] CustomerFilingTrackingAttachments CustomerFilingTrackingAttachments)
         {
             try
             {
 
                 var existingNotification = _db.CustomerFilingTrackingAttachments.
-                                      FirstOrDefault(n => n.FileTrackingId == FileTrackingId);
+                                      FirstOrDefault(n => n.AttachmentId == CustomerFilingTrackingAttachments.AttachmentId);
 
                 if (existingNotification != null)
 
                 {
-                    existingNotification.AttachmentId = CustomerFilingTrackingAttachments.AttachmentId;
                     existingNotification.AttachmentPath = CustomerFilingTrackingAttachments.AttachmentPath;
                     existingNotification.CreateDate = CustomerFilingTrackingAttachments.CreateDate;
                     existingNotification.CreateUser = CustomerFilingTrackingAttachments.CreateUser;
                     existingNotification.UpdatedDate = CustomerFilingTrackingAttachments.UpdatedDate;
                     existingNotification.UpdatedUser = CustomerFilingTrackingAttachments.UpdatedUser;
-
-
                     _db.SaveChanges();
-                    return Ok(existingNotification);
+                    return new APIStatusJSON
+                    {
+                        Status = "Success",
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingTrackingAttachments, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                    };
+
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Attachment Not Found" };
                 }
-
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 //=====================================================================================================================
