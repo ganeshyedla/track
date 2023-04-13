@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
+using System.Net.Mail;
 using System.Text.Json;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
@@ -882,67 +883,8 @@ namespace TrackNowApi.Controllers
             return Ok(_db.FilingMasterAttachments);
          }
 
-        [HttpPost("FilingMasterAttachmentsCreate")]
-        public IActionResult FilingMasterAttachmentsCreate([FromBody] FilingMasterAttachments item)
-        {
-            if (item == null)
-            {
-                return BadRequest();
-            }
-
-            _db.FilingMasterAttachments.Add(item);
-            _db.SaveChanges();
-            return Ok(item);
-
-
-        }
-
-
-        [HttpGet("FilingMasterAttachmentsGetById/{FilingId:int}")]
-        public ActionResult<FilingMasterAttachments> FilingMasterAttachmentsGetById(int FilingId)
-        {
-            var res = _db.FilingMasterAttachments.FirstOrDefault(p => p.FilingId == FilingId);
-
-            return Ok(res);
-
-
-        }
-
-
-        [HttpPut("FilingMasterAttachmentsupdate{FilingId}")]
-        public IActionResult FilingMasterAttachmentsupdate(int FilingId, FilingMasterAttachments updatedCustomer)
-        {
-            var customer = _db.FilingMasterAttachments.FirstOrDefault(p => p.FilingId == FilingId);
-
-            if (customer == null)
-            {
-                return NotFound();
-            }
-
-            customer.AttachmentPath = updatedCustomer.AttachmentPath;
-
-
-            _db.SaveChanges();
-
-            return Ok();
-        }
-
-
-
-        [HttpDelete("(FilingMasterAttachmentsdelete{FilingId:int}")]
-        public IActionResult FilingMasterAttachmentsdelete(int FilingId)
-        {
-            var res = _db.FilingMasterAttachments.FirstOrDefault(t => t.FilingId == FilingId);
-            if (res == null)
-            {
-                return NotFound();
-            }
-
-            _db.FilingMasterAttachments.Remove(res);
-            _db.SaveChanges();
-            return new NoContentResult();
-        }
-
+       
+       
         [HttpPut("FilingMasterDraftCommentsUpdate{CommentsId:Int}")]
         public IActionResult FilingMasterDraftCommentsUpdate(int CommentsId, [FromBody] FilingMasterDraftComments FilingMasterDraftComments)
         {
@@ -1141,24 +1083,30 @@ namespace TrackNowApi.Controllers
 
             return Ok(FilingMasterWorkflowComments);
         }
-// ========================================================================================
+        // ========================================================================================
         [HttpPost("CreateFilingMasterDraftAttachments")]
-        public IActionResult CreateFilingMasterDraftAttachments(FilingMasterDraftAttachments Attachment)
+        public APIStatusJSON CreateFilingMasterDraftAttachments(FilingMasterDraftAttachments Attachment)
         {
             try
             {
                 _db.FilingMasterDraftAttachments.Add(Attachment);
-                 _db.SaveChanges();
-                return Ok(Attachment);
+                _db.SaveChanges();
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(Attachment, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpGet("ViewFilingMasterDraftAttachments/{AttachmentId:decimal}")]
-        public IActionResult ViewFilingMasterDraftAttachments(decimal AttachmentId)
+        public APIStatusJSON ViewFilingMasterDraftAttachments(decimal AttachmentId)
         {
             try
             {
@@ -1167,37 +1115,61 @@ namespace TrackNowApi.Controllers
 
                 if (FilingMasterDraftAttachments != null)
                 {
-                    return Ok(FilingMasterDraftAttachments);
+                    return new APIStatusJSON
+                    {
+                        Status = "Success",
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterDraftAttachments, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                    };
+
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Attachment Not Found" };
                 }
 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
-        [HttpGet("ListFilingMasterDraftAttachments")]
-        public IActionResult ListFilingMasterDraftAttachments()
+        [HttpGet("FilingMasterDraftAttachments/{DraftId:decimal}")]
+        public APIStatusJSON ListFilingMasterDraftAttachments(decimal DraftId)
         {
             try
             {
-                var FilingMasterDraftAttachments = _db.FilingMasterDraftAttachments.ToList();
-                return Ok(FilingMasterDraftAttachments);
+                var FilingMasterDraftAttachments = (from fd in _db.FilingMasterDraft
+                                                    join fda in _db.FilingMasterDraftAttachments on fd.DraftId equals fda.CommentsId
+                                                    where fd.DraftId == DraftId
+                                                    select new
+                                                    {
+                                                        DraftId = fd.DraftId,
+                                                        AttachmentId = fda.AttachmentId,
+                                                        AttachmentPath = fda.AttachmentPath,
+                                                        CommentsId = fda.CommentsId,
+                                                        CreateDate = fda.CreateDate,
+                                                        CreateUser = fda.CreateUser,
+                                                        UpdatedDate = fda.UpdatedDate,
+                                                        UpdatedUser = fda.UpdatedUser
+                                                    });
 
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterDraftAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
         [HttpDelete("DeleteFilingMasterDraftAttachments/{AttachmentId:decimal}")]
-        public IActionResult DeleteFilingMasterDraftAttachments(decimal AttachmentId)
+        public APIStatusJSON DeleteFilingMasterDraftAttachments(decimal AttachmentId)
         {
 
             try
@@ -1210,55 +1182,61 @@ namespace TrackNowApi.Controllers
                 {
                     _db.FilingMasterDraftAttachments.Remove(FilingMasterDraftAttachments);
                     _db.SaveChanges();
-                    return Ok();
+                    return new APIStatusJSON { Status = "Success" };
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Attachment Not Found" };
                 }
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
 
         [HttpPut("UpdateFilingMasterDraftAttachments/{AttachmentId:decimal}")]
-        public IActionResult UpdateFilingMasterDraftAttachments(decimal AttachmentId, [FromBody] FilingMasterDraftAttachments FilingMasterDraftAttachments)
+        public APIStatusJSON UpdateFilingMasterDraftAttachments(decimal AttachmentId, [FromBody] FilingMasterDraftAttachments FilingMasterDraftAttachments)
         {
             try
             {
 
-                var existingNotification = _db.FilingMasterDraftAttachments.
+                var existingFiling = _db.FilingMasterDraftAttachments.
                                       FirstOrDefault(n => n.AttachmentId == AttachmentId);
 
-                if (existingNotification != null)
+                if (existingFiling != null)
 
                 {
-                    existingNotification.AttachmentPath = FilingMasterDraftAttachments.AttachmentPath;
-                    existingNotification.CommentsId = FilingMasterDraftAttachments.CommentsId;
-                    existingNotification.CreateDate = FilingMasterDraftAttachments.CreateDate;
-                    existingNotification.CreateUser = FilingMasterDraftAttachments.CreateUser;
-                    existingNotification.UpdatedDate = FilingMasterDraftAttachments.UpdatedDate;
-                    existingNotification.UpdatedUser = FilingMasterDraftAttachments.UpdatedUser;
+                    existingFiling.AttachmentPath = FilingMasterDraftAttachments.AttachmentPath;
+                    existingFiling.CommentsId = FilingMasterDraftAttachments.CommentsId;
+                    existingFiling.CreateDate = FilingMasterDraftAttachments.CreateDate;
+                    existingFiling.CreateUser = FilingMasterDraftAttachments.CreateUser;
+                    existingFiling.UpdatedDate = FilingMasterDraftAttachments.UpdatedDate;
+                    existingFiling.UpdatedUser = FilingMasterDraftAttachments.UpdatedUser;
 
                     _db.SaveChanges();
-                    return Ok(existingNotification);
+                    return new APIStatusJSON
+                    {
+                        Status = "Success",
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterDraftAttachments, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                    };
+
                 }
                 else
                 {
-                    return NotFound();
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Attachment Not Found" };
                 }
 
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
 
-        //=======================================================================================================
+//==============================================================================================================================
 
         [HttpPost("CreateFilingMasterDraftCommentsAttachments")]
         public IActionResult CreateFilingMasterDraftCommentsAttachments(FilingMasterDraftCommentsAttachments Attachment)
@@ -1748,6 +1726,171 @@ namespace TrackNowApi.Controllers
                 return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
+//========================================================================================================================================
+
+        [HttpPost("FilingMasterAttachmentsCreate")]
+        public APIStatusJSON FilingMasterAttachmentsCreate([FromBody] FilingMasterAttachments item)
+        {
+            try
+            {
+                if (item == null)
+                {
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "FilingAttachment Not Found" };
+                }
+
+                _db.FilingMasterAttachments.Add(item);
+                _db.SaveChanges();
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(item, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+
+
+        }
+
+        [HttpGet("FilingMasterAttachments/{FilingId:decimal}")]
+        public APIStatusJSON ListFilingMasterAttachments(decimal FilingId)
+        {
+            try
+            {
+                var FilingMasterAttachments = (from fm in _db.FilingMaster
+                                               join fa in _db.FilingMasterAttachments on fm.FilingId equals fa.FilingId
+                                               where fm.FilingId == FilingId
+                                               select new
+                                               {
+                                                   FilingId = fm.FilingId,
+                                                   FilingName = fm.FilingName,
+                                                   AttachmentId = fa.AttachmentId,
+                                                   AttachmentPath = fa.AttachmentPath,
+                                                   CreateDate = fa.CreateDate,
+                                                   CreateUser = fa.CreateUser,
+                                                   UpdatedDate = fa.UpdatedDate,
+                                                   UpdatedUser = fa.UpdatedUser
+                                               });
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
+
+        [HttpGet("FilingMasterAttachmentsGetById/{FilingId:int}")]
+        public APIStatusJSON FilingMasterAttachmentsGetById(int FilingId)
+        {
+            try
+            {
+                var FilingMasterAttachments = (from fm in _db.FilingMaster
+                                               join fa in _db.FilingMasterAttachments on fm.FilingId equals fa.FilingId
+                                               where fm.FilingId == FilingId
+                                               select new
+                                               {
+                                                   FilingId = fm.FilingId,
+                                                   FilingName = fm.FilingName,
+                                                   AttachmentId = fa.AttachmentId,
+                                                   AttachmentPath = fa.AttachmentPath,
+                                                   CreateDate = fa.CreateDate,
+                                                   CreateUser = fa.CreateUser,
+                                                   UpdatedDate = fa.UpdatedDate,
+                                                   UpdatedUser = fa.UpdatedUser
+                                               });
+            
+                if (FilingMasterAttachments != null)
+                    return new APIStatusJSON
+                    {
+                        Status = "Success",
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterAttachments, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                    };
+                else
+                {
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "FilingAttachment Not Found" };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
+
+        [HttpPut("FilingMasterAttachmentsupdate{AttachmentId}")]
+        public APIStatusJSON FilingMasterAttachmentsupdate([FromBody] FilingMasterAttachments FilingMasterAttachments)
+        {
+            try
+            {
+                var existingFiling = _db.FilingMasterAttachments.FirstOrDefault(p => p.AttachmentId == FilingMasterAttachments.AttachmentId);
+
+                if (existingFiling != null)
+                {
+                    existingFiling.AttachmentPath = FilingMasterAttachments.AttachmentPath;
+                    existingFiling.AttachmentId = FilingMasterAttachments.AttachmentId;
+                    existingFiling.UpdatedDate = FilingMasterAttachments.UpdatedDate;
+                    existingFiling.UpdatedUser = FilingMasterAttachments.UpdatedUser;
+                    existingFiling.CreateDate = FilingMasterAttachments.CreateDate;
+                    existingFiling.CreateUser = FilingMasterAttachments.CreateUser;
+
+
+                    _db.SaveChanges();
+                    return new APIStatusJSON
+                    {
+                        Status = "Success",
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterAttachments, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                    };
+
+                }
+                else
+                {
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "FilingAttachment Not Found" };
+                }
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
+
+
+        [HttpDelete("(FilingMasterAttachmentsdelete{AttachmentId:int}")]
+        public APIStatusJSON FilingMasterAttachmentsdelete(int AttachmentId)
+        {
+            try
+            {
+                var res = _db.FilingMasterAttachments.FirstOrDefault(t => t.AttachmentId == AttachmentId);
+                if (res == null)
+                {
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Attachment Not Found" };
+                }
+
+                _db.FilingMasterAttachments.Remove(res);
+                _db.SaveChanges();
+                return new APIStatusJSON { Status = "Success" };
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
 
 
     }
