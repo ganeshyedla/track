@@ -6,10 +6,17 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TrackNowApi.Model
 {
+
     public partial class CustomerFilingAttachments
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long FollowupId { get; set; }
-        public long? AttachmentId { get; set; }
+        public long AttachmentId { get; set; }
+        public string? AttachmentPath { get; set; }
+        public decimal? FilingId { get; set; }
+        public decimal? CustomerId { get; set; }
+        public DateTime? CreateDate { get; set; }
+        public string? CreateUser { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+        public string? UpdatedUser { get; set; }
     }
 }

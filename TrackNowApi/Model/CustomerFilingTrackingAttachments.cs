@@ -8,9 +8,10 @@ namespace TrackNowApi.Model
 {
     public partial class CustomerFilingTrackingAttachments
     {
+        
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public decimal FileTrackingId { get; set; }
         public long? AttachmentId { get; set; }
+        public decimal FileTrackingId { get; set; }
         public string AttachmentPath { get; set; }
         public DateTime? CreateDate { get; set; }
         public string CreateUser { get; set; }

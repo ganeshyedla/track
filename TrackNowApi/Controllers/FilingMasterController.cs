@@ -386,6 +386,16 @@ namespace TrackNowApi.Controllers
                         });
                         
                     }
+                    foreach(FilingMasterDraftAttachments da in (_db.FilingMasterDraftAttachments.Where(u=>u.DraftId== FilingMasterDraft.DraftId)))
+                    {
+                        _db.FilingMasterAttachments.Add(new FilingMasterAttachments
+                        {
+                            FilingId = FilingMasterDraft.FilingId,
+                            AttachmentPath = da.AttachmentPath,
+                            CreateDate = DateTime.Now
+                        }) ;
+
+                    }
                 }
 
             }
@@ -547,8 +557,11 @@ namespace TrackNowApi.Controllers
         public APIStatusJSON CreateDraftFilingMaster([FromBody] FilingMasterDraft FilingMasterDraft)
         {
             try {
-            _db.Add(FilingMasterDraft);
-            _db.SaveChanges();
+                
+                FilingMasterDraft.ChangesInprogress = true;
+                
+                _db.Add(FilingMasterDraft);
+                _db.SaveChanges();
                 return new APIStatusJSON
                 {
                     Status = "Success",
@@ -1141,14 +1154,13 @@ namespace TrackNowApi.Controllers
             try
             {
                 var FilingMasterDraftAttachments = (from fd in _db.FilingMasterDraft
-                                                    join fda in _db.FilingMasterDraftAttachments on fd.DraftId equals fda.CommentsId
+                                                    join fda in _db.FilingMasterDraftAttachments on fd.DraftId equals fda.DraftId
                                                     where fd.DraftId == DraftId
                                                     select new
                                                     {
                                                         DraftId = fd.DraftId,
                                                         AttachmentId = fda.AttachmentId,
                                                         AttachmentPath = fda.AttachmentPath,
-                                                        CommentsId = fda.CommentsId,
                                                         CreateDate = fda.CreateDate,
                                                         CreateUser = fda.CreateUser,
                                                         UpdatedDate = fda.UpdatedDate,
@@ -1209,7 +1221,7 @@ namespace TrackNowApi.Controllers
 
                 {
                     existingFiling.AttachmentPath = FilingMasterDraftAttachments.AttachmentPath;
-                    existingFiling.CommentsId = FilingMasterDraftAttachments.CommentsId;
+                    existingFiling.DraftId = FilingMasterDraftAttachments.DraftId;
                     existingFiling.CreateDate = FilingMasterDraftAttachments.CreateDate;
                     existingFiling.CreateUser = FilingMasterDraftAttachments.CreateUser;
                     existingFiling.UpdatedDate = FilingMasterDraftAttachments.UpdatedDate;
