@@ -39,4 +39,16 @@ namespace TrackNowApi.Model
         public DateTime? UpdatedDate { get; set; }
         public string? UpdatedUser { get; set; }
     }
+
+    public partial class CustomerFilingMasterWorkflowAttachments
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public long AttachmentId { get; set; }
+        public string AttachmentPath { get; set; }
+        public decimal? WorkFlowId { get; set; }
+        public DateTime? CreateDate { get; set; }
+        public string CreateUser { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+        public string UpdatedUser { get; set; }
+    }
 }

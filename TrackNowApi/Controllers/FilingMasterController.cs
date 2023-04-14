@@ -1903,8 +1903,112 @@ namespace TrackNowApi.Controllers
                 return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
+        [HttpGet("FilingMasterWorkflowAttachments/{WorkflowId:decimal}")]
+        public APIStatusJSON ListFilingMasterWorkflowAttachments(decimal WorkflowId)
+        {
+            try
+            {
+                var FilingMasterWorkflowAttachments = (from fw in _db.FilingMasterWorkflow
+                                                       join fwa in _db.FilingMasterWorkflowAttachments on fw.WorkflowId equals fwa.WorkFlowId
+                                                       where fw.WorkflowId == WorkflowId
+                                                       select new
+                                                       {
+                                                           WorkflowId = fw.WorkflowId,
+                                                           WorkflowStatus = fw.WorkflowStatus,
+                                                           AttachmentId = fwa.AttachmentId,
+                                                           AttachmentPath = fwa.AttachmentPath,
+                                                           CreateDate = fwa.CreateDate,
+                                                           CreateUser = fwa.CreateUser,
+                                                           UpdatedDate = fwa.UpdatedDate,
+                                                           UpdatedUser = fwa.UpdatedUser
+                                                       });
 
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterWorkflowAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
 
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
 
+        //================================================================================================================
+        [HttpGet("FilingMasterWorkflowCommentsAttachments/{WorkflowId:decimal}/{CommentId:decimal}")]
+        public APIStatusJSON ListFilingMasterWorkflowCommentsAttachments(decimal WorkflowId, decimal CommentId)
+        {
+            try
+            {
+                var FilingMasterWorkflowCommentsAttachments = (from fmw in _db.FilingMasterWorkflow
+                                                               join fmc in _db.FilingMasterComments on fmw.CurrentApproverId equals fmc.CommentsId
+                                                               join fmca in _db.FilingMasterWorkflowCommentsAttachments on fmc.CommentsId equals fmca.CommentsId
+                                                               where fmw.WorkflowId == WorkflowId && fmc.CommentsId == CommentId
+                                                               select new
+                                                               {
+                                                                   WorkflowId = fmw.WorkflowId,
+                                                                   WorkflowStatus = fmw.WorkflowStatus,
+                                                                   AttachmentId = fmca.AttachmentId,
+                                                                   AttachmentPath = fmca.AttachmentPath,
+                                                                   CommentsId = fmca.CommentsId,
+                                                                   CreateDate = fmca.CreateDate,
+                                                                   CreateUser = fmca.CreateUser,
+                                                                   UpdatedDate = fmca.UpdatedDate,
+                                                                   UpdatedUser = fmca.UpdatedUser
+                                                               });
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterWorkflowCommentsAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+        [HttpGet("FilingMasterCommentsAttachments/{FilingId:decimal}/{CommentId:decimal}")]
+        public APIStatusJSON ListFilingMasterCommentsAttachments(decimal FilingId, decimal CommentId)
+        {
+            try
+            {
+                var FilingMasterCommentsAttachments = (from f in _db.FilingMaster
+                                                       join fmc in _db.FilingMasterComments on f.FilingId equals fmc.FilingId
+                                                       join fmca in _db.FilingMasterCommentsAttachments on fmc.CommentsId equals fmca.CommentsId
+                                                       where f.FilingId == FilingId && fmc.CommentsId == CommentId
+                                                       select new
+                                                       {
+                                                           FilingId = f.FilingId,
+                                                           FilingName = f.FilingName,
+                                                           CommentsId = fmc.CommentsId,
+                                                           CommentsText = fmc.CommentsText,
+                                                           AttachmentId = fmca.AttachmentId,
+                                                           AttachmentPath = fmca.AttachmentPath,
+                                                           CreateDate = fmca.CreateDate,
+                                                           CreateUser = fmca.CreateUser,
+                                                           UpdatedDate = fmca.UpdatedDate,
+                                                           UpdatedUser = fmca.UpdatedUser
+                                                       });
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterCommentsAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+
+        }
+        
     }
 }

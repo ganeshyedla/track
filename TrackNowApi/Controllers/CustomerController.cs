@@ -2988,5 +2988,302 @@ namespace TrackNowApi.Controllers
                 return NotFound(ex.Message);
             }
         }
+        [HttpGet("customerfilingmasterworkflowattachments/{workflowid:decimal}")]
+        public APIStatusJSON listcustomerfilingmasterworkflowattachments(decimal workflowid)
+        {
+            try
+            {
+                var customerfilingmasterworkflowattachments = (from cfw in _db.CustomerFilingMasterWorkflow
+                                                               join cfwa in _db.CustomerFilingMasterWorkflowAttachments on cfw.WorkflowId equals cfwa.WorkFlowId
+                                                               where cfw.WorkflowId == workflowid
+                                                               select new
+                                                               {
+                                                                   workflowid = cfw.WorkflowId,
+                                                                   WorkflowStatus = cfw.WorkflowStatus,
+                                                                   attachmentid = cfwa.AttachmentId,
+                                                                   attachmentpath = cfwa.AttachmentPath,
+                                                                   createdate = cfwa.CreateDate,
+                                                                   createuser = cfwa.CreateUser,
+                                                                   updateddate = cfwa.UpdatedDate,
+                                                                   updateduser = cfwa.UpdatedUser
+                                                               });
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(customerfilingmasterworkflowattachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+                ;
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+
+        }
+
+        [HttpGet("CustomerFilingWorkflowCommentsAttachments/{WorkflowId:decimal}/{CommentsId:decimal}")]
+        public APIStatusJSON ListCustomerFilingWorkflowCommentsAttachments(decimal WorkflowId, decimal CommentsId)
+        {
+            try
+            {
+                var CustomerFilingWorkflowCommentsAttachments = (from cfw in _db.CustomerFilingMasterWorkflow
+                                                                 join cc in _db.CustomerComments on cfw.WorkflowId equals cc.CustomerId
+                                                                 join cfwa in _db.CustomerFilingWorkflowCommentsAttachments on cc.CommentsId equals cfwa.CommentsId
+                                                                 where cfw.WorkflowId == WorkflowId && cc.CommentsId == CommentsId
+                                                                 select new
+                                                                 {
+                                                                     WorkflowId = cfw.WorkflowId,
+                                                                     WorkflowStatus = cfw.WorkflowStatus,
+                                                                     CommentsId = cc.CommentsId,
+                                                                     AttachmentId = cfwa.AttachmentId,
+                                                                     AttachmentPath = cfwa.AttachmentPath,
+                                                                     CreateDate = cfwa.CreateDate,
+                                                                     CreateUser = cfwa.CreateUser,
+                                                                     UpdatedDate = cfwa.UpdatedDate,
+                                                                     UpdatedUser = cfwa.UpdatedUser
+                                                                 });
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingWorkflowCommentsAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+        
+        [HttpGet("CustomerAttachments/{CustomerId:decimal}")]
+        public APIStatusJSON ListCustomerAttachments(decimal CustomerId)
+        {
+            try
+            {
+                var CustomerAttachments = from c in _db.Customer
+                                          join ca in _db.CustomerAttachments on c.CustomerId equals ca.CustomerId
+                                          where c.CustomerId == CustomerId
+                                          select new
+                                          {
+                                              CustomerId = c.CustomerId,
+                                              CustomerName = c.CustomerName,
+                                              AttachmentId = ca.AttachmentId,
+                                              AttachmentPath = ca.AttachmentPath,
+                                              CreateDate = ca.CreateDate,
+                                              CreateUser = ca.CreateUser,
+                                              UpdatedDate = ca.UpdatedDate,
+                                              UpdatedUser = ca.UpdatedUser
+                                          };
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+                ;
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+
+        }
+
+
+        [HttpGet("CustomerFilingCommentsAttachments")]
+        public APIStatusJSON ListCustomerFilingCommentsAttachments(decimal customerId, decimal filingId, decimal commentsId)
+        {
+            try
+            {
+                var CustomerFilingCommentsAttachments = from c in _db.Customer
+                                                        join cf in _db.CustomerFilingMaster on c.CustomerId equals cf.CustomerId
+                                                        join cc in _db.CustomerComments on cf.CustomerId equals cc.CustomerId
+                                                        join f in _db.FilingMaster on cf.FilingId equals f.FilingId
+                                                        join cfa in _db.CustomerFilingCommentsAttachments on cc.CommentsId equals cfa.CommentsId
+                                                        where c.CustomerId == customerId && cf.FilingId == filingId && cc.CommentsId == commentsId
+                                                        select new
+                                                        {
+                                                            CustomerId = c.CustomerId,
+                                                            CustomerName = c.CustomerName,
+                                                            FilingId = cf.FilingId,
+                                                            FilingName = f.FilingName,
+                                                            CommentsId = cc.CommentsId,
+                                                            CommentsText = cc.CommentsText,
+                                                            AttachmentId = cfa.AttachmentId,
+                                                            AttachmentPath = cfa.AttachmentPath,
+                                                            CreateDate = cfa.CreateDate,
+                                                            CreateUser = cfa.CreateUser,
+                                                            UpdatedDate = cfa.UpdatedDate,
+                                                            UpdatedUser = cfa.UpdatedUser
+                                                        };
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingCommentsAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+                ;
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+        //===========================================================================================================
+        [HttpGet("CustomerFilingDraftAttachments/{DraftId:decimal}")]
+        public APIStatusJSON ListCustomerFilingDraftAttachments(decimal DraftId)
+        {
+            try
+            {
+                var CustomerFilingDraftAttachments = (from d in _db.CustomerFilingMasterDraft
+                                                      join a in _db.CustomerFilingDraftAttachments on d.DraftId equals a.DraftId
+                                                      where d.DraftId == DraftId
+                                                      select new
+                                                      {
+                                                          DraftId = d.DraftId,
+                                                          AttachmentId = a.AttachmentId,
+                                                          AttachmentPath = a.AttachmentPath,
+                                                          CreateDate = a.CreateDate,
+                                                          CreateUser = a.CreateUser,
+                                                          UpdatedDate = a.UpdatedDate,
+                                                          UpdatedUser = a.UpdatedUser
+                                                      });
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingDraftAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+                ;
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+        //==========================================================================================================
+
+        [HttpGet("CustomerFilingDraftCommentsAttachments/{DraftId:decimal}/{CommentsId:decimal}")]
+        public APIStatusJSON ListDraftCommentsAttachments(decimal DraftId, decimal CommentsId)
+        {
+            try
+            {
+                var CustomerFilingDraftCommentsAttachments = (from d in _db.CustomerFilingMasterDraft
+                                                              join c in _db.CustomerComments on d.CustomerId equals c.CustomerId
+                                                              join a in _db.CustomerFilingDraftCommentsAttachments on c.CommentsId equals a.CommentsId
+                                                              where d.DraftId == DraftId && c.CommentsId == CommentsId
+                                                              select new
+                                                              {
+                                                                  DraftId = d.DraftId,
+                                                                  AttachmentId = a.AttachmentId,
+                                                                  AttachmentPath = a.AttachmentPath,
+                                                                  CommentsId = a.CommentsId,
+                                                                  CommentsText = c.CommentsText,
+                                                                  CreateDate = a.CreateDate,
+                                                                  CreateUser = a.CreateUser,
+                                                                  UpdatedDate = a.UpdatedDate,
+                                                                  UpdatedUser = a.UpdatedUser
+                                                              });
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingDraftCommentsAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
+
+        //===========================================================================================================
+
+        [HttpGet("CustomerFilingTrackingAttachments")]
+        public APIStatusJSON ListCustomerFilingTrackingAttachments(decimal customerId, decimal? fileTrackingId)
+        {
+            try
+            {
+                var CustomerFilingTrackingAttachments = from c in _db.Customer
+                                                        join ft in _db.CustomerFileTracking on c.CustomerId equals ft.CustomerId
+                                                        join fa in _db.CustomerFilingTrackingAttachments on ft.FileTrackingId equals fa.FileTrackingId
+                                                        where c.CustomerId == customerId && (!fileTrackingId.HasValue || ft.FileTrackingId == fileTrackingId)
+                                                        select new
+                                                        {
+                                                            CustomerId = c.CustomerId,
+                                                            CustomerName = c.CustomerName,
+                                                            FileTrackingId = ft.FileTrackingId,
+                                                            AttachmentId = fa.AttachmentId,
+                                                            AttachmentPath = fa.AttachmentPath,
+                                                            CreateDate = fa.CreateDate,
+                                                            CreateUser = fa.CreateUser,
+                                                            UpdatedDate = fa.UpdatedDate,
+                                                            UpdatedUser = fa.UpdatedUser
+
+                                                        };
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingTrackingAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+                ;
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
+        //=============================================================================================================
+        [HttpGet("CustomerFilingTrackingCommentsAttachments")]
+        public APIStatusJSON ListCustomerFilingTrackingCommentsAttachments(decimal customerId, decimal? fileTrackingId, decimal? commentsId)
+        {
+            try
+            {
+                var CustomerFilingTrackingCommentsAttachments = from c in _db.Customer
+                                                                join ft in _db.CustomerFileTracking on c.CustomerId equals ft.CustomerId
+                                                                join fc in _db.CustomerComments on c.CustomerId equals fc.CustomerId into ftc
+                                                                from fc in ftc.DefaultIfEmpty()
+                                                                join fa in _db.CustomerFilingTrackingCommentsAttachments on fc.CommentsId equals fa.CommentsId into fcaf
+                                                                from fa in fcaf.DefaultIfEmpty()
+                                                                where c.CustomerId == customerId && (!fileTrackingId.HasValue || ft.FileTrackingId == fileTrackingId) && (!commentsId.HasValue || fc.CommentsId == commentsId)
+                                                                select new
+                                                                {
+                                                                    CustomerId = c.CustomerId,
+                                                                    CustomerName = c.CustomerName,
+                                                                    FileTrackingId = ft.FileTrackingId,
+                                                                    CommentsId = fc.CommentsId,
+                                                                    CommentsText = fc.CommentsText,
+                                                                    CreateDate = fa.CreateDate,
+                                                                    CreateUser = fa.CreateUser,
+                                                                    UpdatedDate = fa.UpdatedDate,
+                                                                    UpdatedUser = fa.UpdatedUser,
+                                                                    AttachmentId = fa.AttachmentId,
+                                                                    AttachmentPath = fa.AttachmentPath
+                                                                };
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingTrackingCommentsAttachments, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
     }
 }

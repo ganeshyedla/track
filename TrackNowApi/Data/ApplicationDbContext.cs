@@ -67,11 +67,20 @@ namespace TrackNowApi.Data
         public DbSet<CustomerDraftBusinessCategory> CustomerDraftBusinessCategory { get; set; }
         public DbSet<CustomerFilingMasterDraft> CustomerFilingMasterDraft { get; set; }
         public DbSet<FilingDraftBusinessCategory> FilingDraftBusinessCategory { get; set; }
-        
+        public DbSet<CustomerFilingMasterWorkflowAttachments> CustomerFilingMasterWorkflowAttachments { get; set; }
+        public DbSet<FilingMasterCommentsAttachments> FilingMasterCommentsAttachments { get; set; }
+        public DbSet<FilingMasterWorkflowAttachments> FilingMasterWorkflowAttachments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
+            modelBuilder.Entity<CustomerFilingMasterWorkflowAttachments>()
+            .HasKey(t => new { t.AttachmentId });
+
+            modelBuilder.Entity<FilingMasterCommentsAttachments>()
+            .HasKey(t => new { t.AttachmentId });
+
+            modelBuilder.Entity<FilingMasterWorkflowAttachments>()
+            .HasKey(t => new { t.AttachmentId });
 
             modelBuilder.Entity<FilingDraftBusinessCategory>()
             .HasKey(t => new { t.Id });

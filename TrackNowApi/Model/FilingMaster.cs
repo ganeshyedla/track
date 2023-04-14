@@ -26,4 +26,26 @@ namespace TrackNowApi.Model
         public bool? ChangesInprogress { get; set; }
         public decimal? DueDayofFrequency { get; set; }
     }
+    public partial class FilingMasterCommentsAttachments
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public long AttachmentId { get; set; }
+        public string AttachmentPath { get; set; }
+        public decimal CommentsId { get; set; }
+        public DateTime? CreateDate { get; set; }
+        public string CreateUser { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+        public string UpdatedUser { get; set; }
+    }
+    public partial class FilingMasterWorkflowAttachments
+    {
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public long AttachmentId { get; set; }
+        public string AttachmentPath { get; set; }
+        public decimal? WorkFlowId { get; set; }
+        public DateTime? CreateDate { get; set; }
+        public string CreateUser { get; set; }
+        public DateTime? UpdatedDate { get; set; }
+        public string UpdatedUser { get; set; }
+    }
 }
