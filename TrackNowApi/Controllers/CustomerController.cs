@@ -2280,7 +2280,8 @@ namespace TrackNowApi.Controllers
             {
                 return NotFound();
             }
-            customer.UpdateUser = updatedCustomer.UpdateUser;
+            
+            _db.Update(updatedCustomer);
             _db.SaveChanges();
             return Ok();
         }
@@ -2742,7 +2743,7 @@ namespace TrackNowApi.Controllers
                 var opt = new JsonSerializerOptions() { WriteIndented = true };
                 string Customerrecords = JsonSerializer.Serialize<CustomerFilingMasterDraft[]>(Customer, opt);
 
-                var CustomerUpdate = _db.CustomerFilingMasterDraft.FromSqlRaw("dbo.CustomerFilingMasterDraftUpdate {0}", Customerrecords).ToList();
+                var CustomerUpdate = _db.CustomerFilingMasterDraft.FromSqlRaw("dbo.CustomerFilingMasterDraftUpdate {0},{1}", Customerrecords, @LoggedInUser).ToList();
                 
                 return new APIStatusJSON
                 {

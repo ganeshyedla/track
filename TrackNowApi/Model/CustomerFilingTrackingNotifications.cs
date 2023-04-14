@@ -11,6 +11,7 @@ namespace TrackNowApi.Model
     {
         
         public decimal FileTrackingId { get; set; }
+        public decimal NotifiedUserId { get; set; }
         public string NotificationFrom { get; set; }
         public string NotificationTo { get; set; }
         public string NotificationCC { get; set; }

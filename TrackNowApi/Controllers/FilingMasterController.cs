@@ -397,11 +397,83 @@ namespace TrackNowApi.Controllers
 
                     }
                 }
-
+                _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
+                {
+                    WorkflowId = FilingMasterWorkflow.WorkflowId,
+                    NotifiedUserId = FilingMasterWorkflow.CurrentApproverId,
+                    NotificationType = "Notification",
+                    NotificationSubject = "Approval Informaton",
+                    NotificationText = "Changes in FilingMaster has been approved",
+                    InformationRead = false,
+                    InformationDeleted = false,
+                    CreateDate = DateTime.Now,
+                    CreateUser = "System"
+                });
             }
-
             _db.SaveChanges();
             return Ok();
+        }
+
+        [HttpGet("FilingMasterWorkflowNotificationsList")]
+        public APIStatusJSON FilingMasterWorkflowNotificationsList()
+        {
+            try
+            {
+                var FilingMasterWorkflowNotifications = _db.FilingMasterWorkflowNotifications.ToList();
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterWorkflowNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
+        [HttpGet("FilingMasterWorkflowNotificationsListByWorkflowid")]
+        public APIStatusJSON FilingMasterWorkflowNotificationsList(int workflowid)
+        {
+            try
+            {
+                var FilingMasterWorkflowNotifications = _db.FilingMasterWorkflowNotifications.Where(u => u.WorkflowId == workflowid).ToList();
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterWorkflowNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
+        [HttpPost("FilingMasterWorkflowNotifications")]
+        public APIStatusJSON FilingMasterWorkflowNotifications([FromBody] FilingMasterWorkflowNotifications item)
+        {
+            try
+            {
+                _db.FilingMasterWorkflowNotifications.Add(item);
+                _db.SaveChanges();
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(item, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
         }
 
         [HttpPut("FilingMasterReject{WorkflowId:Int}")]
@@ -649,8 +721,21 @@ namespace TrackNowApi.Controllers
                                                               select u.UserId).FirstOrDefault();
                     //return new APIStatus { Status = "Failure", ErrorCode = 1, ErrorMessage = "Approver Not Configured" };
                 }
-
+                
                 _db.Add(FilingMasterWorkflow);
+                _db.SaveChanges();
+                _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
+                {
+                    WorkflowId = FilingMasterWorkflow.WorkflowId,
+                    NotifiedUserId = FilingMasterWorkflow.WorkflowInitiatorId,
+                    NotificationType = "Notification",
+                    NotificationSubject = "Reques of Approval",
+                    NotificationText = "Please approve my request as soon as possible",
+                    InformationRead = false,
+                    InformationDeleted = false,
+                    CreateDate = DateTime.Now,
+                    CreateUser = "System"
+                });
                 _db.SaveChanges();
 
                 

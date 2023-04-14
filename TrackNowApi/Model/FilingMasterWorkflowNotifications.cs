@@ -10,6 +10,7 @@ namespace TrackNowApi.Model
     {
        
         public decimal WorkflowId { get; set; }
+        public decimal NotifiedUserId { get; set; }
         public string NotificationFrom { get; set; }
         public string NotificationTo { get; set; }
         public string NotificationCC { get; set; }
