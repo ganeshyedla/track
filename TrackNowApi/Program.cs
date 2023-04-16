@@ -16,7 +16,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddCors(p => p.AddPolicy("CorsPolicy", build => {
-    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader();
+    build.WithOrigins("*").AllowAnyMethod().AllowAnyHeader().WithExposedHeaders("x-file-url");
 }));
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
