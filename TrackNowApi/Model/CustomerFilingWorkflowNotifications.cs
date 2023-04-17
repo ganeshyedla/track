@@ -10,11 +10,11 @@ namespace TrackNowApi.Model
     public partial class CustomerFilingWorkflowNotifications
     {
         public decimal? WorkflowId { get; set; }
-        public decimal NotifiedUserId { get; set; }
-        public string NotificationFrom { get; set; }
-        public string NotificationTo { get; set; }
-        public string NotificationCC { get; set; }
-        public string NotificationSubject { get; set; }
+        public decimal? NotifiedUserId { get; set; }
+        public string? NotificationFrom { get; set; }
+        public string? NotificationTo { get; set; }
+        public string? NotificationCC { get; set; }
+        public string? NotificationSubject { get; set; }
         public string? NotificationType { get; set; }
         public string? NotificationText { get; set; }
         public bool? InformationRead { get; set; }
