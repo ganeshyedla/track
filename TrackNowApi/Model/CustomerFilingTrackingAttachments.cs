@@ -2,13 +2,14 @@
 #nullable disable
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TrackNowApi.Model
 {
     public partial class CustomerFilingTrackingAttachments
     {
-        
+        [ConcurrencyCheck]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long? AttachmentId { get; set; }
         public decimal FileTrackingId { get; set; }
