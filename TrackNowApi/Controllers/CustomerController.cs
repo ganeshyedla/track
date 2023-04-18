@@ -426,6 +426,7 @@ namespace TrackNowApi.Controllers
                           CustomerId = c.CustomerId,
                           CustomerName = c.CustomerName,
                           FilingId = f.FilingId,
+                          FilingName = f.FilingName,
                           FilingDescription = f.FilingDescription,
                           FilingFrequency = f.FilingFrequency,
                           StateInfo = f.StateInfo,
