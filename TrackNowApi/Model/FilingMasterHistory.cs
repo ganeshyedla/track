@@ -19,6 +19,7 @@ namespace TrackNowApi.Model
         public string? Jsidept { get; set; }
         public string? JsicontactName { get; set; }
         public string? JsicontactEmail { get; set; }
+        public string? JSIContactNumber { get; set; }
         public DateTime? CreateDate { get; set; }
         public string? CreateUser { get; set; }
         public DateTime? UpdateDate { get; set; }

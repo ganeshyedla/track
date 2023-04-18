@@ -329,6 +329,7 @@ namespace TrackNowApi.Controllers
                         rowsToUpdate.Jsidept = FilingMasterDraft.Jsidept;
                         rowsToUpdate.JsicontactName = FilingMasterDraft.JsicontactName;
                         rowsToUpdate.JsicontactEmail = FilingMasterDraft.JsicontactEmail;
+                        rowsToUpdate.JSIContactNumber = FilingMasterDraft.JSIContactNumber;
                         rowsToUpdate.UpdateDate = FilingMasterDraft.UpdateDate;
                         rowsToUpdate.UpdateUser = FilingMasterDraft.UpdateUser;
                         rowsToUpdate.Juristiction = FilingMasterDraft.Juristiction;
@@ -350,15 +351,18 @@ namespace TrackNowApi.Controllers
                         FilingFrequency = FilingMasterDraft.FilingFrequency,
                         StateInfo = FilingMasterDraft.StateInfo,
                         Required = FilingMasterDraft.Required,
+                        RuleInfo = FilingMasterDraft.RuleInfo,
                         Jsidept = FilingMasterDraft.Jsidept,
                         JsicontactName = FilingMasterDraft.JsicontactName,
                         JsicontactEmail = FilingMasterDraft.JsicontactEmail,
+                        JSIContactNumber = FilingMasterDraft.JSIContactNumber,
                         UpdateDate = FilingMasterDraft.UpdateDate,
                         UpdateUser = FilingMasterDraft.UpdateUser,
                         Juristiction = FilingMasterDraft.Juristiction,
+                        DueDayofFrequency = FilingMasterDraft.DueDayofFrequency,
                         Notes = FilingMasterDraft.Notes,
                         ChangesInprogress = false
-                    };
+                };
                     _db.FilingMaster.Add(FilingMasterData);
                     _db.SaveChanges();
                     FilingId = _db.FilingMaster.Max(u => (decimal)u.FilingId);
@@ -503,6 +507,7 @@ namespace TrackNowApi.Controllers
 
             FilingMasterDraft.ChangesInprogress = false;
             FilingMasterDraft.UpdateDate = DateTime.Now;
+            FilingMasterDraft.Status = FilingMasterWorkflow.WorkflowStatus;
             FilingMasterDraft.UpdateUser = Userid.ToString();
             _db.FilingMasterDraft.Attach(FilingMasterDraft);
             _db.Entry(FilingMasterDraft).Property(x => x.ChangesInprogress).IsModified = true;
@@ -512,7 +517,21 @@ namespace TrackNowApi.Controllers
             var rowsToUpdate = _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
             if (rowsToUpdate != null)
                 rowsToUpdate.ChangesInprogress = false;
-            
+
+            _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
+            {
+                WorkflowId = FilingMasterWorkflow.WorkflowId,
+                NotifiedUserId = FilingMasterWorkflow.CurrentApproverId,
+                NotificationType = "Notification",
+                NotificationSubject = "Reject Notification",
+                NotificationText = "Changes in FilingMaster has been Rejected",
+                InformationRead = false,
+                InformationDeleted = false,
+                CreateDate = DateTime.Now,
+                CreateUser = "System"
+            });
+
+
             _db.SaveChanges();
             return Ok();
         }

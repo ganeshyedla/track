@@ -602,6 +602,49 @@ namespace TrackNowApi.Controllers
                 return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
+        [HttpGet("ViewCustomerFilingWorkflowNotifications/{NotificationId}")]
+        public APIStatusJSON ViewCustomerFilingWorkflowNotifications(int NotificationId)
+        {
+            try
+            {
+                var CustomerFilingWorkflowNotifications = _db.CustomerFilingWorkflowNotifications.Where(u=>u.NotificationId==NotificationId).ToList();
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingWorkflowNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+        [HttpDelete("DeleteCustomerFilingWorkflowNotifications/{NotificationId}")]
+        public APIStatusJSON DeleteCustomerFilingWorkflowNotifications(int NotificationId)
+        {
+            try
+            {
+                CustomerFilingWorkflowNotifications CustomerFilingWorkflowNotifications = 
+                    _db.CustomerFilingWorkflowNotifications.Where(u => u.NotificationId == NotificationId).FirstOrDefault();
+
+                _db.CustomerFilingWorkflowNotifications.Remove(CustomerFilingWorkflowNotifications);
+                _db.SaveChanges();
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingWorkflowNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
         [HttpPost("CreateCustomerFilingDraftComments")]
         public IActionResult CreateCustomerFilingDraftComments([FromBody] CustomerFilingDraftComments CustomerFilingDraftComments)
         {

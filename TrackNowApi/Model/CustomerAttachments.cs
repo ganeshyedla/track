@@ -8,8 +8,8 @@ namespace TrackNowApi.Model
 {
     public partial class CustomerAttachments
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public decimal CustomerId { get; set; }
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long? AttachmentId { get; set; }
         public string AttachmentPath { get; set; }
         public DateTime? CreateDate { get; set; }

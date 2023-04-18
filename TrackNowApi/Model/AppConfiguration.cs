@@ -125,6 +125,20 @@ namespace TrackNowApi.Model
         public string? FileTrackingId { get; set; }
         public List<IFormFile> Files { get; set; }
     }
+    public class UploadFile
+    {
+        public string? TableName { get; set; }
+        public string? CustomerId { get; set; }
+        public string? FilingId { get; set; }
+        public string? CommentId { get; set; }
+        public string? AttachmentId { get; set; }
+        public string? WorkflowId { get; set; }
+        public string? DraftId { get; set; }
+        public string? FileTrackingId { get; set; }
+        public string? Url { get; set; }
+        public string? CreateUser { get; set; }
+        public List<IFormFile> Files { get; set; }
+    }
     public class azzureupload
     {
         public string Message { get; set; }

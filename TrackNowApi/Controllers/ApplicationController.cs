@@ -6,6 +6,8 @@ using System.Text.Json;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
 using Azure.Storage.Blobs;
+using Microsoft.EntityFrameworkCore;
+using System.Net.Mail;
 
 namespace TrackNowApi.Controllers
 {
@@ -503,6 +505,223 @@ namespace TrackNowApi.Controllers
         }
 
         [HttpPost("[action]")]
+        public APIStatusJSON UploadwithAttachmentUpdate([FromForm] UploadFile request)
+        {
+            try
+            {
+                BlobContainerClient blobContainerClient = new BlobContainerClient(Blob_connectionString, "jsitracknow");
+
+                UploadFile[] UploadInfo = new UploadFile[100];
+
+                List<azzureupload> uploadedFiles = new List<azzureupload>();
+                var folderPath="";
+                int i = 0;
+                foreach (IFormFile file in request.Files)
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        file.CopyTo(stream);
+                        stream.Position = 0;
+
+                        var blobName = file.FileName;
+                        
+                        if (request.TableName.StartsWith("Customer"))
+                        {
+                            folderPath = $"Customer/{request.CustomerId}/";
+                            if (!string.IsNullOrEmpty(request.FilingId))
+                            {
+                                folderPath += $"Filing/{request.FilingId}/";
+                            }
+                            else if (!string.IsNullOrEmpty(request.FileTrackingId))
+                            {
+                                folderPath += $"FileTracking/{request.FileTrackingId}/";
+                            }
+                        }
+                        if (request.TableName.StartsWith("Filing"))
+                        { folderPath = $"FilingMaster/{request.FilingId}/";}
+
+                        if (!string.IsNullOrEmpty(request.CommentId))
+                        {
+                            folderPath += $"Comments/CommentID:{request.CommentId}/";
+                        }
+                        else if (!string.IsNullOrEmpty(request.FilingId))
+                        {
+                            folderPath += $"Filing/{request.FilingId}/";
+                        }
+                        else if (!string.IsNullOrEmpty(request.WorkflowId))
+                        {
+                            folderPath += $"WorkFlow/{request.WorkflowId}/";
+                        }
+                        else if (!string.IsNullOrEmpty(request.FileTrackingId))
+                        {
+                            folderPath += $"FileTracking/{request.FileTrackingId}/";
+                        }
+                        else if (!string.IsNullOrEmpty(request.DraftId))
+                        {
+                            folderPath += $"Draft/{request.DraftId}/";
+                        }
+
+                        var blobClient = blobContainerClient.GetBlobClient($"{folderPath}{blobName}");
+                        blobClient.Upload(stream);
+
+                        var blobUrl = blobClient.Uri.AbsoluteUri;
+                        var blobUrlFormatted = $"{blobUrl.Substring(0, blobUrl.LastIndexOf("/"))}/{blobName}";
+
+                        request.Url = blobUrlFormatted;
+                        AttachmentUpdate(request);
+                        
+                        UploadInfo[i] = request;
+
+                        if (!string.IsNullOrEmpty(request.AttachmentId))
+                        {
+                            folderPath += $"AttachmentID:{request.AttachmentId}/";
+                        }
+
+                        uploadedFiles.Add(new azzureupload { FileName = blobName, Message = $"File '{blobName}' uploaded successfully." });
+                    }
+                    i++;
+
+                }
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(UploadInfo, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+            }
+            catch (RequestFailedException ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Upload request failed" };
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+        [HttpPost("[action]")]
+        public APIStatusJSON AttachmentUpdate([FromForm] UploadFile request)
+        {
+            decimal CustomerId, CommentId, WorkflowId, DraftId, FilingId, FileTrackingId;
+            decimal.TryParse(request.CustomerId, out CustomerId) ;
+            decimal.TryParse(request.CommentId, out CommentId);
+            decimal.TryParse(request.WorkflowId, out WorkflowId);
+            decimal.TryParse(request.DraftId, out DraftId);
+            decimal.TryParse(request.FilingId, out FilingId);
+            decimal.TryParse(request.FileTrackingId, out FileTrackingId);
+            
+
+            try
+            {
+                switch (request.TableName)
+                {
+                    case "CustomerAttachments":
+                        CustomerAttachments CustomerAttachments = new CustomerAttachments { CustomerId = CustomerId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.CustomerAttachments.Add(CustomerAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = CustomerAttachments.AttachmentId.ToString();
+                        break;
+                    case "CustomerFilingAttachments":
+                        CustomerFilingAttachments CustomerFilingAttachments = new CustomerFilingAttachments { CustomerId = CustomerId, FilingId = FilingId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.CustomerFilingAttachments.Add(CustomerFilingAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = CustomerFilingAttachments.AttachmentId.ToString();
+                        break;
+                    case "CustomerFilingCommentsAttachments":
+                        CustomerFilingCommentsAttachments CustomerFilingCommentsAttachments = new CustomerFilingCommentsAttachments { CommentsId = CommentId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.CustomerFilingCommentsAttachments.Add(CustomerFilingCommentsAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = CustomerFilingCommentsAttachments.AttachmentId.ToString();
+                        break;
+                    case "CustomerFilingDraftAttachments":
+                        CustomerFilingDraftAttachments CustomerFilingDraftAttachments = new CustomerFilingDraftAttachments { DraftId = DraftId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.CustomerFilingDraftAttachments.Add(CustomerFilingDraftAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = CustomerFilingDraftAttachments.AttachmentId.ToString();
+                        break;
+                    case "CustomerFilingDraftCommentsAttachments":
+                        CustomerFilingDraftCommentsAttachments CustomerFilingDraftCommentsAttachments = new CustomerFilingDraftCommentsAttachments { CommentsId = CommentId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.CustomerFilingDraftCommentsAttachments.Add(CustomerFilingDraftCommentsAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = CustomerFilingDraftCommentsAttachments.AttachmentId.ToString();
+                        break;
+                    case "CustomerFilingMasterWorkflowAttachments":
+                        CustomerFilingMasterWorkflowAttachments CustomerFilingMasterWorkflowAttachments = new CustomerFilingMasterWorkflowAttachments { WorkFlowId = WorkflowId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.CustomerFilingMasterWorkflowAttachments.Add(CustomerFilingMasterWorkflowAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = CustomerFilingMasterWorkflowAttachments.AttachmentId.ToString();
+                        break;
+                    case "CustomerFilingTrackingAttachments":
+                        CustomerFilingTrackingAttachments CustomerFilingTrackingAttachments = new CustomerFilingTrackingAttachments { FileTrackingId = FileTrackingId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser};
+                        _db.CustomerFilingTrackingAttachments.Add(CustomerFilingTrackingAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = CustomerFilingTrackingAttachments.AttachmentId.ToString();
+                        break;
+                    case "CustomerFilingTrackingCommentsAttachments":
+                        CustomerFilingTrackingCommentsAttachments CustomerFilingTrackingCommentsAttachments = new CustomerFilingTrackingCommentsAttachments { CommentsId = CommentId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.CustomerFilingTrackingCommentsAttachments.Add(CustomerFilingTrackingCommentsAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = CustomerFilingTrackingCommentsAttachments.AttachmentId.ToString();
+                        break;
+                    case "CustomerFilingWorkflowCommentsAttachments":
+                        CustomerFilingWorkflowCommentsAttachments CustomerFilingWorkflowCommentsAttachments = new CustomerFilingWorkflowCommentsAttachments { CommentsId = CommentId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.CustomerFilingWorkflowCommentsAttachments.Add(CustomerFilingWorkflowCommentsAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = CustomerFilingWorkflowCommentsAttachments.AttachmentId.ToString();
+                        break;
+                    case "FilingMasterAttachments":
+                        FilingMasterAttachments FilingMasterAttachments = new FilingMasterAttachments { FilingId = FilingId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.FilingMasterAttachments.Add(FilingMasterAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = FilingMasterAttachments.AttachmentId.ToString();
+                        break;
+                    case "FilingMasterCommentsAttachments":
+                        FilingMasterCommentsAttachments FilingMasterCommentsAttachments = new FilingMasterCommentsAttachments { CommentsId = CommentId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.FilingMasterCommentsAttachments.Add(FilingMasterCommentsAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = FilingMasterCommentsAttachments.AttachmentId.ToString();
+                        break;
+                    case "FilingMasterDraftAttachments":
+                        FilingMasterDraftAttachments FilingMasterDraftAttachments = new FilingMasterDraftAttachments { DraftId = DraftId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.FilingMasterDraftAttachments.Add(FilingMasterDraftAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = FilingMasterDraftAttachments.AttachmentId.ToString();
+                        break;
+                    case "FilingMasterDraftCommentsAttachments":
+                        FilingMasterDraftCommentsAttachments FilingMasterDraftCommentsAttachments = new FilingMasterDraftCommentsAttachments { CommentsId = CommentId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.FilingMasterDraftCommentsAttachments.Add(FilingMasterDraftCommentsAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = FilingMasterDraftCommentsAttachments.AttachmentId.ToString();
+                        break;
+                    case "FilingMasterWorkflowAttachments":
+                        FilingMasterWorkflowAttachments FilingMasterWorkflowAttachments = new FilingMasterWorkflowAttachments { WorkFlowId = WorkflowId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.FilingMasterWorkflowAttachments.Add(FilingMasterWorkflowAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = FilingMasterWorkflowAttachments.AttachmentId.ToString();
+                        break;
+                    case "FilingMasterWorkflowCommentsAttachments":
+                        FilingMasterWorkflowCommentsAttachments FilingMasterWorkflowCommentsAttachments = new FilingMasterWorkflowCommentsAttachments { CommentsId = CommentId, AttachmentPath = request.Url, CreateDate = DateTime.Now, CreateUser = request.CreateUser };
+                        _db.FilingMasterWorkflowCommentsAttachments.Add(FilingMasterWorkflowCommentsAttachments);
+                        _db.SaveChanges();
+                        request.AttachmentId = FilingMasterWorkflowCommentsAttachments.AttachmentId.ToString();
+                        break;
+                    default:
+                        break;
+                }
+                
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(request, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
+        [HttpPost("[action]")]
         public APIStatusJSON CustomerFilingUpload([FromForm] CustomerFilingUpload request)
         {
             try
@@ -545,7 +764,7 @@ namespace TrackNowApi.Controllers
                         {
                             folderPath += $"Draft/{request.DraftId}/";
                         }
-                        
+
                         if (!string.IsNullOrEmpty(request.AttachmentId))
                         {
                             folderPath += $"AttachmentID:{request.AttachmentId}/";
@@ -576,7 +795,6 @@ namespace TrackNowApi.Controllers
                 return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
-
         [HttpPost("[action]")]
         public APIStatusJSON FilingmasterUpload([FromForm] FilingUploadFilesRequest request)
         {
