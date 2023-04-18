@@ -15,5 +15,6 @@ namespace TrackNowApi.Model
         public string? CreateUser { get; set; }
         public DateTime? UpdateDate { get; set; }
         public string? UpdateUser { get; set; }
+        public string? Notes { get; set; }
     }
 }
