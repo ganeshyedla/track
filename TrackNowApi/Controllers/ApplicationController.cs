@@ -864,13 +864,38 @@ namespace TrackNowApi.Controllers
             {
                 if (!string.IsNullOrEmpty(request.FileUrl))
                 {
+                    // Extract filename from URL
+                    var uri = new Uri(request.FileUrl);
+                    var filename = Path.GetFileName(uri.LocalPath);
+
+
+
                     // Download the file using the URL
                     using (var client = new HttpClient())
                     {
                         var response = await client.GetAsync(request.FileUrl);
                         var content = await response.Content.ReadAsStreamAsync();
 
-                        return new FileStreamResult(content, "application/octet-stream");
+
+
+                        // Set the content type based on the file extension
+                        var contentType = "application/octet-stream";
+                        if (Path.GetExtension(request.FileUrl).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
+                        {
+                            contentType = "application/pdf";
+                        }
+
+
+
+                        // Create a FileStreamResult and set the FileDownloadName and ContentType properties
+                        var result = new FileStreamResult(content, contentType)
+                        {
+                            FileDownloadName = filename
+                        };
+
+
+
+                        return result;
                     }
                 }
                 else
@@ -883,7 +908,6 @@ namespace TrackNowApi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
 
 
     }
