@@ -587,6 +587,26 @@ namespace TrackNowApi.Controllers
 
             return Ok(CustomerFilingComments);
         }
+        [HttpGet("CustomerFilingWorkflowNotificationsList{ReceipientId}")]
+        public APIStatusJSON CustomerFilingWorkflowNotificationsListbyReceipientId(int ReceipientId)
+        {
+            try
+            {
+                var CustomerFilingWorkflowNotifications = _db.CustomerFilingWorkflowNotifications.Where(x=>x.NotifiedUserId== ReceipientId).ToList();
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingWorkflowNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
         [HttpGet("CustomerFilingWorkflowNotificationsList")]
         public APIStatusJSON CustomerFilingWorkflowNotificationsList()
         {

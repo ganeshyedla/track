@@ -438,6 +438,27 @@ namespace TrackNowApi.Controllers
                 return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
+        [HttpGet("FilingMasterWorkflowNotificationsList{ReceipientId}")]
+        public APIStatusJSON FilingMasterWorkflowNotificationsListbyReceipientId(int ReceipientId)
+        {
+            try
+            {
+                var FilingMasterWorkflowNotifications = _db.FilingMasterWorkflowNotifications.Where(u => u.NotificationId == ReceipientId).ToList();
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterWorkflowNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
 
         [HttpGet("FilingMasterWorkflowNotificationsListByWorkflowid")]
         public APIStatusJSON FilingMasterWorkflowNotificationsList(int workflowid)
