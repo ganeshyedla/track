@@ -2006,6 +2006,24 @@ namespace TrackNowApi.Controllers
             }
         }
 
+        [HttpGet("ListCustomerFilingTrackingNotifications{ReceipientId}")]
+        public APIStatusJSON ListCustomerFilingTrackingNotificationsbyReceipientId(int ReceipientId)
+        {
+            try
+            {
+                var CustomerFilingTrackingNotifications = _db.CustomerFilingTrackingNotifications.Where(x => x.NotifiedUserId == ReceipientId).ToList();
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingTrackingNotifications, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
         [HttpPut("UpdateCustomerFilingTrackingNotification/{NotificationId:decimal}")]
         public APIStatusJSON UpdateCustomerFilingTrackingNotification(decimal NotificationId, [FromBody] CustomerFilingTrackingNotifications customerFilingTrackingNotification)
         {
