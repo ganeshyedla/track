@@ -2367,11 +2367,13 @@ namespace TrackNowApi.Controllers
             {
                 return NotFound();
             }
-            
-            _db.Update(updatedCustomer);
+
+            _db.Entry(customer).CurrentValues.SetValues(updatedCustomer);
+           // _db.Update(updatedCustomer);
             _db.SaveChanges();
             return Ok();
         }
+
         [HttpDelete("CustomerFilingMasterWorkflowdelete/{WorkflowId:int}")]
         public IActionResult CustomerFilingMasterWorkflowDelete(int WorkflowId)
         {

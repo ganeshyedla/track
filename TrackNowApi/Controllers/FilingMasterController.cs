@@ -770,7 +770,7 @@ namespace TrackNowApi.Controllers
                     NotifiedUserId = FilingMasterWorkflow.WorkflowInitiatorId,
                     NotificationType = "Notification",
                     NotificationSubject = "Request of Approval",
-                    NotificationText = "Please approve my request as soon as possible",
+                    NotificationText = "Review And approve my request Workflow",
                     InformationRead = false,
                     InformationDeleted = false,
                     CreateDate = DateTime.Now,
