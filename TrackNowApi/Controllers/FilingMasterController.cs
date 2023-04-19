@@ -443,7 +443,7 @@ namespace TrackNowApi.Controllers
         {
             try
             {
-                var FilingMasterWorkflowNotifications = _db.FilingMasterWorkflowNotifications.Where(u => u.NotificationId == ReceipientId).ToList();
+                var FilingMasterWorkflowNotifications = _db.FilingMasterWorkflowNotifications.Where(u => u.NotifiedUserId == ReceipientId).ToList();
 
                 return new APIStatusJSON
                 {
