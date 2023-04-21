@@ -1,10 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.VisualBasic;
 using System.Data;
 using System.Net.Mail;
 using System.Text.Json;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
+using static Azure.Core.HttpHeader;
 
 namespace TrackNowApi.Controllers
 {
@@ -2349,15 +2351,52 @@ namespace TrackNowApi.Controllers
         [HttpGet("CustomerFilingMasterWorkflowbyid/{WorkflowId:int}")]
         public ActionResult<CustomerFilingMasterWorkflow> CustomerFilingMasterWorkflowGetById(int WorkflowId)
         {
-            var res = _db.CustomerFilingMasterWorkflow.FirstOrDefault(p => p.WorkflowId == WorkflowId);
-            if (res != null)
+            try
             {
-                return Ok(res);
+                var CustomerFilingMasterWorkflow = (from o in _db.CustomerFilingMasterDraft
+                           join c in _db.Customer on o.CustomerId equals c.CustomerId
+                           join w in _db.CustomerFilingMasterWorkflow on o.DraftId equals w.DraftId
+                           join f in _db.FilingMaster on o.FilingId equals f.FilingId
+                           where w.WorkflowId == WorkflowId
+                           select new
+                           {
+                               WorkflowId = w.WorkflowId,
+                               WorkflowInitiatorId = w.WorkflowInitiatorId,
+                               CurrentApproverId = w.CurrentApproverId,
+                               DraftId = w.DraftId,
+                               WorkflowStatus = w.WorkflowStatus,
+                               FilingId = o.FilingId,
+                               CustomerId = o.CustomerId,
+                               FilingName = f.FilingName,
+                               CustomerName = c.CustomerName,
+                               CreateDate = w.CreateDate,
+                               CreateUser = w.CreateUser,
+                               UpdateDate = w.UpdateDate,
+                               UpdateUser = w.UpdateUser,
+                           }).ToList();
+
+
+                        if (CustomerFilingMasterWorkflow.Count == 0) // if no records found
+                        {
+                            return NotFound("No Workflow records found.");
+                        }
+
+                return Ok(CustomerFilingMasterWorkflow);
+
             }
-            else
+            catch (Exception ex)
             {
-                return NotFound();
+                return NotFound(ex.Message);
             }
+            //    var res = _db.CustomerFilingMasterWorkflow.FirstOrDefault(p => p.WorkflowId == WorkflowId);
+            //    if (res != null)
+            //    {
+            //        return Ok(res);
+            //    }
+            //    else
+            //    {
+            //        return NotFound();
+            //    }
         }
         [HttpPut("CustomerFilingMasterWorkflowupdate/{WorkflowId}")]
         public IActionResult CustomerFilingMasterWorkflowUpdate(int WorkflowId, CustomerFilingMasterWorkflow updatedCustomer)
@@ -2605,31 +2644,63 @@ namespace TrackNowApi.Controllers
             try
             {
 
-                var CustomerFileTracking = _db.CustomerFileTracking
-                                       .FirstOrDefault(F => F.FileTrackingId == FileTrackingId);
-                if (CustomerFileTracking != null)
-                {
+                var CustomerFileTracking = (
+                               from c in _db.CustomerFileTracking
+                               join f in _db.FilingMaster on c.FilingId equals f.FilingId
+                               join o in _db.Customer on c.CustomerId equals o.CustomerId
+                               where c.FileTrackingId == FileTrackingId
+                               select new
+                               {
+                                   FileTrackingId = c.FileTrackingId,
+                                   CustomerId = c.CustomerId,
+                                   CustomerName = o.CustomerName,
+                                   FilingId = c.FilingId,
+                                   FilingName = f.FilingName,
+                                   FilingFrequency = f.FilingFrequency,
+                                   DueDate = c.DueDate,
+                                   Status = c.Status,
+                                   CreateDate = c.CreateDate,
+                                   CreateUser = c.CreateUser,
+                                   UpdateDate = c.UpdateDate,
+                                   UpdateUser = c.UpdateUser,
 
+                               });
+
+                if (CustomerFileTracking == null)
+                {
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "File Tracking Not Found" };
+
+                }
+                else
+                {
+   
                     return new APIStatusJSON
                     {
                         Status = "Success",
                         Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFileTracking, new JsonSerializerOptions
                         { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                     };
-
                 }
-                else
-                {
-                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "File Tracking Not Found" };
-
-                }
-
-
             }
             catch (Exception ex)
             {
                 return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
+
+            //   var CustomerFileTracking = _db.CustomerFileTracking
+            //                       .FirstOrDefault(F => F.FileTrackingId == FileTrackingId);
+            //if (CustomerFileTracking != null)
+            //{
+
+            //    return new APIStatusJSON
+            //    {
+            //        Status = "Success",
+            //        Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFileTracking, new JsonSerializerOptions
+            //        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+            //    };
+
+            //}
+
         }
 
         [HttpDelete("CustomerFileTracking/{FileTrackingId:Int}")]

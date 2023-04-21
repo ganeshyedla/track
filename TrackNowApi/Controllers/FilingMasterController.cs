@@ -871,12 +871,46 @@ namespace TrackNowApi.Controllers
                        ));
 
         }
-        [HttpGet("FilingMasterWorkflowList{WorkflowId:Int}")]
+        [HttpGet("FilingMasterWorkflowList/{WorkflowId:Int}")]
         public IActionResult FilingMasterWorkflowList(int WorkflowId)
         {
-            FilingMasterWorkflow FilingMasterWorkflow = _db.FilingMasterWorkflow.FirstOrDefault(x => x.WorkflowId == WorkflowId);
+            try
+            {
+                var FilingMasterWorkflow =(from f in _db.FilingMasterWorkflow
+                           join c in _db.FilingMasterDraft on f.DraftId equals c.DraftId
+                              where f.WorkflowId == WorkflowId
+                              select new
+                           {
+                               WorkflowId = f.WorkflowId,
+                               WorkflowInitiatorId = f.WorkflowInitiatorId,
+                               CurrentApproverId = f.CurrentApproverId,
+                               DraftId = f.DraftId,
+                               WorkflowStatus = f.WorkflowStatus,
+                               FilingId = c.FilingId,
+                               FilingName = c.FilingName,
+                               CreateDate = f.CreateDate,
+                               CreateUser = f.CreateUser,
+                               UpdateDate = f.UpdateDate,
+                               UpdateUser = f.UpdateUser,
+                           }
+                    );
 
-            return Ok(FilingMasterWorkflow);
+                if (FilingMasterWorkflow.Count() == 0) // if no records found
+                {
+                    return NotFound("No Workflow records found.");
+                }
+
+
+                return Ok( FilingMasterWorkflow );
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+            //FilingMasterWorkflow FilingMasterWorkflow = _db.FilingMasterWorkflow.FirstOrDefault(x => x.WorkflowId == WorkflowId);
+
+            //return Ok(FilingMasterWorkflow);
 
         }
         [HttpPut("FilingMasterWorkflowUpdate{WorkflowId:Int}")]
