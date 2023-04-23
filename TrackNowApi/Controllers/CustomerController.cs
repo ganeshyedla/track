@@ -415,7 +415,7 @@ namespace TrackNowApi.Controllers
         [HttpGet("BusinessBasedFilingMasterList")]
         public IActionResult BusinessBasedFilingMasterList(int CustomerId)
         {
-            return Ok((from
+            return Ok((from a in (from
                       c in _db.Customer
                       join cb in _db.CustomerBusinessCategory on c.CustomerId equals cb.CustomerId
                       join b in _db.BusinessCategoryMaster on cb.BusinessCategoryId equals b.BusinessCategoryId
@@ -437,15 +437,31 @@ namespace TrackNowApi.Controllers
                           Required = f.Required,
                           Jsidept = f.Jsidept,
                           JsicontactName = f.JsicontactName,
-                          JsiContactEmail = f.JsicontactEmail,
-                          BusinessCategory = (from i in _db.BusinessCategoryMaster
-                                              join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
-                                              where j.FilingId == f.FilingId
-                                              select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList(),
-                        }).Where(x => !_db.CustomerFilingMaster.Any(c => c.FilingId == x.FilingId && c.CustomerId == x.CustomerId) &&
+                          JsiContactEmail = f.JsicontactEmail
+                      }).Distinct().Where(x => !_db.CustomerFilingMaster.Any(c => c.FilingId == x.FilingId && c.CustomerId == x.CustomerId) &&
                                       !_db.CustomerFilingMasterDraft.Any(c => c.FilingId == x.FilingId && c.CustomerId == x.CustomerId && c.Status == "Pending")   
                                 )
-                        );
+                        select new
+                         {
+                             CustomerId = a.CustomerId,
+                             CustomerName = a.CustomerName,
+                             FilingId = a.FilingId,
+                             FilingName = a.FilingName,
+                             FilingDescription = a.FilingDescription,
+                             FilingFrequency = a.FilingFrequency,
+                             StateInfo = a.StateInfo,
+                             RuleInfo = a.RuleInfo,
+                             Juristiction = a.Juristiction,
+                             Required = a.Required,
+                             Jsidept = a.Jsidept,
+                             JsicontactName = a.JsicontactName,
+                             JsiContactEmail = a.JsiContactEmail,
+                             BusinessCategory = (from i in _db.BusinessCategoryMaster
+                                                 join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
+                                                 where j.FilingId == a.FilingId
+                                                 select new { i.BusinessCategoryId, i.BusinessCategoryName }).ToList()
+                         }
+                        ));
         }
         [HttpPut("CustomerFilingMasterReject{WorkflowId:Int}")]
         public IActionResult CustomerFilingMasterReject(int WorkflowId, string Userid)
