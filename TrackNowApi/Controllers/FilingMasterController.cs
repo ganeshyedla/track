@@ -567,7 +567,7 @@ namespace TrackNowApi.Controllers
                            FilingDescription = o.FilingDescription,
                            FilingFrequency = o.FilingFrequency,
                            StateInfo = o.StateInfo,
-                           RuleInf = o.RuleInfo,
+                           RuleInfo = o.RuleInfo,
                            Required = o.Required,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
@@ -600,7 +600,7 @@ namespace TrackNowApi.Controllers
                            FilingDescription = o.FilingDescription,
                            FilingFrequency = o.FilingFrequency,
                            StateInfo = o.StateInfo,
-                           RuleInf = o.RuleInfo,
+                           RuleInfo = o.RuleInfo,
                            Required = o.Required,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
@@ -807,7 +807,7 @@ namespace TrackNowApi.Controllers
                            FilingDescription = o.FilingDescription,
                            FilingFrequency = o.FilingFrequency,
                            StateInfo = o.StateInfo,
-                           RuleInf = o.RuleInfo,
+                           RuleInfo = o.RuleInfo,
                            Required = o.Required,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.FilingDraftBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
@@ -847,7 +847,7 @@ namespace TrackNowApi.Controllers
                            FilingDescription = o.FilingDescription,
                            FilingFrequency = o.FilingFrequency,
                            StateInfo = o.StateInfo,
-                           RuleInf = o.RuleInfo,
+                           RuleInfo = o.RuleInfo,
                            Required = o.Required,
                            BusinessCategory = (from i in _db.BusinessCategoryMaster
                                                join j in _db.FilingBusinessCategory on i.BusinessCategoryId equals j.BusinessCategoryId
