@@ -451,6 +451,7 @@ namespace TrackNowApi.Controllers
                              FilingName = a.FilingName,
                              FilingDescription = a.FilingDescription,
                              FilingFrequency = a.FilingFrequency,
+                             DueDayofFrequency = a.DueDayofFrequency,
                              StateInfo = a.StateInfo,
                              RuleInfo = a.RuleInfo,
                              Juristiction = a.Juristiction,
