@@ -1414,13 +1414,13 @@ namespace TrackNowApi.Controllers
 
         }
 
-        [HttpGet("ListCustomerFilingCommentsAttachments")]
-        public IActionResult ListCustomerFilingCommentsAttachments()
+        [HttpGet("ListCustomerFilingCommentsAttachments/{CommentsId}")]
+        public IActionResult ListCustomerFilingCommentsAttachments(int CommentsId)
         {
             try
             {
 
-                var CustomerFilingCommentsAttachments = _db.CustomerFilingCommentsAttachments.ToList();
+                var CustomerFilingCommentsAttachments = _db.CustomerFilingCommentsAttachments.Where(u => u.CommentsId == CommentsId).ToList();
                 return Ok(CustomerFilingCommentsAttachments);
 
 
