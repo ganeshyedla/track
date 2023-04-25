@@ -3468,8 +3468,8 @@ namespace TrackNowApi.Controllers
         }
 
 
-        [HttpGet("CustomerFilingCommentsAttachments")]
-        public APIStatusJSON ListCustomerFilingCommentsAttachments(decimal customerId, decimal filingId, decimal commentsId)
+        [HttpGet("ListCustomerFilingCommentsAttachments/{customerId}/{filingId}")]
+        public APIStatusJSON ListCustomerFilingCommentsAttachments(decimal customerId, decimal filingId, decimal? commentsId = null)
         {
             try
             {
@@ -3478,7 +3478,7 @@ namespace TrackNowApi.Controllers
                                                         join cc in _db.CustomerComments on cf.CustomerId equals cc.CustomerId
                                                         join f in _db.FilingMaster on cf.FilingId equals f.FilingId
                                                         join cfa in _db.CustomerFilingCommentsAttachments on cc.CommentsId equals cfa.CommentsId
-                                                        where c.CustomerId == customerId && cf.FilingId == filingId && cc.CommentsId == commentsId
+                                                        where c.CustomerId == customerId && cf.FilingId == filingId && (commentsId == null || cc.CommentsId == commentsId)
                                                         select new
                                                         {
                                                             CustomerId = c.CustomerId,
