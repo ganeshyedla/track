@@ -629,7 +629,33 @@ namespace TrackNowApi.Controllers
             {
                 return BadRequest(ModelState);
             }
+
+            FilingMasterHistory FilingMasterHistory = new FilingMasterHistory();
+            FilingMasterHistory.FilingId = FilingMaster.FilingId;
+            FilingMasterHistory.FilingName = FilingMaster.FilingName;
+            FilingMasterHistory.FilingDescription = FilingMaster.FilingDescription;
+            FilingMasterHistory.FilingFrequency = FilingMaster.FilingFrequency;
+            FilingMasterHistory.StateInfo = FilingMaster.StateInfo;
+            FilingMasterHistory.RuleInfo = FilingMaster.RuleInfo;
+            FilingMasterHistory.Required= FilingMaster.Required;
+            FilingMasterHistory.Jsidept= FilingMaster.Jsidept;
+            FilingMasterHistory.JsicontactName = FilingMaster.JsicontactName;
+            FilingMasterHistory.JsicontactEmail = FilingMaster.JsicontactEmail;
+            FilingMasterHistory.JSIContactNumber = FilingMaster.JSIContactNumber;
+            FilingMasterHistory.CreateDate = FilingMaster.CreateDate;
+            FilingMasterHistory.CreateUser = FilingMaster.CreateUser;
+            FilingMasterHistory.UpdateDate = FilingMaster.UpdateDate;
+            FilingMasterHistory.UpdateUser = FilingMaster.UpdateUser;
+            FilingMasterHistory.Juristiction = FilingMaster.Juristiction;
+            FilingMasterHistory.Notes = FilingMaster.Notes;
+            FilingMasterHistory.DueDayofFrequency = FilingMaster.DueDayofFrequency;
+            FilingMasterHistory.ChangesInprogress = FilingMaster.ChangesInprogress;
+            FilingMasterHistory.DueDayofFrequency = FilingMaster.DueDayofFrequency;
+            FilingMasterHistory.Dboperation = "Update FilingMaster ";
+            FilingMasterHistory.Source = "FilingMasterUpdate API";
+
             _db.Update(FilingMaster);
+            CreateFilingMasterHistory(FilingMasterHistory);
             _db.SaveChanges();
 
             return Ok(FilingMaster);
@@ -649,6 +675,32 @@ namespace TrackNowApi.Controllers
 
                 if (FilingMaster !=null)
                 {
+                    FilingMasterHistory filingMasterHistory = new FilingMasterHistory
+                    {
+                        FilingId = FilingMaster.FilingId,
+                        FilingName = FilingMaster.FilingName,
+                        FilingDescription = FilingMaster.FilingDescription,
+                        FilingFrequency = FilingMaster.FilingFrequency,
+                        StateInfo = FilingMaster.StateInfo,
+                        RuleInfo = FilingMaster.RuleInfo,
+                        Required = FilingMaster.Required,
+                        Jsidept = FilingMaster.Jsidept,
+                        JsicontactName = FilingMaster.JsicontactName,
+                        JsicontactEmail = FilingMaster.JsicontactEmail,
+                        JSIContactNumber = FilingMaster.JSIContactNumber,
+                        CreateDate = FilingMaster.CreateDate,
+                        CreateUser = FilingMaster.CreateUser,
+                        UpdateDate = FilingMaster.UpdateDate,
+                        UpdateUser = FilingMaster.UpdateUser,
+                        Juristiction = FilingMaster.Juristiction,
+                        Notes = FilingMaster.Notes,
+                        ChangesInprogress = FilingMaster.ChangesInprogress,
+                        Dboperation = "Delete FilingMaster",
+                        Source = "FilingMasterDelete API",
+                        DueDayofFrequency = FilingMaster.DueDayofFrequency
+                    };
+
+                    _db.FilingMasterHistory.Add(filingMasterHistory);
                     _db.FilingMaster.Remove(FilingMaster);
                     _db.SaveChanges();
                 }

@@ -302,27 +302,68 @@ namespace TrackNowApi.Controllers
                        })); ;
 
         }
-        [HttpDelete("CustomerDelete{CustomerId:Int}")]
+
+        [HttpDelete("CustomerDelete/{CustomerId:Int}")]
         public IActionResult CustomerDelete(int CustomerId)
         {
-            Customer  TmpCustomer = _db.Customer.Where(d => d.CustomerId == CustomerId).FirstOrDefault();
-            if( TmpCustomer != null) { 
-                Customer ParentCustomer = _db.Customer.Where(d => d.ParentCustomerId == TmpCustomer.CustomerId).FirstOrDefault();
-                if (ParentCustomer == null)
+            try
+            {
+                // Find the customer record to be deleted
+                Customer TmpCustomer = _db.Customer.Where(d => d.CustomerId == CustomerId).FirstOrDefault();
+
+                if (TmpCustomer != null)
                 {
-                    _db.Customer.Remove(TmpCustomer);
-                    _db.SaveChanges();
+                    // Check if the customer has any child customers
+                    Customer ParentCustomer = _db.Customer.Where(d => d.ParentCustomerId == TmpCustomer.CustomerId).FirstOrDefault();
+
+                    if (ParentCustomer == null)
+                    {
+                        // Add a record to the CustomerHistory table
+                        CustomerHistory customerHistory = new CustomerHistory
+                        {
+                            Title = TmpCustomer.Title,
+                            CustomerId = TmpCustomer.CustomerId,
+                            CustomerName = TmpCustomer.CustomerName,
+                            Address = TmpCustomer.Address,
+                            City = TmpCustomer.City,
+                            State = TmpCustomer.State,
+                            LocationCode = TmpCustomer.ZipCode,
+                            TaxNumber = TmpCustomer.TaxNumber,
+                            Phone = TmpCustomer.Phone,
+                            Email = TmpCustomer.Email,
+                            CreateDate = TmpCustomer.CreateDate,
+                            CreateUser = TmpCustomer.CreateUser,
+                            UpdateDate = TmpCustomer.UpdateDate,
+                            UpdateUser = TmpCustomer.UpdateUser,
+                            Juristiction = TmpCustomer.Juristiction,
+                            Notes = TmpCustomer.Notes,
+                            JSI_POC = TmpCustomer.JSI_POC,
+                            Customer_POC = TmpCustomer.Customer_POC,
+                            Dboperation = "Delete Customer",
+                            Source = "CustomerDelete API"
+                        };
+                        _db.CustomerHistory.Add(customerHistory);
+
+                        // Delete the customer record from the Customer table
+                        _db.Customer.Remove(TmpCustomer);
+                        _db.SaveChanges();
+                    }
+                    else
+                    {
+                        return NotFound("This Parent Customer has child customers, could not delete it");
+                    }
                 }
                 else
                 {
-                    return NotFound(" This Parent Customer has Child, Could not delete it");  
+                    return NotFound("No Customer found");
                 }
+
+                return Ok();
             }
-            else
+            catch (Exception ex)
             {
-                return NotFound(" No Customer Found");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Error deleting customer: " + ex.Message);
             }
-            return Ok();
         }
 
         [HttpPut("CustomerUpdate{CustomerId:Int}")]
@@ -365,11 +406,132 @@ namespace TrackNowApi.Controllers
         [HttpPost("CreateCustomerHistory")]
         public IActionResult CreateCustomerHistory([FromBody] CustomerHistory CustomerHistory)
         {
+            try
+            {
+                _db.CustomerHistory.Add(CustomerHistory);
+                _db.SaveChanges();
+                return Ok(CustomerHistory);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+            
+        }
 
-            _db.Add(CustomerHistory);
-            _db.SaveChanges();
+        [HttpGet("ViewCustomerHistory/{CustomerId:int}")]
+        public IActionResult ViewCustomerHistory(int CustomerId)
+        {
+            try
+            {
+                var CustomerHistory = _db.CustomerHistory
+                                               .FirstOrDefault(n => n.CustomerId == CustomerId);
 
-            return Ok(CustomerHistory);
+                if (CustomerHistory != null)
+                {
+                    return Ok(CustomerHistory);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("ListCustomerHistory")]
+        public IActionResult ListCustomerHistory()
+        {
+            try
+            {
+                var CustomerHistory = _db.CustomerHistory.ToList();
+                return Ok(CustomerHistory);
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+
+        [HttpDelete("DeleteCustomerHistory/{CustomerId:int}")]
+        public IActionResult DeleteCustomerHistory(int CustomerId)
+        {
+
+            try
+            {
+
+                var CustomerHistory = _db.CustomerHistory
+                                            .FirstOrDefault(n => n.CustomerId == CustomerId);
+
+                if (CustomerHistory != null)
+                {
+                    _db.CustomerHistory.Remove(CustomerHistory);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+        [HttpPut("UpdateCustomerHistory/{CustomerId:int}")]
+        public IActionResult UpdateCustomerHistory(int CustomerId, [FromBody] CustomerHistory CustomerHistory)
+        {
+            try
+            {
+
+                var existingNotification = _db.CustomerHistory.
+                                      FirstOrDefault(n => n.CustomerId == CustomerId);
+
+
+                if (existingNotification != null)
+                {
+                    existingNotification.Title = CustomerHistory.Title;
+                    existingNotification.historyid = CustomerHistory.historyid;
+                    existingNotification.BusinessCategoryId = CustomerHistory.BusinessCategoryId;
+                    existingNotification.CustomerName = CustomerHistory.CustomerName;
+                    existingNotification.Address = CustomerHistory.Address;
+                    existingNotification.City = CustomerHistory.City;
+                    existingNotification.State = CustomerHistory.State;
+                    existingNotification.LocationCode = CustomerHistory.LocationCode;
+                    existingNotification.TaxNumber = CustomerHistory.TaxNumber;
+                    existingNotification.Phone = CustomerHistory.Phone;
+                    existingNotification.Email = CustomerHistory.Email;
+                    existingNotification.CreateDate = CustomerHistory.CreateDate;
+                    existingNotification.CreateUser = CustomerHistory.CreateUser;
+                    existingNotification.UpdateDate = CustomerHistory.UpdateDate;
+                    existingNotification.UpdateUser = CustomerHistory.UpdateUser;
+                    existingNotification.Juristiction = CustomerHistory.Juristiction;
+                    existingNotification.Dboperation = CustomerHistory.Dboperation;
+                    existingNotification.Source = CustomerHistory.Source;
+                    existingNotification.Notes = CustomerHistory.Notes;
+                    existingNotification.JSI_POC = CustomerHistory.JSI_POC;
+                    existingNotification.Customer_POC = CustomerHistory.Customer_POC;
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         //[HttpPost("CreateCustomerFilingMaster")]
@@ -2285,7 +2447,7 @@ namespace TrackNowApi.Controllers
         {
             var res = _db.CustomerFilingWorkflowCommentsAttachments.FirstOrDefault(t => t.AttachmentId == AttachmentId);
             if (res == null)
-            {
+            { 
                 return NotFound();
             }
             _db.CustomerFilingWorkflowCommentsAttachments.Remove(res);
@@ -2294,15 +2456,32 @@ namespace TrackNowApi.Controllers
         }
 
 
-        [HttpGet("CustomerFilingMasterHistoryList")]
-        public IActionResult CustomerFilingMasterHistoryList()
+        [HttpGet("CustomerFilingMasterHistoryList/{CustomerId:int}/{FilingId:int}")]
+        public IActionResult CustomerFilingMasterHistoryList(int CustomerId, int FilingId)
         {
-            var res = _db.CustomerFilingMasterHistory.ToList();
-            return Ok(res);
+            var CustomerFilingMasterHistory = (from cfh in _db.CustomerFilingMasterHistory
+                       join c in _db.Customer on cfh.CustomerId equals c.CustomerId
+                       join cf in _db.CustomerFilingMaster on cfh.CustomerId equals cf.CustomerId
+                       where c.CustomerId == CustomerId && cf.FilingId == FilingId
+                       select new
+                       {
+                           historyid = cfh.historyid,
+                           CustomerId = c.CustomerId,
+                           FilingId = cf.FilingId,
+                           Notes = cfh.Notes,
+                           Dboperations = cfh.Dboperations,
+                           Source = cfh.Source,
+                           CreateDate = cfh.CreateDate,
+                           CreateUser = cfh.CreateUser,
+                           UpdateDate = cfh.UpdateDate,
+                           UpdateUser = cfh.UpdateUser
+                       });
+
+            return Ok(CustomerFilingMasterHistory);
         }
 
         [HttpPost("CustomerFilingMasterHistoryCreate")]
-        public IActionResult CustomerFilingMasterHistory([FromBody] CustomerFilingMasterHistory item)
+        public IActionResult CustomerFilingMasterHistoryCreate([FromBody] CustomerFilingMasterHistory item)
         {
             if (item == null)
             {
@@ -2855,14 +3034,30 @@ namespace TrackNowApi.Controllers
         {
             try
             {
-
-                var CustomerFilingMaster = _db.CustomerFilingMaster
-                                                 .FirstOrDefault(a => a.CustomerId == CustomerId);
+                var CustomerFilingMaster = _db.CustomerFilingMaster.FirstOrDefault(a => a.CustomerId == CustomerId);
 
                 if (CustomerFilingMaster != null)
                 {
+                    // Add a record to CustomerFilingMasterHistory for auditing purposes
+                    var CustomerFilingMasterHistory = new CustomerFilingMasterHistory
+                    {
+                        //historyid = CustomerFilingMaster.Id,
+                        CustomerId = CustomerFilingMaster.CustomerId,
+                        FilingId = CustomerFilingMaster.FilingId,
+                        Notes = CustomerFilingMaster.Notes,
+                        Dboperations = "Delete CustomerFilingMaster",
+                        Source = "DeleteCustomerFilingMaster API",
+                        CreateDate = CustomerFilingMaster.CreateDate,
+                        CreateUser = CustomerFilingMaster.CreateUser,
+                        UpdateDate = CustomerFilingMaster.UpdateDate,
+                        UpdateUser = CustomerFilingMaster.UpdateUser
+                    };
+                    _db.CustomerFilingMasterHistory.Add(CustomerFilingMasterHistory);
+
+                    // Delete the record from CustomerFilingMaster
                     _db.CustomerFilingMaster.Remove(CustomerFilingMaster);
                     _db.SaveChanges();
+
                     return Ok();
                 }
                 else
@@ -2872,11 +3067,10 @@ namespace TrackNowApi.Controllers
             }
             catch (Exception ex)
             {
-
                 return NotFound(ex.Message);
             }
-
         }
+
 
 
         [HttpPut("CustomerFilingMaster/{Id:int}")]
@@ -2884,29 +3078,28 @@ namespace TrackNowApi.Controllers
         {
             try
             {
-
-                var existingNotification = _db.CustomerFilingMaster.
-                                      FirstOrDefault(n => n.Id == Id);
-
-                if (existingNotification != null)
-
+                if (CustomerFilingMaster == null || CustomerFilingMaster.Id != Id)
                 {
-                    existingNotification.CustomerId = CustomerFilingMaster.CustomerId;
-                    existingNotification.FilingId = CustomerFilingMaster.FilingId;
-                    existingNotification.Notes = CustomerFilingMaster.Notes;
-                    existingNotification.CreateDate = CustomerFilingMaster.CreateDate;
-                    existingNotification.CreateUser = CustomerFilingMaster.CreateUser;
-                    existingNotification.UpdateDate = CustomerFilingMaster.UpdateDate;
-                    existingNotification.UpdateUser = CustomerFilingMaster.UpdateUser;
-
-
-                    _db.SaveChanges();
-                    return Ok(existingNotification);
+                    return BadRequest(ModelState);
                 }
-                else
-                {
-                    return NotFound();
-                }
+
+                CustomerFilingMasterHistory CustomerFilingMasterHistory = new CustomerFilingMasterHistory();
+               // CustomerFilingMasterHistory.historyid = Id;
+                CustomerFilingMasterHistory.CustomerId = CustomerFilingMaster.CustomerId;
+                CustomerFilingMasterHistory.FilingId = CustomerFilingMaster.FilingId;
+                CustomerFilingMasterHistory.Notes = CustomerFilingMaster.Notes;
+                CustomerFilingMasterHistory.UpdateDate = CustomerFilingMaster.UpdateDate;
+                CustomerFilingMasterHistory.UpdateUser = CustomerFilingMaster.UpdateUser;
+                CustomerFilingMasterHistory.CreateDate = CustomerFilingMaster.CreateDate;
+                CustomerFilingMasterHistory.CreateUser = CustomerFilingMaster.CreateUser;
+                CustomerFilingMasterHistory.Dboperations = "Update CustomerFilingMaster";
+                CustomerFilingMasterHistory.Source = "UpdateCustomerFilingMaster API";
+
+                _db.Update(CustomerFilingMaster);
+                CustomerFilingMasterHistoryCreate(CustomerFilingMasterHistory);
+                _db.SaveChanges();
+
+                return Ok(CustomerFilingMaster);
 
             }
             catch (Exception ex)
@@ -2914,7 +3107,7 @@ namespace TrackNowApi.Controllers
                 return NotFound(ex.Message);
             }
         }
-        //===============================================================================================================
+//===============================================================================================================
 
         [HttpPost("CustomerFilingMasterDraft")]
         public APIStatusJSON CreateCustomerFilingMasterDraft(CustomerFilingMasterDraft[] Customer, string @LoggedInUser)
