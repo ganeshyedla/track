@@ -8,6 +8,7 @@ using TrackNowApi.Model;
 using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
 using System.Net.Mail;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace TrackNowApi.Controllers
 {
@@ -19,11 +20,14 @@ namespace TrackNowApi.Controllers
     {
         private readonly ApplicationDbContext _db;
         private readonly string Blob_connectionString;
+        private readonly IConfiguration _configuration;
+
 
         public ApplicationController(ApplicationDbContext db, IConfiguration configuration)
         {
             _db = db;
             Blob_connectionString = configuration.GetConnectionString("Blob_connectionString");
+            _configuration = configuration;
         }
 
         [HttpGet("UserRole")]
@@ -857,6 +861,59 @@ namespace TrackNowApi.Controllers
             }
         }
 
+        //[HttpGet("[action]")]
+        //public async Task<IActionResult> DownloadFile([FromQuery] DownloadFileRequest request)
+        //{
+        //    try
+        //    {
+        //        if (!string.IsNullOrEmpty(request.FileUrl))
+        //        {
+        //            // Extract filename from URL
+        //            var uri = new Uri(request.FileUrl);
+        //            var filename = Path.GetFileName(uri.LocalPath);
+
+
+
+        //            // Download the file using the URL
+        //            using (var client = new HttpClient())
+        //            {
+        //                var response = await client.GetAsync(request.FileUrl);
+        //                var content = await response.Content.ReadAsStreamAsync();
+
+
+
+        //                // Set the content type based on the file extension
+        //                var contentType = "application/octet-stream";
+        //                if (Path.GetExtension(request.FileUrl).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
+        //                {
+        //                    contentType = "application/pdf";
+        //                }
+
+
+
+        //                // Create a FileStreamResult and set the FileDownloadName and ContentType properties
+        //                var result = new FileStreamResult(content, contentType)
+        //                {
+        //                    FileDownloadName = filename
+        //                };
+
+
+
+        //                return result;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            return BadRequest("File URL cannot be null or empty.");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return StatusCode(500, ex.Message);
+        //    }
+        //}
+
+
         [HttpGet("[action]")]
         public async Task<IActionResult> DownloadFile([FromQuery] DownloadFileRequest request)
         {
@@ -864,11 +921,8 @@ namespace TrackNowApi.Controllers
             {
                 if (!string.IsNullOrEmpty(request.FileUrl))
                 {
-                    // Extract filename from URL
-                    var uri = new Uri(request.FileUrl);
+                    var uri = new Uri(request.FileUrl);
                     var filename = Path.GetFileName(uri.LocalPath);
-
-
 
                     // Download the file using the URL
                     using (var client = new HttpClient())
@@ -876,24 +930,18 @@ namespace TrackNowApi.Controllers
                         var response = await client.GetAsync(request.FileUrl);
                         var content = await response.Content.ReadAsStreamAsync();
 
-
-
-                        // Set the content type based on the file extension
-                        var contentType = "application/octet-stream";
-                        if (Path.GetExtension(request.FileUrl).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
+                        // Determine content type based on file extension
+                        var provider = new FileExtensionContentTypeProvider();
+                        if (!provider.TryGetContentType(filename, out var contentType))
                         {
-                            contentType = "application/pdf";
+                            contentType = "application/octet-stream";
                         }
-
-
 
                         // Create a FileStreamResult and set the FileDownloadName and ContentType properties
                         var result = new FileStreamResult(content, contentType)
                         {
-                            FileDownloadName = filename
+                            FileDownloadName = filename // Set the file name here
                         };
-
-
 
                         return result;
                     }
@@ -908,6 +956,51 @@ namespace TrackNowApi.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+
+
+        //=====================DELETE========//
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteFileurl([FromBody] string url)
+        {
+
+
+            try
+            {
+                //url = "https://jsiblob.blob.core.windows.net/jsitracknow/Customer/330/AttachmentID:56/sangeethaupload.pdf";
+                //// Create a BlobUriBuilder from the input URL
+                //BlobUriBuilder blobUriBuilder = new BlobUriBuilder(url);
+                BlobUriBuilder blobUriBuilder = new BlobUriBuilder(new Uri(url));
+
+
+                // Create a BlobServiceClient instance
+                BlobServiceClient blobServiceClient = new BlobServiceClient(Blob_connectionString);
+
+
+
+                // Get the BlobContainerClient for the container name
+                BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(blobUriBuilder.BlobContainerName);
+
+                // Get the BlobClient for the blob name
+                BlobClient blobClient = blobContainerClient.GetBlobClient(blobUriBuilder.BlobName);
+
+                // Delete the blob if it exists
+                if (await blobClient.ExistsAsync())
+                {
+                    await blobClient.DeleteAsync();
+                    return Ok($"File '{blobUriBuilder.BlobName}' deleted successfully");
+                }
+                else
+                {
+                    return NotFound($"File '{blobUriBuilder.BlobName}' not found");
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Error deleting file: {ex.Message}");
+            }
+        }
+
 
 
     }
