@@ -3713,48 +3713,49 @@ namespace TrackNowApi.Controllers
 
         }
 
-
         [HttpGet("ListCustomerFilingCommentsAttachments/{customerId}/{filingId}")]
         public APIStatusJSON ListCustomerFilingCommentsAttachments(decimal customerId, decimal filingId, decimal? commentsId = null)
         {
             try
             {
-                var CustomerFilingCommentsAttachments = from c in _db.Customer
-                                                        join cf in _db.CustomerFilingMaster on c.CustomerId equals cf.CustomerId
-                                                        join cc in _db.CustomerComments on cf.CustomerId equals cc.CustomerId
-                                                        join f in _db.FilingMaster on cf.FilingId equals f.FilingId
-                                                        join cfa in _db.CustomerFilingCommentsAttachments on cc.CommentsId equals cfa.CommentsId
-                                                        where c.CustomerId == customerId && cf.FilingId == filingId && (commentsId == null || cc.CommentsId == commentsId)
-                                                        select new
-                                                        {
-                                                            CustomerId = c.CustomerId,
-                                                            CustomerName = c.CustomerName,
-                                                            FilingId = cf.FilingId,
-                                                            FilingName = f.FilingName,
-                                                            CommentsId = cc.CommentsId,
-                                                            CommentsText = cc.CommentsText,
-                                                            AttachmentId = cfa.AttachmentId,
-                                                            AttachmentPath = cfa.AttachmentPath,
-                                                            CreateDate = cfa.CreateDate,
-                                                            CreateUser = cfa.CreateUser,
-                                                            UpdatedDate = cfa.UpdatedDate,
-                                                            UpdatedUser = cfa.UpdatedUser
-                                                        };
+                var res = from c in _db.Customer
+                          join cf in _db.CustomerFilingMaster on c.CustomerId equals cf.CustomerId
+                          join cc in _db.CustomerFilingComments on cf.CustomerId equals cc.CustomerId
+                          join f in _db.FilingMaster on cf.FilingId equals f.FilingId
+                          join ccc in _db.CustomerFilingCommentsAttachments on cc.CommentsId equals ccc.CommentsId into ccfa
+                          from cfa in ccfa.DefaultIfEmpty()
+                          where c.CustomerId == customerId && cf.FilingId == filingId && cc.CommentsId == (commentsId.HasValue ? commentsId : cc.CommentsId)
+
+                          select new
+                          {
+                              CustomerId = c.CustomerId,
+                              CustomerName = c.CustomerName,
+                              FilingId = cf.FilingId,
+                              FilingName = f.FilingName,
+                              CommentsId = cc.CommentsId,
+                              CommentsText = cc.CommentsText,
+                              AttachmentId = cfa.AttachmentId == null ? 0 : cfa.AttachmentId,
+                              AttachmentPath = cfa.AttachmentPath,
+                              CreateDate = cfa.CreateDate,
+                              CreateUser = cfa.CreateUser,
+                              UpdatedDate = cfa.UpdatedDate,
+                              UpdatedUser = cfa.UpdatedUser
+                          };
 
                 return new APIStatusJSON
                 {
                     Status = "Success",
-                    Data = JsonDocument.Parse(JsonSerializer.Serialize(CustomerFilingCommentsAttachments, new JsonSerializerOptions
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(res, new JsonSerializerOptions
                     { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
                 };
-                ;
+
             }
             catch (Exception ex)
             {
                 return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
-        //===========================================================================================================
+//===========================================================================================================
         [HttpGet("CustomerFilingDraftAttachments/{DraftId:decimal}")]
         public APIStatusJSON ListCustomerFilingDraftAttachments(decimal DraftId)
         {
