@@ -709,8 +709,8 @@ namespace TrackNowApi.Controllers
 
                 EmailNotification Mail = new EmailNotification();
                 Mail.EmailTo = RequestorDetails.LoginId;
-                Mail.EmailSubject = GetConfigValue("Mail_ClientFilingApproveResponse_Subject").Replace("{{FilingName}}", FilingMaster.FilingName);
-                Mail.EmailMessage = GetConfigValue("Mail_ClientFilingApproveResponse_Message").Replace("{{FilingName}}", FilingMaster.FilingName)
+                Mail.EmailSubject = GetConfigValue("Mail_ClientFilingRejectResponse_Subject").Replace("{{FilingName}}", FilingMaster.FilingName);
+                Mail.EmailMessage = GetConfigValue("Mail_ClientFilingRejectResponse_Message").Replace("{{FilingName}}", FilingMaster.FilingName)
                     .Replace("{\r\n}", Environment.NewLine).Replace("{{Requestor}}", RequestorDetails.UserName);
 
                 _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
@@ -761,8 +761,8 @@ namespace TrackNowApi.Controllers
 
             EmailNotification Mail = new EmailNotification();
             Mail.EmailTo = RequestorDetails.LoginId;
-            Mail.EmailSubject = GetConfigValue("Mail_ClientFilingRejectResponse_Subject").Replace("{{FilingName}}", FilingMaster.FilingName);
-            Mail.EmailMessage = GetConfigValue("Mail_ClientFilingRejectResponse_Message").Replace("{{FilingName}}", FilingMaster.FilingName)
+            Mail.EmailSubject = GetConfigValue("Mail_ClientFilingApproveResponse_Subject").Replace("{{FilingName}}", FilingMaster.FilingName);
+            Mail.EmailMessage = GetConfigValue("Mail_ClientFilingApproveResponse_Message").Replace("{{FilingName}}", FilingMaster.FilingName)
                 .Replace("{\r\n}", Environment.NewLine).Replace("{{Requestor}}", RequestorDetails.UserName);
 
             _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
@@ -3339,12 +3339,13 @@ namespace TrackNowApi.Controllers
                                                                                  select w).FirstOrDefault();
 
                     Users RequestorDetails = (from u in _db.Users where u.UserId == CustomerFilingMasterWorkflow.WorkflowInitiatorId select u).FirstOrDefault();
+                    Users ApproverDetails = (from u in _db.Users where u.UserId == CustomerFilingMasterWorkflow.CurrentApproverId select u).FirstOrDefault();
 
                     EmailNotification Mail = new EmailNotification();
                     Mail.EmailTo = RequestorDetails.LoginId;
                     Mail.EmailSubject = GetConfigValue("Mail_ClientFilingApproveRequest_Subject").Replace("{{FilingName}}", FilingMaster.FilingName);
                     Mail.EmailMessage = GetConfigValue("Mail_ClientFilingApproveRequest_Message").Replace("{{FilingName}}", FilingMaster.FilingName)
-                        .Replace("{\r\n}", Environment.NewLine).Replace("{{Requestor}}", RequestorDetails.UserName);
+                        .Replace("{\r\n}", Environment.NewLine).Replace("{{Requestor}}", RequestorDetails.UserName).Replace("{{ApproverName}}", ApproverDetails.UserName);
 
                     _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
                     {
