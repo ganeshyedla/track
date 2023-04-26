@@ -13,8 +13,8 @@ namespace TrackNowApi.Model
         public string AttachmentPath { get; set; }
         public decimal CommentsId { get; set; }
         public DateTime? CreateDate { get; set; }
-        public string CreateUser { get; set; }
+        public string? CreateUser { get; set; }
         public DateTime? UpdatedDate { get; set; }
-        public string UpdatedUser { get; set; }
+        public string? UpdatedUser { get; set; }
     }
 }
