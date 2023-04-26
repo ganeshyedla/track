@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure.Communication.Email;
+using Azure;
+using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Net.Mail;
@@ -14,10 +16,12 @@ namespace TrackNowApi.Controllers
     public class FilingMasterController : ControllerBase
     {
         private readonly ApplicationDbContext _db;
+        private readonly string Email_connectionString;
 
-        public FilingMasterController(ApplicationDbContext db)
+        public FilingMasterController(ApplicationDbContext db, IConfiguration configuration)
         {
             _db = db;
+            Email_connectionString = configuration.GetConnectionString("COMMUNICATION_SERVICES_CONNECTION_STRING");
         }
         [HttpPost("CreateFilingMaster")]
         public IActionResult CreateFilingMaster(FilingMaster FilingMaster)
@@ -401,10 +405,11 @@ namespace TrackNowApi.Controllers
 
                     }
                 }
+                
                 _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
                 {
                     WorkflowId = FilingMasterWorkflow.WorkflowId,
-                    NotifiedUserId = FilingMasterWorkflow.CurrentApproverId,
+                    NotifiedUserId = FilingMasterWorkflow.WorkflowInitiatorId,
                     NotificationType = "Notification",
                     NotificationSubject = "Approval Informaton",
                     NotificationText = "Changes in FilingMaster has been approved",
@@ -413,6 +418,31 @@ namespace TrackNowApi.Controllers
                     CreateDate = DateTime.Now,
                     CreateUser = "System"
                 });
+
+                Users RequestorDetails = (from u in _db.Users where u.UserId == FilingMasterWorkflow.WorkflowInitiatorId select u).FirstOrDefault();
+
+                EmailNotification Mail = new EmailNotification();
+                Mail.EmailTo = RequestorDetails.LoginId;
+                Mail.EmailSubject = GetConfigValue("Mail_MasterFilingApproveResponse_Subject").Replace("{{FilingName}}", FilingMasterDraft.FilingName);
+                Mail.EmailMessage = GetConfigValue("Mail_MasterFilingApproveResponse_Message").Replace("{{FilingName}}", FilingMasterDraft.FilingName)
+                    .Replace("{\r\n}", Environment.NewLine).Replace("{{Requestor}}", RequestorDetails.UserName); ;
+
+                _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
+                {
+                    WorkflowId = FilingMasterWorkflow.WorkflowId,
+                    NotifiedUserId = FilingMasterWorkflow.WorkflowInitiatorId,
+                    NotificationFrom = "DoNotReply@9ff9dc46-4bab-4c9d-b883-e79af66841e3.azurecomm.net",
+                    NotificationTo = RequestorDetails.LoginId,
+                    NotificationType = "Email",
+                    NotificationSubject = Mail.EmailSubject,
+                    NotificationText = Mail.EmailMessage,
+                    InformationRead = false,
+                    InformationDeleted = false,
+                    CreateDate = DateTime.Now,
+                    CreateUser = "System"
+                });
+
+                APIStatusJSON MailResult = SendMail(Mail);
             }
             _db.SaveChanges();
             return Ok();
@@ -542,7 +572,7 @@ namespace TrackNowApi.Controllers
             _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
             {
                 WorkflowId = FilingMasterWorkflow.WorkflowId,
-                NotifiedUserId = FilingMasterWorkflow.CurrentApproverId,
+                NotifiedUserId = FilingMasterWorkflow.WorkflowInitiatorId,
                 NotificationType = "Notification",
                 NotificationSubject = "Reject Notification",
                 NotificationText = "Changes in FilingMaster has been Rejected",
@@ -551,7 +581,30 @@ namespace TrackNowApi.Controllers
                 CreateDate = DateTime.Now,
                 CreateUser = "System"
             });
+            Users RequestorDetails = (from u in _db.Users where u.UserId == FilingMasterWorkflow.WorkflowInitiatorId select u).FirstOrDefault();
 
+            EmailNotification Mail = new EmailNotification();
+            Mail.EmailTo = RequestorDetails.LoginId;
+            Mail.EmailSubject = GetConfigValue("Mail_MasterFilingRejectResponse_Subject").Replace("{{FilingName}}", FilingMasterDraft.FilingName);
+            Mail.EmailMessage = GetConfigValue("Mail_MasterFilingRejectResponse_Message").Replace("{{FilingName}}", FilingMasterDraft.FilingName)
+                .Replace("{\r\n}", Environment.NewLine).Replace("{{Requestor}}", RequestorDetails.UserName);
+
+            _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
+            {
+                WorkflowId = FilingMasterWorkflow.WorkflowId,
+                NotifiedUserId = FilingMasterWorkflow.WorkflowInitiatorId,
+                NotificationFrom = "DoNotReply@9ff9dc46-4bab-4c9d-b883-e79af66841e3.azurecomm.net",
+                NotificationTo = RequestorDetails.LoginId,
+                NotificationType = "Email",
+                NotificationSubject = Mail.EmailSubject,
+                NotificationText = Mail.EmailMessage,
+                InformationRead = false,
+                InformationDeleted = false,
+                CreateDate = DateTime.Now,
+                CreateUser = "System"
+            });
+
+            APIStatusJSON MailResult = SendMail(Mail);
 
             _db.SaveChanges();
             return Ok();
@@ -816,6 +869,9 @@ namespace TrackNowApi.Controllers
                 
                 _db.Add(FilingMasterWorkflow);
                 _db.SaveChanges();
+
+                Users ApproverDetails = (from u in _db.Users where u.UserId == FilingMasterWorkflow.CurrentApproverId select u).FirstOrDefault();
+
                 _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
                 {
                     WorkflowId = FilingMasterWorkflow.WorkflowId,
@@ -828,6 +884,31 @@ namespace TrackNowApi.Controllers
                     CreateDate = DateTime.Now,
                     CreateUser = "System"
                 });
+
+
+                EmailNotification Mail = new EmailNotification();
+                Mail.EmailTo = ApproverDetails.LoginId;
+                Mail.EmailSubject = GetConfigValue("Mail_MasterFilingApproveRequest_Subject").Replace("{{FilingName}}", FilingMasterDraft.FilingName)
+                    .Replace("{{ApproverName}}", ApproverDetails.UserName);
+                Mail.EmailMessage = GetConfigValue("Mail_MasterFilingApproveRequest_Message").Replace("{{FilingName}}", FilingMasterDraft.FilingName)
+                    .Replace("{{ApproverName}}", ApproverDetails.UserName).Replace("{\r\n}", Environment.NewLine);
+
+                _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
+                {
+                    WorkflowId = FilingMasterWorkflow.WorkflowId,
+                    NotifiedUserId = FilingMasterWorkflow.WorkflowInitiatorId,
+                    NotificationFrom= "DoNotReply@9ff9dc46-4bab-4c9d-b883-e79af66841e3.azurecomm.net",
+                    NotificationTo= ApproverDetails.LoginId,
+                    NotificationType = "Email",
+                    NotificationSubject = Mail.EmailSubject,
+                    NotificationText = Mail.EmailMessage,
+                    InformationRead = false,
+                    InformationDeleted = false,
+                    CreateDate = DateTime.Now,
+                    CreateUser = "System"
+                });
+                
+                APIStatusJSON MailResult = SendMail(Mail);
                 _db.SaveChanges();
 
                 
@@ -843,6 +924,48 @@ namespace TrackNowApi.Controllers
                 return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
             }
         }
+        [HttpGet("GetConfigValue")]
+        public string GetConfigValue(string ConfigItem)
+        {
+            return ((from var in _db.AppConfiguration where var.ConfigItem == ConfigItem && var.CustomerId == null select var.ConfigItemValue).FirstOrDefault());
+        }
+        [HttpGet("SendMail")]
+        public APIStatusJSON SendMail(EmailNotification EmailObj)
+        {
+            try
+            {
+
+                EmailClient emailClient = new EmailClient(Email_connectionString);
+
+                var sender = "DoNotReply@9ff9dc46-4bab-4c9d-b883-e79af66841e3.azurecomm.net";
+
+                var emailRecipients = new EmailRecipients(new List<EmailAddress> { new EmailAddress(EmailObj.EmailTo) },
+                                                            EmailObj.EmailCC != null ? new List<EmailAddress> { new EmailAddress(EmailObj.EmailCC)} : null,
+                                                            EmailObj.EmailBCC != null ? new List<EmailAddress> { new EmailAddress(EmailObj.EmailBCC) } : null);
+
+                // Define the email details
+                var subject = EmailObj.EmailSubject;
+                var emailContent = new EmailContent(subject)
+                {
+                    Html = EmailObj.EmailMessage
+                };
+
+                var emailMessage = new EmailMessage(sender, emailRecipients, emailContent);
+                //emailMessage.Importance = EmailImportance.Low;
+
+                EmailSendOperation sendEmailResult = emailClient.Send(WaitUntil.Completed, emailMessage);
+
+                //EmailSendResult sendStatus = sendEmailResult.GetRawResponse()
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                };
+            }
+            catch (Exception ex) { return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message }; }
+
+        }
+
         [HttpGet("FilingMasterWorkflowList")]
         public IActionResult FilingMasterWorkflowList()
         {

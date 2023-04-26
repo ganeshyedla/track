@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Azure;
+using Azure.Communication.Email;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualBasic;
 using System.Data;
@@ -7,6 +9,7 @@ using System.Text.Json;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
 using static Azure.Core.HttpHeader;
+using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 
 namespace TrackNowApi.Controllers
 {
@@ -17,10 +20,61 @@ namespace TrackNowApi.Controllers
     {
         private readonly ApplicationDbContext _db;
 
-        public CustomerController(ApplicationDbContext db)
+        private readonly string Email_connectionString;
+
+        public CustomerController(ApplicationDbContext db, IConfiguration configuration)
         {
             _db = db;
+            Email_connectionString = configuration.GetConnectionString("COMMUNICATION_SERVICES_CONNECTION_STRING");
         }
+        
+        [HttpGet("GetConfigValue")]
+        public string GetConfigValue(string ConfigItem)
+        {
+            return ((from var in _db.AppConfiguration where var.ConfigItem == ConfigItem && var.CustomerId == null select var.ConfigItemValue).FirstOrDefault());
+        }
+        [HttpGet("GetConfigValuebyCustmer")]
+        public string GetConfigValuebyCustmer(string ConfigItem, decimal CustomerId)
+        {
+            return ((from var in _db.AppConfiguration where var.ConfigItem == ConfigItem && var.CustomerId == CustomerId select var.ConfigItemValue).FirstOrDefault());
+        }
+        [HttpGet("SendMail")]
+        public APIStatusJSON SendMail(EmailNotification EmailObj)
+        {
+            try
+            {
+
+                EmailClient emailClient = new EmailClient(Email_connectionString);
+
+                var sender = "DoNotReply@9ff9dc46-4bab-4c9d-b883-e79af66841e3.azurecomm.net";
+
+                var emailRecipients = new EmailRecipients(new List<EmailAddress> { new EmailAddress(EmailObj.EmailTo) },
+                                                            EmailObj.EmailCC != null ? new List<EmailAddress> { new EmailAddress(EmailObj.EmailCC) } : null,
+                                                            EmailObj.EmailBCC != null ? new List<EmailAddress> { new EmailAddress(EmailObj.EmailBCC) } : null);
+
+                // Define the email details
+                var subject = EmailObj.EmailSubject;
+                var emailContent = new EmailContent(subject)
+                {
+                    Html = EmailObj.EmailMessage
+                };
+
+                var emailMessage = new EmailMessage(sender, emailRecipients, emailContent);
+                //emailMessage.Importance = EmailImportance.Low;
+
+                EmailSendOperation sendEmailResult = emailClient.Send(WaitUntil.Completed, emailMessage);
+
+                //EmailSendResult sendStatus = sendEmailResult.GetRawResponse()
+
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                };
+            }
+            catch (Exception ex) { return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message }; }
+
+        }
+
         [HttpPost("CreateCustomer")]
         public IActionResult CreateCustomer([FromBody] Customer customer)
         {
@@ -641,6 +695,41 @@ namespace TrackNowApi.Controllers
                 //return await _context.output.ToListAsync();
                 _db.Database.ExecuteSqlRaw(StoredProc);
 
+                CustomerFilingMasterWorkflow CustomerFilingMasterWorkflow = (from w in _db.CustomerFilingMasterWorkflow
+                                                                             where w.WorkflowId == WorkflowId
+                                                                             select w).FirstOrDefault();
+
+                CustomerFilingMasterDraft CustomerFilingMasterDraft = (from d in _db.CustomerFilingMasterDraft
+                                                                       where d.DraftId == CustomerFilingMasterWorkflow.DraftId
+                                                                       select d).FirstOrDefault();
+
+                FilingMaster FilingMaster = _db.FilingMaster.Where(d => d.FilingId == CustomerFilingMasterDraft.FilingId).FirstOrDefault();
+
+                Users RequestorDetails = (from u in _db.Users where u.UserId == CustomerFilingMasterWorkflow.WorkflowInitiatorId select u).FirstOrDefault();
+
+                EmailNotification Mail = new EmailNotification();
+                Mail.EmailTo = RequestorDetails.LoginId;
+                Mail.EmailSubject = GetConfigValue("Mail_ClientFilingApproveResponse_Subject").Replace("{{FilingName}}", FilingMaster.FilingName);
+                Mail.EmailMessage = GetConfigValue("Mail_ClientFilingApproveResponse_Message").Replace("{{FilingName}}", FilingMaster.FilingName)
+                    .Replace("{\r\n}", Environment.NewLine).Replace("{{Requestor}}", RequestorDetails.UserName);
+
+                _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
+                {
+                    WorkflowId = CustomerFilingMasterWorkflow.WorkflowId,
+                    NotifiedUserId = CustomerFilingMasterWorkflow.WorkflowInitiatorId,
+                    NotificationFrom = "DoNotReply@9ff9dc46-4bab-4c9d-b883-e79af66841e3.azurecomm.net",
+                    NotificationTo = RequestorDetails.LoginId,
+                    NotificationType = "Email",
+                    NotificationSubject = Mail.EmailSubject,
+                    NotificationText = Mail.EmailMessage,
+                    InformationRead = false,
+                    InformationDeleted = false,
+                    CreateDate = DateTime.Now,
+                    CreateUser = "System"
+                });
+
+                APIStatusJSON MailResult = SendMail(Mail);
+
 
                 return Ok();
 
@@ -658,7 +747,40 @@ namespace TrackNowApi.Controllers
             //return await _context.output.ToListAsync();
             _db.Database.ExecuteSqlRaw(StoredProc);
 
+            CustomerFilingMasterWorkflow CustomerFilingMasterWorkflow = (from w in _db.CustomerFilingMasterWorkflow
+                                                                         where w.WorkflowId == WorkflowId
+                                                                         select w).FirstOrDefault();
 
+            CustomerFilingMasterDraft CustomerFilingMasterDraft = (from d in _db.CustomerFilingMasterDraft
+                                                                   where d.DraftId == CustomerFilingMasterWorkflow.DraftId
+                                                                   select d).FirstOrDefault();
+
+            FilingMaster FilingMaster = _db.FilingMaster.Where(d => d.FilingId == CustomerFilingMasterDraft.FilingId).FirstOrDefault();
+
+            Users RequestorDetails = (from u in _db.Users where u.UserId == CustomerFilingMasterWorkflow.WorkflowInitiatorId select u).FirstOrDefault();
+
+            EmailNotification Mail = new EmailNotification();
+            Mail.EmailTo = RequestorDetails.LoginId;
+            Mail.EmailSubject = GetConfigValue("Mail_ClientFilingRejectResponse_Subject").Replace("{{FilingName}}", FilingMaster.FilingName);
+            Mail.EmailMessage = GetConfigValue("Mail_ClientFilingRejectResponse_Message").Replace("{{FilingName}}", FilingMaster.FilingName)
+                .Replace("{\r\n}", Environment.NewLine).Replace("{{Requestor}}", RequestorDetails.UserName);
+
+            _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
+            {
+                WorkflowId = CustomerFilingMasterWorkflow.WorkflowId,
+                NotifiedUserId = CustomerFilingMasterWorkflow.WorkflowInitiatorId,
+                NotificationFrom = "DoNotReply@9ff9dc46-4bab-4c9d-b883-e79af66841e3.azurecomm.net",
+                NotificationTo = RequestorDetails.LoginId,
+                NotificationType = "Email",
+                NotificationSubject = Mail.EmailSubject,
+                NotificationText = Mail.EmailMessage,
+                InformationRead = false,
+                InformationDeleted = false,
+                CreateDate = DateTime.Now,
+                CreateUser = "System"
+            });
+
+            APIStatusJSON MailResult = SendMail(Mail);
             return Ok();
 
         }
@@ -3107,8 +3229,97 @@ namespace TrackNowApi.Controllers
                 return NotFound(ex.Message);
             }
         }
-//===============================================================================================================
+        [HttpGet("CustomerFilingTrackerGenerator")]
+        public APIStatusJSON CustomerFilingTrackerGenerator(string Frequency)
+        {
+            try
+            {
+                var FilingTracker = _db.CustomerFileTracking.FromSqlRaw("dbo.CustomerFileTrackGenerator {0}", Frequency).ToList();
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingTracker, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON
+                {
+                    Status = "Failure",
+                    ErrorCode = 1,
+                    ErrorMessage = ex.Message
+                };
 
+            }
+        }
+        [HttpGet("CustomerFilingTrackerNotifications")]
+        public APIStatusJSON CustomerFilingTrackerNotifications()
+        {
+            try
+            {
+                var FileTracker = _db.CustomerFileTracking.FromSqlRaw("dbo.CustomerFileTrackMailNotifications").ToList();
+
+
+                //var FileTracker = (from i in _db.CustomerFileTracking
+                //                   join j in _db.FilingMaster on i.FilingId equals j.FilingId
+                //                   where ((DateTime)i.DueDate).AddDays((double)j.DueDayofFrequency) == DateTime.Today
+                //                   select i).ToList();
+
+                foreach (CustomerFileTracking ft in FileTracker)
+                {
+
+                    Customer Customer = _db.Customer.Where(d => d.CustomerId == ft.CustomerId).FirstOrDefault();
+
+                    FilingMaster FilingMaster = _db.FilingMaster.Where(d => d.FilingId == ft.FilingId).FirstOrDefault();
+
+                    Users ReceiverDetails = (from u in _db.Users where u.CustomerId == Customer.CustomerId select u).FirstOrDefault();
+
+                    EmailNotification Mail = new EmailNotification();
+                    Mail.EmailTo = ReceiverDetails.LoginId;
+
+                    if (GetConfigValuebyCustmer("Mail_FilingTrackerReminder_Subject", Convert.ToDecimal(ft.CustomerId)) != null)
+                        Mail.EmailSubject = GetConfigValuebyCustmer("Mail_FilingTrackerReminder_Subject", Convert.ToDecimal(ft.CustomerId));
+                    else
+                        Mail.EmailSubject = GetConfigValue("Mail_FilingTrackerReminder_Subject");
+
+                    if (GetConfigValuebyCustmer("Mail_FilingTrackerReminder_Subject", Convert.ToDecimal(ft.CustomerId)) != null)
+                        Mail.EmailMessage = GetConfigValuebyCustmer("Mail_FilingTrackerReminder_Message", Convert.ToDecimal(ft.CustomerId));
+                    else
+                        Mail.EmailMessage = GetConfigValue("Mail_FilingTrackerReminder_Message");
+
+                    Mail.EmailSubject = Mail.EmailSubject.Replace("{{FilingName}}", FilingMaster.FilingName);
+                    Mail.EmailMessage = Mail.EmailMessage.Replace("{{FilingName}}", FilingMaster.FilingName)
+                        .Replace("{{Customer}}", ReceiverDetails.UserName).Replace("{{DueDate}}", ft.DueDate.ToString());
+
+                    _db.CustomerFilingTrackingNotifications.Add(new CustomerFilingTrackingNotifications
+                    {
+                        NotifiedUserId = ReceiverDetails.UserId,
+                        NotificationFrom = "DoNotReply@9ff9dc46-4bab-4c9d-b883-e79af66841e3.azurecomm.net",
+                        NotificationTo = ReceiverDetails.LoginId,
+                        NotificationType = "Email",
+                        NotificationSubject = Mail.EmailSubject,
+                        NotificationText = Mail.EmailMessage,
+                        InformationRead = false,
+                        InformationDeleted = false,
+                        CreateDate = DateTime.Now,
+                        CreateUser = "System"
+                    });
+
+                    APIStatusJSON MailResult = SendMail(Mail);
+                }
+                return new APIStatusJSON
+                {
+                    Status = "Success"
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+
+            }
+        }
         [HttpPost("CustomerFilingMasterDraft")]
         public APIStatusJSON CreateCustomerFilingMasterDraft(CustomerFilingMasterDraft[] Customer, string @LoggedInUser)
         {
@@ -3117,7 +3328,41 @@ namespace TrackNowApi.Controllers
                 string Customerrecords = JsonSerializer.Serialize<CustomerFilingMasterDraft[]>(Customer, opt);
 
                 var CustomerUpdate = _db.CustomerFilingMasterDraft.FromSqlRaw("dbo.CustomerFilingMasterDraftUpdate {0},{1}", Customerrecords, @LoggedInUser).ToList();
-                
+
+                foreach (CustomerFilingMasterDraft Cfm in CustomerUpdate)
+                {
+
+                    FilingMaster FilingMaster = _db.FilingMaster.Where(d => d.FilingId == Cfm.FilingId).FirstOrDefault();
+
+                    CustomerFilingMasterWorkflow CustomerFilingMasterWorkflow = (from w in _db.CustomerFilingMasterWorkflow
+                                                                                 where w.DraftId == Cfm.DraftId
+                                                                                 select w).FirstOrDefault();
+
+                    Users RequestorDetails = (from u in _db.Users where u.UserId == CustomerFilingMasterWorkflow.WorkflowInitiatorId select u).FirstOrDefault();
+
+                    EmailNotification Mail = new EmailNotification();
+                    Mail.EmailTo = RequestorDetails.LoginId;
+                    Mail.EmailSubject = GetConfigValue("Mail_ClientFilingApproveRequest_Subject").Replace("{{FilingName}}", FilingMaster.FilingName);
+                    Mail.EmailMessage = GetConfigValue("Mail_ClientFilingApproveRequest_Message").Replace("{{FilingName}}", FilingMaster.FilingName)
+                        .Replace("{\r\n}", Environment.NewLine).Replace("{{Requestor}}", RequestorDetails.UserName);
+
+                    _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
+                    {
+                        WorkflowId = CustomerFilingMasterWorkflow.WorkflowId,
+                        NotifiedUserId = CustomerFilingMasterWorkflow.WorkflowInitiatorId,
+                        NotificationFrom = "DoNotReply@9ff9dc46-4bab-4c9d-b883-e79af66841e3.azurecomm.net",
+                        NotificationTo = RequestorDetails.LoginId,
+                        NotificationType = "Email",
+                        NotificationSubject = Mail.EmailSubject,
+                        NotificationText = Mail.EmailMessage,
+                        InformationRead = false,
+                        InformationDeleted = false,
+                        CreateDate = DateTime.Now,
+                        CreateUser = "System"
+                    });
+
+                    APIStatusJSON MailResult = SendMail(Mail);
+                }
                 return new APIStatusJSON
                 {
                     Status = "Success",

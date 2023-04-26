@@ -4,6 +4,15 @@ using System.Text.Json;
 
 namespace TrackNowApi.Model
 {
+    public partial class EmailNotification
+    {
+        public string? EmailSubject { get; set; }
+        public string? EmailMessage { get; set; }
+        public string? EmailTo { get; set; }
+        public string? EmailCC { get; set; }
+        public string? EmailBCC { get; set; }
+    }
+
     public partial class AppConfiguration
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
@@ -74,6 +83,7 @@ namespace TrackNowApi.Model
         public long UserId { get; set; }
         public string? UserName { get; set; }
         public string? LoginId { get; set; }
+        public decimal? CustomerId { get; set; }
         public DateTime? CreateDate { get; set; }
         public string? CreateUser { get; set; }
         public DateTime? UpdateDate { get; set; }
