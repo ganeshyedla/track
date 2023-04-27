@@ -402,6 +402,34 @@ namespace TrackNowApi.Controllers
             }
         }
 
+        [HttpGet("ListFilingfrequency")]
+        public APIStatusJSON ListFilingfrequency()
+        {
+            try
+            {
+                var FilingFrquency = _db.FilingFrquency.ToList();
+
+                if (FilingFrquency != null)
+                {
+                    return new APIStatusJSON
+                    {
+                        Status = "Success",
+                        Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingFrquency, new JsonSerializerOptions
+                        { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                    };
+                }
+                else
+                {
+                    return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = "Filing Frquency Not found" };
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
+
         [HttpGet("ListApprovers")]
         public APIStatusJSON ListApprovers()
         {   try

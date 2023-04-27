@@ -4,6 +4,16 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TrackNowApi.Model
 {
+
+    public partial class FilingMasterApproveReject
+    {
+        public decimal WorkFlowId { get; set; }
+        public decimal Userid { get; set; }
+        public decimal DraftId { get; set; }
+        public string? Notes { get; set; }
+
+    }
+
     public partial class FilingMaster
     {
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

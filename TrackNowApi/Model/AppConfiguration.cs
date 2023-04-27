@@ -4,7 +4,15 @@ using System.Text.Json;
 
 namespace TrackNowApi.Model
 {
-    public partial class EmailNotification
+    
+    public partial class FilingFrquency
+    {
+        public decimal FilingFrquencyId { get; set; }
+        public string? FilingFrquencyName { get; set; }
+        public decimal? MonthsInfrquency { get; set; }
+        public decimal? DaysinFrequency { get; set; }
+    }
+        public partial class EmailNotification
     {
         public string? EmailSubject { get; set; }
         public string? EmailMessage { get; set; }

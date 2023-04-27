@@ -267,15 +267,15 @@ namespace TrackNowApi.Controllers
 
         //====================================
        
-        [HttpPut("FilingMasterApprove{WorkflowId:Int}")]
-        public IActionResult FilingMasterApprove(ulong WorkflowId, ulong Userid, ulong DraftId )
+        [HttpPut("FilingMasterApprove")]
+        public IActionResult FilingMasterApprove([FromBody] FilingMasterApproveReject ApprovalData )
         {
             FilingMasterWorkflow FilingMasterWorkflow =  (from w in _db.FilingMasterWorkflow
-                                                          where w.WorkflowId == WorkflowId
+                                                          where w.WorkflowId == ApprovalData.WorkFlowId
                                                           select w).FirstOrDefault();
 
             FilingMasterDraft FilingMasterDraft = (from f in _db.FilingMasterDraft
-                                                   where f.DraftId == DraftId
+                                                   where f.DraftId == ApprovalData.DraftId
                                                    select f).FirstOrDefault();
 
             if (FilingMasterWorkflow == null || FilingMasterDraft == null)
@@ -284,8 +284,9 @@ namespace TrackNowApi.Controllers
             }
 
             FilingMasterWorkflow.WorkflowStatus = "Approved";
+            FilingMasterWorkflow.Notes = ApprovalData.Notes;
             FilingMasterWorkflow.UpdateDate = DateTime.Now;
-            FilingMasterWorkflow.UpdateUser = Userid.ToString();
+            FilingMasterWorkflow.UpdateUser = ApprovalData.Userid.ToString();
             _db.FilingMasterWorkflow.Attach(FilingMasterWorkflow);
             _db.Entry(FilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
             _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
@@ -293,7 +294,7 @@ namespace TrackNowApi.Controllers
 
             FilingMasterDraft.ChangesInprogress = false;
             FilingMasterDraft.UpdateDate = DateTime.Now;
-            FilingMasterDraft.UpdateUser = Userid.ToString();
+            FilingMasterDraft.UpdateUser = ApprovalData.Userid.ToString();
             _db.FilingMasterDraft.Attach(FilingMasterDraft);
             _db.Entry(FilingMasterDraft).Property(x => x.ChangesInprogress).IsModified = true;
             _db.Entry(FilingMasterDraft).Property(x => x.UpdateDate).IsModified = true;
@@ -305,12 +306,12 @@ namespace TrackNowApi.Controllers
             {
                 
                 var DraftBusinessCategoryInfo = (from f in _db.FilingDraftBusinessCategory
-                                                 where f.DraftId == DraftId
+                                                 where f.DraftId == ApprovalData.DraftId
                                                  select f).ToList();
 
                 var FilingBusinessCategoryInfo = (from f in _db.FilingMasterDraft
                                                   join o in _db.FilingBusinessCategory on f.FilingId equals o.FilingId
-                                                  where f.DraftId == DraftId
+                                                  where f.DraftId == ApprovalData.DraftId
                                                   select o);
 
                 foreach (FilingBusinessCategory Bc in FilingBusinessCategoryInfo)
@@ -448,6 +449,86 @@ namespace TrackNowApi.Controllers
             return Ok();
         }
 
+        [HttpPut("FilingMasterReject")]
+        public IActionResult FilingMasterReject([FromBody]  FilingMasterApproveReject ApprovalData)
+        {
+
+            FilingMasterDraft FilingMasterDraft = (from f in _db.FilingMasterDraft
+                                                   where f.DraftId == ApprovalData.DraftId
+                                                   select f).FirstOrDefault();
+
+            FilingMasterWorkflow FilingMasterWorkflow = (from w in _db.FilingMasterWorkflow
+                                                         where w.WorkflowId == ApprovalData.WorkFlowId
+                                                         select w).FirstOrDefault();
+            if (FilingMasterWorkflow == null)
+            {
+                return BadRequest(ModelState);
+            }
+
+            FilingMasterWorkflow.WorkflowStatus = "Rejected";
+            FilingMasterWorkflow.Notes = ApprovalData.Notes;
+            FilingMasterWorkflow.UpdateDate = DateTime.Now;
+            FilingMasterWorkflow.UpdateUser = ApprovalData.Userid.ToString();
+            _db.FilingMasterWorkflow.Attach(FilingMasterWorkflow);
+            _db.Entry(FilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
+            _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
+            _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
+
+
+            FilingMasterDraft.ChangesInprogress = false;
+            FilingMasterDraft.UpdateDate = DateTime.Now;
+            FilingMasterDraft.Status = FilingMasterWorkflow.WorkflowStatus;
+            FilingMasterDraft.UpdateUser = ApprovalData.Userid.ToString();
+            _db.FilingMasterDraft.Attach(FilingMasterDraft);
+            _db.Entry(FilingMasterDraft).Property(x => x.ChangesInprogress).IsModified = true;
+            _db.Entry(FilingMasterDraft).Property(x => x.UpdateDate).IsModified = true;
+            _db.Entry(FilingMasterDraft).Property(x => x.UpdateUser).IsModified = true;
+
+            var rowsToUpdate = _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
+            if (rowsToUpdate != null)
+                rowsToUpdate.ChangesInprogress = false;
+
+            _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
+            {
+                WorkflowId = FilingMasterWorkflow.WorkflowId,
+                NotifiedUserId = FilingMasterWorkflow.WorkflowInitiatorId,
+                NotificationType = "Notification",
+                NotificationSubject = "Reject Notification",
+                NotificationText = "Changes in FilingMaster has been Rejected",
+                InformationRead = false,
+                InformationDeleted = false,
+                CreateDate = DateTime.Now,
+                CreateUser = "System"
+            });
+            Users RequestorDetails = (from u in _db.Users where u.UserId == FilingMasterWorkflow.WorkflowInitiatorId select u).FirstOrDefault();
+
+            EmailNotification Mail = new EmailNotification();
+            Mail.EmailTo = RequestorDetails.LoginId;
+            Mail.EmailSubject = GetConfigValue("Mail_MasterFilingRejectResponse_Subject").Replace("{{FilingName}}", FilingMasterDraft.FilingName);
+            Mail.EmailMessage = GetConfigValue("Mail_MasterFilingRejectResponse_Message").Replace("{{FilingName}}", FilingMasterDraft.FilingName)
+                .Replace("{\r\n}", Environment.NewLine).Replace("{{Requestor}}", RequestorDetails.UserName);
+
+            _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
+            {
+                WorkflowId = FilingMasterWorkflow.WorkflowId,
+                NotifiedUserId = FilingMasterWorkflow.WorkflowInitiatorId,
+                NotificationFrom = "DoNotReply@9ff9dc46-4bab-4c9d-b883-e79af66841e3.azurecomm.net",
+                NotificationTo = RequestorDetails.LoginId,
+                NotificationType = "Email",
+                NotificationSubject = Mail.EmailSubject,
+                NotificationText = Mail.EmailMessage,
+                InformationRead = false,
+                InformationDeleted = false,
+                CreateDate = DateTime.Now,
+                CreateUser = "System"
+            });
+
+            APIStatusJSON MailResult = SendMail(Mail);
+
+            _db.SaveChanges();
+            return Ok();
+        }
+
         [HttpGet("FilingMasterWorkflowNotificationsList")]
         public APIStatusJSON FilingMasterWorkflowNotificationsList()
         {
@@ -531,84 +612,6 @@ namespace TrackNowApi.Controllers
             }
         }
 
-        [HttpPut("FilingMasterReject{WorkflowId:Int}")]
-        public IActionResult FilingMasterReject(ulong WorkflowId, ulong Userid, ulong DraftId)
-        {
-
-            FilingMasterDraft FilingMasterDraft = (from f in _db.FilingMasterDraft
-                                                   where f.DraftId == DraftId
-                                                   select f).FirstOrDefault();
-
-            FilingMasterWorkflow FilingMasterWorkflow = (from w in _db.FilingMasterWorkflow
-                                                         where w.WorkflowId == WorkflowId
-                                                         select w).FirstOrDefault();
-            if (FilingMasterWorkflow == null)
-            {
-                return BadRequest(ModelState);
-            }
-         
-            FilingMasterWorkflow.WorkflowStatus = "Rejected";
-            FilingMasterWorkflow.UpdateDate = DateTime.Now;
-            FilingMasterWorkflow.UpdateUser = Userid.ToString();
-            _db.FilingMasterWorkflow.Attach(FilingMasterWorkflow);
-            _db.Entry(FilingMasterWorkflow).Property(x => x.WorkflowStatus).IsModified = true;
-            _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateDate).IsModified = true;
-            _db.Entry(FilingMasterWorkflow).Property(x => x.UpdateUser).IsModified = true;
-
-
-            FilingMasterDraft.ChangesInprogress = false;
-            FilingMasterDraft.UpdateDate = DateTime.Now;
-            FilingMasterDraft.Status = FilingMasterWorkflow.WorkflowStatus;
-            FilingMasterDraft.UpdateUser = Userid.ToString();
-            _db.FilingMasterDraft.Attach(FilingMasterDraft);
-            _db.Entry(FilingMasterDraft).Property(x => x.ChangesInprogress).IsModified = true;
-            _db.Entry(FilingMasterDraft).Property(x => x.UpdateDate).IsModified = true;
-            _db.Entry(FilingMasterDraft).Property(x => x.UpdateUser).IsModified = true;
-
-            var rowsToUpdate = _db.FilingMaster.AsEnumerable().Where(r => r.FilingId == FilingMasterDraft.FilingId).FirstOrDefault();
-            if (rowsToUpdate != null)
-                rowsToUpdate.ChangesInprogress = false;
-
-            _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
-            {
-                WorkflowId = FilingMasterWorkflow.WorkflowId,
-                NotifiedUserId = FilingMasterWorkflow.WorkflowInitiatorId,
-                NotificationType = "Notification",
-                NotificationSubject = "Reject Notification",
-                NotificationText = "Changes in FilingMaster has been Rejected",
-                InformationRead = false,
-                InformationDeleted = false,
-                CreateDate = DateTime.Now,
-                CreateUser = "System"
-            });
-            Users RequestorDetails = (from u in _db.Users where u.UserId == FilingMasterWorkflow.WorkflowInitiatorId select u).FirstOrDefault();
-
-            EmailNotification Mail = new EmailNotification();
-            Mail.EmailTo = RequestorDetails.LoginId;
-            Mail.EmailSubject = GetConfigValue("Mail_MasterFilingRejectResponse_Subject").Replace("{{FilingName}}", FilingMasterDraft.FilingName);
-            Mail.EmailMessage = GetConfigValue("Mail_MasterFilingRejectResponse_Message").Replace("{{FilingName}}", FilingMasterDraft.FilingName)
-                .Replace("{\r\n}", Environment.NewLine).Replace("{{Requestor}}", RequestorDetails.UserName);
-
-            _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
-            {
-                WorkflowId = FilingMasterWorkflow.WorkflowId,
-                NotifiedUserId = FilingMasterWorkflow.WorkflowInitiatorId,
-                NotificationFrom = "DoNotReply@9ff9dc46-4bab-4c9d-b883-e79af66841e3.azurecomm.net",
-                NotificationTo = RequestorDetails.LoginId,
-                NotificationType = "Email",
-                NotificationSubject = Mail.EmailSubject,
-                NotificationText = Mail.EmailMessage,
-                InformationRead = false,
-                InformationDeleted = false,
-                CreateDate = DateTime.Now,
-                CreateUser = "System"
-            });
-
-            APIStatusJSON MailResult = SendMail(Mail);
-
-            _db.SaveChanges();
-            return Ok();
-        }
         [HttpGet("FilingMasterList")]
         public IActionResult FilingMasterList()
         {
