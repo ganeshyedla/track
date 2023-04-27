@@ -2384,6 +2384,115 @@ namespace TrackNowApi.Controllers
             }
 
         }
-        
+        //===========================================================================================================
+        [HttpPost("CreateFilingMasterCommentsAttachments")]
+        public IActionResult CreateFilingMasterCommentsAttachments(FilingMasterCommentsAttachments Attachment)
+        {
+            try
+            {
+
+                {
+                    _db.FilingMasterCommentsAttachments.Add(Attachment);
+                    _db.SaveChanges();
+                    return Ok(Attachment);
+                }
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+
+        }
+
+
+        [HttpGet("ViewFilingMasterCommentsAttachments/{AttachmentId:Int}")]
+        public IActionResult ViewFilingMasterCommentsAttachments(int AttachmentId)
+        {
+            try
+            {
+                //  using (var Customer = new Models.TrackNowContext())
+
+                var FilingMasterCommentsAttachments = _db.FilingMasterCommentsAttachments
+                                       .FirstOrDefault(F => F.AttachmentId == AttachmentId);
+                if (FilingMasterCommentsAttachments != null)
+                {
+                    return Ok(FilingMasterCommentsAttachments);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpDelete("DeleteFilingMasterCommentsAttachments/{AttachmentId:Int}")]
+        public IActionResult DeleteFilingMasterCommentsAttachments(int AttachmentId)
+        {
+            try
+            {
+
+                var FilingMasterCommentsAttachments = _db.FilingMasterCommentsAttachments
+                                                 .FirstOrDefault(a => a.AttachmentId == AttachmentId);
+
+                if (FilingMasterCommentsAttachments != null)
+                {
+                    _db.FilingMasterCommentsAttachments.Remove(FilingMasterCommentsAttachments);
+                    _db.SaveChanges();
+                    return Ok();
+                }
+                else
+                {
+                    return NotFound();
+                }
+            }
+            catch (Exception ex)
+            {
+
+                return NotFound(ex.Message);
+            }
+
+        }
+
+        [HttpPut("UpdateFilingMasterCommentsAttachments/{AttachmentId:int}")]
+        public IActionResult UpdateFilingMasterCommentsAttachments(int AttachmentId, [FromBody] FilingMasterCommentsAttachments FilingMasterCommentsAttachments)
+        {
+            try
+            {
+
+                var existingNotification = _db.FilingMasterCommentsAttachments.
+                                      FirstOrDefault(n => n.AttachmentId == AttachmentId);
+
+                if (existingNotification != null)
+
+                {
+                    existingNotification.AttachmentPath = FilingMasterCommentsAttachments.AttachmentPath;
+                    existingNotification.CommentsId = FilingMasterCommentsAttachments.CommentsId;
+                    existingNotification.UpdatedDate = FilingMasterCommentsAttachments.UpdatedDate;
+                    existingNotification.UpdatedUser = FilingMasterCommentsAttachments.UpdatedUser;
+                    existingNotification.CreateDate = FilingMasterCommentsAttachments.CreateDate;
+                    existingNotification.CreateUser = FilingMasterCommentsAttachments.CreateUser;
+
+
+                    _db.SaveChanges();
+                    return Ok(existingNotification);
+                }
+                else
+                {
+                    return NotFound();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
     }
 }
