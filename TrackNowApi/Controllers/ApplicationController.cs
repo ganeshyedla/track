@@ -889,61 +889,11 @@ namespace TrackNowApi.Controllers
             }
         }
 
-        //[HttpGet("[action]")]
-        //public async Task<IActionResult> DownloadFile([FromQuery] DownloadFileRequest request)
-        //{
-        //    try
-        //    {
-        //        if (!string.IsNullOrEmpty(request.FileUrl))
-        //        {
-        //            // Extract filename from URL
-        //            var uri = new Uri(request.FileUrl);
-        //            var filename = Path.GetFileName(uri.LocalPath);
-
-
-
-        //            // Download the file using the URL
-        //            using (var client = new HttpClient())
-        //            {
-        //                var response = await client.GetAsync(request.FileUrl);
-        //                var content = await response.Content.ReadAsStreamAsync();
-
-
-
-        //                // Set the content type based on the file extension
-        //                var contentType = "application/octet-stream";
-        //                if (Path.GetExtension(request.FileUrl).Equals(".pdf", StringComparison.OrdinalIgnoreCase))
-        //                {
-        //                    contentType = "application/pdf";
-        //                }
-
-
-
-        //                // Create a FileStreamResult and set the FileDownloadName and ContentType properties
-        //                var result = new FileStreamResult(content, contentType)
-        //                {
-        //                    FileDownloadName = filename
-        //                };
-
-
-
-        //                return result;
-        //            }
-        //        }
-        //        else
-        //        {
-        //            return BadRequest("File URL cannot be null or empty.");
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return StatusCode(500, ex.Message);
-        //    }
-        //}
-
+       
+        //===downloading all file type======//
 
         [HttpGet("[action]")]
-        public async Task<IActionResult> DownloadFile([FromQuery] DownloadFileRequest request)
+        public async Task<IActionResult> DownloadBlob([FromQuery] DownloadFileRequest request)
         {
             try
             {
@@ -986,10 +936,10 @@ namespace TrackNowApi.Controllers
         }
 
 
-        //=====================DELETE========//
+        //=============DELETE==============//
 
-        [HttpDelete]
-        public async Task<IActionResult> DeleteFileurl([FromBody] string url)
+        [HttpDelete("DeleteFileurl")]
+        public async Task<IActionResult> DeleteFileurl( string url)
         {
 
 
@@ -1000,11 +950,8 @@ namespace TrackNowApi.Controllers
                 //BlobUriBuilder blobUriBuilder = new BlobUriBuilder(url);
                 BlobUriBuilder blobUriBuilder = new BlobUriBuilder(new Uri(url));
 
-
                 // Create a BlobServiceClient instance
                 BlobServiceClient blobServiceClient = new BlobServiceClient(Blob_connectionString);
-
-
 
                 // Get the BlobContainerClient for the container name
                 BlobContainerClient blobContainerClient = blobServiceClient.GetBlobContainerClient(blobUriBuilder.BlobContainerName);
