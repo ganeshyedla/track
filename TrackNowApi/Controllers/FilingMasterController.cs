@@ -267,6 +267,7 @@ namespace TrackNowApi.Controllers
         }
 
         //====================================
+
        
         [HttpPut("FilingMasterApprove")]
         public APIStatusJSON FilingMasterApprove([FromBody] FilingMasterApproveReject ApprovalData )
@@ -566,12 +567,12 @@ namespace TrackNowApi.Controllers
                 }
             }
         [HttpGet("FilingMasterAudit")]
-        public APIStatusJSON FilingMasterAudit()
+        public APIStatusJSON FilingMasterAudit(ulong? FilingId=null)
         {
             try
             {
                 
-                var FilingMasterAudit = _db.FilingMasterAudit.FromSqlRaw("dbo.MasterFilingAuditLog").ToList();
+                var FilingMasterAudit = _db.FilingMasterAudit.FromSqlRaw("dbo.MasterFilingAuditLog {0}", FilingId).ToList();
 
                 return new APIStatusJSON
                 {
