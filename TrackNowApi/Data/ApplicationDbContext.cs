@@ -71,6 +71,8 @@ namespace TrackNowApi.Data
         public DbSet<FilingMasterCommentsAttachments> FilingMasterCommentsAttachments { get; set; }
         public DbSet<FilingMasterWorkflowAttachments> FilingMasterWorkflowAttachments { get; set; }
         public DbSet<FilingFrquency> FilingFrquency { get; set; }
+        public DbSet<FilingMasterAudit> FilingMasterAudit { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -79,6 +81,9 @@ namespace TrackNowApi.Data
 
             modelBuilder.Entity<FilingFrquency>()
             .HasKey(t => new { t.FilingFrquencyId });
+            
+            modelBuilder.Entity<FilingMasterAudit>()
+            .HasKey(t => new { t.Id });
 
             modelBuilder.Entity<FilingMasterCommentsAttachments>()
             .HasKey(t => new { t.AttachmentId });

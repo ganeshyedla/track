@@ -7,6 +7,7 @@ using System.Net.Mail;
 using System.Text.Json;
 using TrackNowApi.Data;
 using TrackNowApi.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace TrackNowApi.Controllers
 {
@@ -414,6 +415,8 @@ namespace TrackNowApi.Controllers
 
                         }
                     }
+                    
+                    FilingMasterDraft.FilingId = FilingId;
 
                     _db.FilingMasterWorkflowNotifications.Add(new FilingMasterWorkflowNotifications
                     {
@@ -562,7 +565,27 @@ namespace TrackNowApi.Controllers
 
                 }
             }
+        [HttpGet("FilingMasterAudit")]
+        public APIStatusJSON FilingMasterAudit()
+        {
+            try
+            {
+                
+                var FilingMasterAudit = _db.FilingMasterAudit.FromSqlRaw("dbo.MasterFilingAuditLog").ToList();
 
+                return new APIStatusJSON
+                {
+                    Status = "Success",
+                    Data = JsonDocument.Parse(JsonSerializer.Serialize(FilingMasterAudit, new JsonSerializerOptions
+                    { WriteIndented = true, PropertyNamingPolicy = JsonNamingPolicy.CamelCase }))
+                };
+
+            }
+            catch (Exception ex)
+            {
+                return new APIStatusJSON { Status = "Failure", ErrorCode = 1, ErrorMessage = ex.Message };
+            }
+        }
         [HttpGet("FilingMasterWorkflowNotificationsList")]
         public APIStatusJSON FilingMasterWorkflowNotificationsList()
         {
